@@ -50,6 +50,26 @@ diff -ud -Nrud gcc-4.8.1/gcc/config.gcc gcc-4.8.1/gcc/config.gcc
    ;;
  *-*-netbsd*)
    tmake_file="t-slibgcc"
+@@ -824,7 +828,7 @@
+ 		;;
+ 	esac
+ 	;;
+-aarch64*-*-linux*)
++aarch64*-*-linux* | aarch64*-*-helenos*)
+ 	tm_file="${tm_file} dbxelf.h elfos.h gnu-user.h linux.h glibc-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-linux.h"
+ 	tmake_file="${tmake_file} aarch64/t-aarch64 aarch64/t-aarch64-linux"
+@@ -833,6 +837,10 @@
+ 		tm_defines="${tm_defines} TARGET_BIG_ENDIAN_DEFAULT=1"
+ 		;;
+ 	esac
++	# HelenOS
++	case $target in
++	*-helenos*) tm_file="$tm_file aarch64/helenos-aarch64.h aarch64/helenos.h" ;;
++	esac
+ 	;;
+ alpha*-*-linux*)
+ 	tm_file="elfos.h ${tm_file} alpha/elf.h alpha/linux.h alpha/linux-elf.h glibc-stdint.h"
 @@ -868,7 +872,7 @@
  	extra_options="${extra_options} netbsd.opt netbsd-elf.opt"
  	tmake_file="${tmake_file} arm/t-arm"
@@ -226,6 +246,15 @@ diff -ud -Nrud gcc-4.8.1/libgcc/config.host gcc-4.8.1/libgcc/config.host
    tmake_file="$tmake_file t-crtstuff-pic t-libgcc-pic t-eh-dw2-dip t-slibgcc t-slibgcc-gld t-slibgcc-elf-ver t-linux"
    extra_parts="crtbegin.o crtbeginS.o crtbeginT.o crtend.o crtendS.o"
    ;;
+@@ -285,7 +285,7 @@
+ 	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
+ 	tmake_file="${tmake_file} ${cpu_type}/t-softfp t-softfp"
+ 	;;
+-aarch64*-*-linux*)
++aarch64*-*-linux* | aarch64*-*-helenos*)
+ 	md_unwind_header=aarch64/linux-unwind.h
+ 	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
+ 	tmake_file="${tmake_file} ${cpu_type}/t-softfp t-softfp"
 @@ -322,7 +322,7 @@
  arm*-*-netbsdelf*)
  	tmake_file="$tmake_file arm/t-arm arm/t-netbsd t-slibgcc-gld-nover"

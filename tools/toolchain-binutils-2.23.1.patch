@@ -1,6 +1,15 @@
 diff -ud -rud binutils-2.23.1/bfd/config.bfd binutils-2.23.1/bfd/config.bfd
 --- binutils-2.23.1/bfd/config.bfd	2012-09-04 16:14:59.000000000 +0200
 +++ binutils-2.23.1/bfd/config.bfd	2013-07-25 09:47:45.116719403 +0200
+@@ -154,7 +154,7 @@
+     targ_selvecs="bfd_elf64_littleaarch64_vec bfd_elf32_bigarm_vec bfd_elf32_littlearm_vec"
+     want64=true
+     ;;
+-  aarch64-*-linux*)
++  aarch64-*-linux* | aarch64-*-helenos*)
+     targ_defvec=bfd_elf64_littleaarch64_vec
+     targ_selvecs="bfd_elf64_bigaarch64_vec bfd_elf32_littlearm_vec bfd_elf32_bigarm_vec"
+     want64=true
 @@ -203,7 +203,7 @@
      targ_defvec=ecoffalpha_little_vec
      want64=true
@@ -99,6 +108,16 @@ diff -ud -rud binutils-2.23.1/config.sub binutils-2.23.1/config.sub
 diff -ud -rud binutils-2.23.1/gas/configure.tgt binutils-2.23.1/gas/configure.tgt
 --- binutils-2.23.1/gas/configure.tgt	2012-09-04 14:53:45.000000000 +0200
 +++ binutils-2.23.1/gas/configure.tgt	2013-07-25 09:53:00.181319734 +0200
+@@ -99,7 +99,8 @@
+ # Note: This table is alpha-sorted, please try to keep it that way.
+ case ${generic_target} in
+   aarch64*-*-elf)			fmt=elf;;
+-  aarch64*-*-linux*)			fmt=elf em=linux ;;
++  aarch64*-*-linux* | aarch64*-*-helenos*)
++  					fmt=elf em=linux ;;
+ 
+   alpha-*-*vms*)			fmt=evax ;;
+   alpha-*-osf*)				fmt=ecoff ;;
 @@ -119,7 +119,8 @@
    arm-*-kaos*)				fmt=elf ;;
    arm-*-conix*)				fmt=elf ;;
@@ -157,6 +176,16 @@ diff -ud -rud binutils-2.23.1/gas/configure.tgt binutils-2.23.1/gas/configure.tg
 diff -ud -rud binutils-2.23.1/ld/configure.tgt binutils-2.23.1/ld/configure.tgt
 --- binutils-2.23.1/ld/configure.tgt	2012-09-04 14:53:47.000000000 +0200
 +++ binutils-2.23.1/ld/configure.tgt	2013-07-25 09:56:05.498734292 +0200
+@@ -33,7 +33,8 @@
+ 			targ_extra_emuls="aarch64elfb armelf armelfb" ;;
+ aarch64_be-*-linux*)	targ_emul=aarch64linuxb
+ 			targ_extra_emuls="aarch64linux aarch64elfb aarch64elf armelfb_linux_eabi armelf_linux_eabi armelfb armelf" ;;
+-aarch64-*-linux*)	targ_emul=aarch64linux
++aarch64-*-linux* | aarch64-*-helenos*)
++			targ_emul=aarch64linux
+ 			targ_extra_emuls="aarch64linuxb aarch64elf aarch64elfb armelf_linux_eabi armelfb_linux_eabi armelf armelfb" ;;
+ alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
+ 		        targ_emul=elf64alpha_fbsd
 @@ -87,7 +87,8 @@
  			targ_extra_emuls="armelfb armelf armelf_linux"
  			targ_extra_libpath="armelf_linux"

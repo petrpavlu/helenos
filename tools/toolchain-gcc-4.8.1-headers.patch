@@ -1,3 +1,32 @@
+diff -Nrud gcc-4.8.1/gcc/config/aarch64/helenos-aarch64.h gcc-4.8.1/gcc/config/aarch64/helenos-aarch64.h
+--- gcc-4.8.1/gcc/config/aarch64/helenos-aarch64.h	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.8.1/gcc/config/aarch64/helenos-aarch64.h	2015-03-25 21:16:07.969274448 +0000
+@@ -0,0 +1,6 @@
++/* Definitions for HelenOS compiled for aarch64. */
++
++#define HELENOS_ARCH_CPP_BUILTINS() \
++	do { \
++		builtin_define_with_value("helenos_uarch", "aarch64", 0); \
++	} while (0)
+diff -Nrud gcc-4.8.1/gcc/config/aarch64/helenos.h b/gcc-4.8.1/gcc/config/aarch64/helenos.h
+--- gcc-4.8.1/gcc/config/aarch64/helenos.h	1970-01-01 01:00:00.000000000 +0100
++++ gcc-4.8.1/gcc/config/aarch64/helenos.h	2015-03-25 21:15:16.808033379 +0000
+@@ -0,0 +1,15 @@
++/* Definitions for HelenOS compiled for aarch64.
++ *
++ * (TARGET_OS_CPP_BUILTINS copied from
++ * $GCC_ROOT/gcc/config/aarch64/aarch64-linux.h)
++ */
++
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()		\
++  do						\
++    {						\
++	GNU_USER_TARGET_OS_CPP_BUILTINS();	\
++	HELENOS_CPP_BUILTINS();			\
++	HELENOS_ARCH_CPP_BUILTINS();		\
++    }						\
++  while (0)
 diff -ud -Nrud gcc-4.8.1/gcc/config/arm/helenos-arm32.h gcc-4.8.1/gcc/config/arm/helenos-arm32.h
 --- gcc-4.8.1/gcc/config/arm/helenos-arm32.h	1970-01-01 01:00:00.000000000 +0100
 +++ gcc-4.8.1/gcc/config/arm/helenos-arm32.h	2013-07-12 13:13:18.292688885 +0200

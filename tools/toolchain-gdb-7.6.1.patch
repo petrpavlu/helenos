@@ -1,6 +1,15 @@
 diff -rud gdb-7.6.1-original/bfd/config.bfd gdb-7.6.1/bfd/config.bfd
 --- gdb-7.6.1-original/bfd/config.bfd	2013-03-05 12:47:01.000000000 +0100
 +++ gdb-7.6.1/bfd/config.bfd	2013-07-18 15:54:07.724777922 +0200
+@@ -172,7 +172,7 @@
+     targ_selvecs="bfd_elf64_littleaarch64_vec bfd_elf32_bigarm_vec bfd_elf32_littlearm_vec"
+     want64=true
+     ;;
+-  aarch64-*-linux*)
++  aarch64-*-linux* | aarch64-*-helenos*)
+     targ_defvec=bfd_elf64_littleaarch64_vec
+     targ_selvecs="bfd_elf64_bigaarch64_vec bfd_elf32_littlearm_vec bfd_elf32_bigarm_vec"
+     want64=true
 @@ -221,7 +221,7 @@
      targ_defvec=ecoffalpha_little_vec
      want64=true
@@ -99,6 +108,15 @@ diff -rud gdb-7.6.1-original/config.sub gdb-7.6.1/config.sub
 diff -rud gdb-7.6.1-original/gdb/configure.tgt gdb-7.6.1/gdb/configure.tgt
 --- gdb-7.6.1-original/gdb/configure.tgt	2013-03-05 14:37:10.000000000 +0100
 +++ gdb-7.6.1/gdb/configure.tgt	2013-07-18 15:50:25.210529047 +0200
+@@ -36,7 +36,7 @@
+ 	gdb_target_obs="aarch64-tdep.o aarch64-newlib-tdep.o"
+ 	;;
+ 
+-aarch64*-*-linux*)
++aarch64*-*-linux* | aarch64*-*-helenos*)
+ 	# Target: AArch64 linux
+ 	gdb_target_obs="aarch64-tdep.o aarch64-linux-tdep.o \
+ 			glibc-tdep.o linux-tdep.o solib-svr4.o \
 @@ -85,7 +85,7 @@
  	gdb_target_obs="arm-tdep.o arm-wince-tdep.o"
  	build_gdbserver=yes
