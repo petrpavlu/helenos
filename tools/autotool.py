@@ -233,6 +233,12 @@ def get_target(config):
 			clang_target = "mipsel-unknown-none"
 			helenos_target = "mipsel-helenos"
 	
+	if (config['PLATFORM'] == "aarch64"):
+		target = config['PLATFORM']
+		gnu_target = "aarch64-linux-gnu"
+		clang_target = "aarch64-unknown-none"
+		helenos_target = "aarch64-helenos"
+
 	if (config['PLATFORM'] == "amd64"):
 		target = config['PLATFORM']
 		gnu_target = "amd64-linux-gnu"
@@ -922,7 +928,7 @@ def main():
 		check_python()
 		
 		# Platform-specific utilities
-		if ((config['BARCH'] == "amd64") or (config['BARCH'] == "ia32") or (config['BARCH'] == "ppc32") or (config['BARCH'] == "sparc64")):
+		if (config['BARCH'] in ('aarch64', 'amd64', 'ia32', 'ppc32', 'sparc64')):
 			common['GENISOIMAGE'] = check_app_alternatives(["mkisofs", "genisoimage"], ["--version"], "ISO 9660 creation utility", "usually part of genisoimage")
 		
 		probe = probe_compiler(common,
