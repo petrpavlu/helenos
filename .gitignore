@@ -1,3 +1,16 @@
+# Files ignored by default by Bazaar (bzr ignore --default-rules).
+*.a
+*.o
+*.py[co]
+*.so
+*.sw[nop]
+*~
+.#*
+[#]*#
+__pycache__
+bzr-orphans
+
+# Content of .bzrignore.
 *.disasm
 *.map
 *.prev
@@ -352,3 +365,14 @@ uspace/lib/c/arch/mips32/include/libarch/fibril_context.h
 uspace/lib/c/arch/mips32/include/libarch/istate_struct.h
 uspace/lib/c/arch/ia64/include/libarch/fibril_context.h
 uspace/lib/c/arch/ia64/include/libarch/istate_struct.h
+
+# AArch64 support.
+kernel/arch/aarch64/_link.ld
+kernel/arch/aarch64/include/arch/context_struct.h
+kernel/arch/aarch64/include/arch/istate_struct.h
+uspace/lib/c/arch/aarch64/_link-dlexe.ld
+uspace/lib/c/arch/aarch64/_link-loader.ld
+uspace/lib/c/arch/aarch64/_link-shlib.ld
+uspace/lib/c/arch/aarch64/_link.ld
+uspace/lib/c/arch/aarch64/include/libarch/fibril_context.h
+uspace/lib/c/arch/aarch64/include/libarch/istate_struct.h
