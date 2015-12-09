@@ -30,7 +30,7 @@
 
 include Makefile.common
 
-GRUB = grub.$(GRUB_ARCH)
+GRUB = grub/$(BARCH)-$(GRUB_ARCH)
 BOOT = $(DISTROOT)/boot
 
 ELTORITO = boot/grub/$(GRUB_ARCH).img
