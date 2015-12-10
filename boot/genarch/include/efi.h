@@ -198,5 +198,7 @@ typedef struct {
 #define EFI_PAGE_SIZE	4096
 
 extern void *efi_vendor_table_find(efi_system_table_t *, efi_guid_t);
+extern efi_status_t efi_get_memory_map(efi_system_table_t *, sysarg_t *,
+    efi_v1_memdesc_t **, sysarg_t *, sysarg_t *, uint32_t *);
 
 #endif
