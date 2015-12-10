@@ -70,3 +70,4 @@ BOOT_OUTPUT =
 POST_OUTPUT = $(ROOT_PATH)/image.iso
 PREBUILD = $(INITRD).img
 BUILD = Makefile.grub
+GRUB_LOADER = multiboot
