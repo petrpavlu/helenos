@@ -1,0 +1,142 @@
+/*
+ * Copyright (c) 2015 Petr Pavlu
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * - The name of the author may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <arch/arch.h>
+
+.section BOOTSTRAP
+
+.global start
+.global jump_to_kernel
+.global get_bdata_start
+.global get_bdata_end
+
+.global bdata_start
+.global bdata_end
+
+/* MS-DOS stub + Linux/AArch64 header */
+msdos_stub:
+	.ascii "MZ"                     /* MS-DOS signature */
+	.space 0x36                     /* Ignore fields up to byte at 0x38 */
+	.ascii "ARM\x64"                /* Linux magic */
+	.long pe_header - msdos_stub    /* Offset to the PE header */
+
+/* Portable Executable header */
+pe_header:
+	/* PE signature */
+	.ascii "PE\x0\x0"
+
+	/* COFF File Header */
+	.short 0xaa64                   /* Machine = IMAGE_FILE_MACHINE_ARM64 */
+	.short 1                        /* Number of sections */
+	.long 0                         /* Time date stamp */
+	.long 0                         /* Pointer to symbol table */
+	.long 0                         /* Number of symbols */
+	.short sec_table - opt_header   /* Size of optional header */
+	/* Characteristics = IMAGE_FILE_EXECUTABLE_IMAGE |
+	 *   IMAGE_FILE_LARGE_ADDRESS_AWARE */
+	.short 0x22
+
+	/* Optional header standard fields */
+opt_header:
+	.short 0x20b                    /* Magic = PE32+ */
+	.byte 0                         /* Major linker version */
+	.byte 0                         /* Minor linker version */
+	.long bdata_end - msdos_stub    /* Size of code */
+	.long 0                         /* Size of initialized data */
+	.long 0                         /* Size of uninitialized data */
+	.long start - msdos_stub        /* Address of entry point */
+	.long start - msdos_stub        /* Base of code */
+
+	/* Optional header Windows-specific fields */
+	.quad 0                         /* Image base */
+	.long 4                         /* Section alignment */
+	.long 4                         /* File alignment */
+	.short 0                        /* Major operating system version */
+	.short 0                        /* Minor operating system version */
+	.short 0                        /* Major image version */
+	.short 0                        /* Minor image version */
+	.short 0                        /* Major subsystem version */
+	.short 0                        /* Minor subsystem version */
+	.long 0                         /* Win32 version value */
+	.long bdata_end - msdos_stub    /* Size of image */
+	.long start - msdos_stub        /* Size of headers */
+	.long 0                         /* Checksum */
+	.short 10                       /* Subsystem = EFI application */
+	.short 0                        /* DLL characteristics */
+	.quad 0                         /* Size of stack reserve */
+	.quad 0                         /* Size of stack commit */
+	.quad 0                         /* Size of heap reserve */
+	.quad 0                         /* Size of heap commit */
+	.long 0                         /* Loader flags */
+	.long 0                         /* Number of RVA and sizes */
+
+sec_table:
+        .ascii ".text\x0\x0\x0"         /* Name */
+	.long bdata_end - start         /* Virtual size */
+	.long start - msdos_stub        /* Virtual address */
+	.long bdata_end - start         /* Size of raw data */
+	.long start - msdos_stub        /* Pointer to raw data */
+	.long 0                         /* Pointer to relocations */
+	.long 0                         /* Pointer to line numbers */
+	.short 0                        /* Number of relocations */
+	.short 0                        /* Number of line numbers */
+	/* Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE |
+	 *   IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE */
+	.long 0xe0000020
+
+start:
+	/* x0 is the image handle. */
+	/* x1 is a pointer to the UEFI system table. */
+
+	/*
+	 * Stay on the UEFI stack. Its size is at least 128 kB, plenty for this
+	 * boot loader.
+	 */
+
+	/*
+	 * Pass the image handle (x0), a pointer to the UEFI system table (x1),
+	 * and the image load address (x2) to the boostrap function.
+	 */
+	adr x2, msdos_stub
+	b bootstrap
+
+get_bdata_start:
+	adr x0, bdata_start
+	ret
+
+get_bdata_end:
+	adr x0, bdata_end
+	ret
+
+jump_to_kernel:
+	/* x0 is kernel entry point. */
+	/* x1 is pointer to the bootinfo structure. */
+
+	/* TODO */
+
+	br x0
