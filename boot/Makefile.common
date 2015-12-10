@@ -256,5 +256,6 @@ MAP ?= image.map
 PREBUILD ?= build_comps
 BUILD ?= Makefile.build
 COMPONENTS ?= $(BASE_COMPONENTS) $(INITRD).img
+IS_PIC_LOADER ?= no
 
 MODULES := $(notdir $(COMPONENTS))

@@ -37,7 +37,7 @@ ifneq ($(POSTBUILD),)
 endif
 
 build_comps: $(COMPONENTS) $(LINK).in
-	$(PACK) $(OBJCOPY) $(BFD_NAME) $(BFD_ARCH) arch/$(KARCH) $(COMPONENTS)
+	$(PACK) $(OBJCOPY) $(BFD_NAME) $(BFD_ARCH) arch/$(KARCH) $(IS_PIC_LOADER) $(COMPONENTS)
 
 $(INITRD).img: build_dist
 ifeq ($(RDFMT),tmpfs)
