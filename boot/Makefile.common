@@ -227,11 +227,9 @@ RD_TESTS = \
 	$(USPACE_PATH)/lib/uri/test-liburi \
 	$(USPACE_PATH)/app/bdsh/test-bdsh
 
-
-COMPONENTS = \
+BASE_COMPONENTS = \
 	$(KERNEL_PATH)/kernel.bin \
-	$(INIT_TASKS) \
-	$(INITRD).img
+	$(INIT_TASKS)
 
 LINK = arch/$(BARCH)/_link.ld
 COMPS_H = arch/$(BARCH)/include/_components.h
@@ -251,11 +249,12 @@ RD_DRVS = $(RD_DRVS_ESSENTIAL) $(RD_DRVS_NON_ESSENTIAL)
 RD_DRVS_FW = $(RD_DRVS_FW_ESSENTIAL) $(RD_DRVS_FW_NON_ESSENTIAL)
 endif
 
-MODULES := $(notdir $(COMPONENTS))
-
 BOOT_OUTPUT ?= $(ROOT_PATH)/image.boot
 RAW ?= image.raw
 JOB ?= image.job
 MAP ?= image.map
 PREBUILD ?= build_comps
 BUILD ?= Makefile.build
+COMPONENTS ?= $(BASE_COMPONENTS) $(INITRD).img
+
+MODULES := $(notdir $(COMPONENTS))

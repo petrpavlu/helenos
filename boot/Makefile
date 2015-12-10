@@ -128,12 +128,13 @@ clean: clean_dist
 ifneq ($(POSTBUILD),)
 	$(MAKE) -f $(POSTBUILD) clean PRECHECK=$(PRECHECK)
 endif
+	rm -f $(COMPS_H) $(COMPS_C) $(LINK) $(LINK).comp *.co
 	rm -fr $(SANDBOX)
 	rm -f $(POST_OUTPUT) $(BOOT_OUTPUT) $(DEPEND) $(DEPEND_PREV) arch/*/include/common.h
 	find generic/src/ arch/*/src/ genarch/src/ -name '*.o' -follow -exec rm \{\} \;
 
 clean_dist:
-	rm -f $(INITRD).img $(COMPS_H) $(COMPS_C) $(LINK) $(LINK).comp *.co
+	rm -f $(INITRD).img
 	rm -f $(USPACE_PATH)/dist/srv/*
 	rm -rf $(USPACE_PATH)/dist/drv/*
 	rm -rf $(USPACE_PATH)/dist/lib/*
