@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2015 Petr Pavlu
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * - The name of the author may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+.text
+
+.global memcpy_from_uspace
+.global memcpy_to_uspace
+.global memcpy_from_uspace_failover_address
+.global memcpy_to_uspace_failover_address
+.global early_putchar
+
+memcpy_from_uspace:
+memcpy_to_uspace:
+	/* Completely un-optimized memcpy(). */
+	/*
+	 * TODO Improve this code when HelenOS uses newer binutils which have a
+	 * fixed GNU assembler.
+	 */
+
+	cbz x2, 2f
+	mov x3, x0
+1:
+	ldrb w4, [x3], #1
+	strb w4, [x1], #1
+	subs x2, x2, #1
+	b.ne 1b
+
+2:
+	ret
+
+memcpy_from_uspace_failover_address:
+memcpy_to_uspace_failover_address:
+	mov x0, #0
+	ret
+
+/* REVISIT */
+early_putchar:
+	ret

@@ -1,0 +1,48 @@
+/*
+ * AArch64 linker script
+ *
+ *  kernel text
+ *  kernel data
+ *
+ */
+
+#include <arch/boot/boot.h>
+#include <arch/mm/km.h>
+
+#define LOAD_ADDRESS_V  (KM_AARCH64_IDENTITY_START + BOOT_OFFSET)
+#define LOAD_ADDRESS_P  BOOT_OFFSET
+
+OUTPUT_ARCH(aarch64)
+ENTRY(kernel_image_start)
+
+SECTIONS {
+	.image LOAD_ADDRESS_V: AT (LOAD_ADDRESS_P) {
+		ktext_start = .;
+		*(K_TEXT_START)
+		*(.text .text.*);
+		ktext_end = .;
+
+		kdata_start = .;
+		*(K_DATA_START)
+		*(.data);                       /* initialized data */
+		hardcoded_ktext_size = .;
+		QUAD(ktext_end - ktext_start);
+		hardcoded_kdata_size = .;
+		QUAD(kdata_end - kdata_start);
+		hardcoded_load_address = .;
+		QUAD(LOAD_ADDRESS_V);
+		*(.bss);                        /* uninitialized static variables */
+		*(COMMON);                      /* global variables */
+
+		*(.rodata*);
+		. = ALIGN(8);
+		symbol_table = .;
+		*(symtab.*);
+
+		kdata_end = .;
+	}
+
+	/DISCARD/ : {
+		*(*);
+	}
+}
