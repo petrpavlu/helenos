@@ -367,6 +367,8 @@ uspace/lib/c/arch/ia64/include/libarch/fibril_context.h
 uspace/lib/c/arch/ia64/include/libarch/istate_struct.h
 
 # AArch64 support.
+boot/arch/aarch64/_link.ld
+boot/arch/aarch64/_link.ld.comp
 kernel/arch/aarch64/_link.ld
 kernel/arch/aarch64/include/arch/context_struct.h
 kernel/arch/aarch64/include/arch/istate_struct.h
@@ -376,3 +378,13 @@ uspace/lib/c/arch/aarch64/_link-shlib.ld
 uspace/lib/c/arch/aarch64/_link.ld
 uspace/lib/c/arch/aarch64/include/libarch/fibril_context.h
 uspace/lib/c/arch/aarch64/include/libarch/istate_struct.h
+
+# Additional generic files.
+*.co
+_components.c
+_components.h
+boot/generic/include/arch
+boot/generic/include/genarch
+boot/pack/
+image.boot
+image.raw
