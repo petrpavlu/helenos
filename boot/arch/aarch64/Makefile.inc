@@ -28,11 +28,9 @@
 
 BOOT_OUTPUT = image.boot
 POST_OUTPUT = $(ROOT_PATH)/image.iso
-PREBUILD = build_comps $(INITRD).img
 POSTBUILD = Makefile.grub
-COMPONENTS = $(BASE_COMPONENTS)
 IS_PIC_LOADER = yes
-GRUB_LOADER = linux
+GRUB_LOADER = chainloader
 
 BFD_NAME = elf64-littleaarch64
 # Request binary BFD output. The AArch64 port manually prepares the .text

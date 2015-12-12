@@ -69,9 +69,8 @@ ifeq ($(GRUB_LOADER),multiboot)
 		cp "$$module" $(BOOT)/ ; \
 	done
 endif
-ifeq ($(GRUB_LOADER),linux)
+ifeq ($(GRUB_LOADER),chainloader)
 	cp "$(BOOT_OUTPUT)" $(BOOT)/
-	cp "$(INITRD).img" $(BOOT)/
 endif
 	
 	echo "set default=0" > $(BOOT_CONFIG)
@@ -99,11 +98,9 @@ ifeq ($(GRUB_LOADER),multiboot)
 		fi \
 	done
 endif
-ifeq ($(GRUB_LOADER),linux)
+ifeq ($(GRUB_LOADER),chainloader)
 	echo "	echo 'Loading $(BOOT_OUTPUT)'" >> $(BOOT_CONFIG)
-	echo "	linux /boot/$(BOOT_OUTPUT)" >> $(BOOT_CONFIG)
-	echo "	echo 'Loading $(INITRD).img'" >> $(BOOT_CONFIG)
-	echo "	initrd /boot/$(INITRD).img" >> $(BOOT_CONFIG)
+	echo "	chainloader /boot/$(BOOT_OUTPUT)" >> $(BOOT_CONFIG)
 	echo "	boot" >> $(BOOT_CONFIG)
 endif
 	echo "}" >> $(BOOT_CONFIG)

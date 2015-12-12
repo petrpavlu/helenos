@@ -38,11 +38,10 @@
 .global bdata_start
 .global bdata_end
 
-/* MS-DOS stub + Linux/AArch64 header */
+/* MS-DOS stub */
 msdos_stub:
 	.ascii "MZ"                     /* MS-DOS signature */
-	.space 0x36                     /* Ignore fields up to byte at 0x38 */
-	.ascii "ARM\x64"                /* Linux magic */
+	.space 0x3a                     /* Ignore fields up to byte at 0x3c */
 	.long pe_header - msdos_stub    /* Offset to the PE header */
 
 /* Portable Executable header */
@@ -126,11 +125,13 @@ start:
 	b bootstrap
 
 get_bdata_start:
-	adr x0, bdata_start
+	adrp x0, bdata_start
+	add x0, x0, #:lo12:bdata_start
 	ret
 
 get_bdata_end:
-	adr x0, bdata_end
+	adrp x0, bdata_end
+	add x0, x0, #:lo12:bdata_end
 	ret
 
 jump_to_kernel:

@@ -43,9 +43,11 @@ do { \
 		".global " #symbol "_end\n" \
 		"adr x0, components + %[off]\n" \
 		"adr x1, 1f\n" \
-		"adr x2, " #symbol "_start\n" \
+		"adrp x2, " #symbol "_start\n" \
+		"add x2, x2, #:lo12:" #symbol "_start\n" \
 		"stp x1, x2, [x0], #16\n" \
-		"adr x1, " #symbol "_end\n" \
+		"adrp x1, " #symbol "_end\n" \
+		"add x1, x1, #:lo12:" #symbol "_end\n" \
 		"sub x1, x1, x2\n" \
 		"str x1, [x0]\n" \
 		"b 2f\n" \
