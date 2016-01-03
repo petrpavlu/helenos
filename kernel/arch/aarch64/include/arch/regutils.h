@@ -36,16 +36,15 @@
 #ifndef KERN_aarch64_REGUTILS_H_
 #define KERN_aarch64_REGUTILS_H_
 
-#include <trace.h>
-
-#ifdef KERNEL
+#ifndef __ASM__
+#if defined(KERNEL) || defined(BOOT)
 #include <typedefs.h>
 #else
 #include <sys/types.h>
 #endif
 
 #define SPECIAL_REG_GEN_READ(name) \
-	NO_TRACE static inline uintptr_t name##_read(void) \
+	static inline uintptr_t name##_read(void) \
 	{ \
 		uintptr_t res; \
 		asm volatile ( \
@@ -56,13 +55,20 @@
 	}
 
 #define SPECIAL_REG_GEN_WRITE(name) \
-	NO_TRACE static inline void name##_write(uintptr_t regn) \
+	static inline void name##_write(uintptr_t regn) \
 	{ \
 		asm volatile ( \
 			"msr " #name ", %[regn]" \
 			:: [regn] "r" (regn) \
 		); \
 	}
+
+#else /* __ASM__ */
+
+#define SPECIAL_REG_GEN_READ(name)
+#define SPECIAL_REG_GEN_WRITE(name)
+
+#endif /* __ASM__*/
 
 SPECIAL_REG_GEN_WRITE(TTBR0_EL1)
 #define TTBR0_EL1_ASID_SHIFT  48
