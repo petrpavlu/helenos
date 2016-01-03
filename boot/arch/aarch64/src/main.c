@@ -40,19 +40,17 @@
 #include <arch/asm.h>
 #include <arch/boot.h>
 #include <arch/main.h>
+#include <arch/regutils.h>
 #include <errno.h>
 #include <inflate.h>
 #include <macros.h>
+#include <memstr.h>
 #include <printf.h>
 #include <putchar.h>
 #include <str.h>
 #include <version.h>
 
-extern void *bdata_start;
-extern void *bdata_end;
-
 static efi_system_table_t *efi_system_table;
-static bootinfo_t bootinfo;
 
 /** Ensure the visibility of updates to instructions in the given range.
  *
@@ -111,13 +109,14 @@ efi_status_t bootstrap(void *efi_handle_in,
 {
 	efi_status_t status;
 	uintptr_t current_el;
-	sysarg_t memory_map_size;
-	efi_v1_memdesc_t *memory_map = NULL;
+	uint64_t memory_map = 0;
+	sysarg_t memory_map_size = 0;
 	sysarg_t map_key;
-	sysarg_t descriptor_size;
-	uint32_t descriptor_version;
+	sysarg_t map_descriptor_size;
+	uint32_t map_descriptor_version;
 	uint64_t alloc_addr = 0;
 	sysarg_t alloc_pages = 0;
+	bootinfo_t *bootinfo;
 
 	efi_system_table = efi_system_table_in;
 
@@ -126,7 +125,6 @@ efi_status_t bootstrap(void *efi_handle_in,
 	printf("Boot data: %p -> %p\n", get_bdata_start(), get_bdata_end());
 	printf("\nMemory statistics\n");
 	printf(" %p|%p: loader\n", load_address, load_address);
-	printf(" %p|%p: boot info structure\n", &bootinfo, &bootinfo);
 	printf(" %p|%p: UEFI system table\n", efi_system_table_in,
 	    efi_system_table_in);
 
@@ -148,20 +146,22 @@ efi_status_t bootstrap(void *efi_handle_in,
 	}
 
 	/* Obtain memory map. */
-	status = efi_get_memory_map(efi_system_table, &memory_map_size,
-	    &memory_map, &map_key, &descriptor_size, &descriptor_version);
+	status = efi_get_memory_map(efi_system_table, EFI_ALLOCATE_ANY_PAGES,
+	    EFI_LOADER_DATA, (efi_v1_memdesc_t **) &memory_map,
+	    &memory_map_size, &map_key, &map_descriptor_size,
+	    &map_descriptor_version);
 	if (status != EFI_SUCCESS) {
-		printf("Error: Unable to obtain memory map, status code: "
-		    "%lx.\n", status);
+		printf("Error: Unable to obtain initial memory map, status "
+		    "code: %" PRIx64 ".\n", status);
 		goto fail;
 	}
 
 	/* Find start of usable RAM. */
 	bool memory_base_found = false;
 	uint64_t memory_base;
-	for (sysarg_t i = 0; i < memory_map_size / descriptor_size; i++) {
+	for (sysarg_t i = 0; i < memory_map_size / map_descriptor_size; i++) {
 		efi_v1_memdesc_t *desc = (void *) memory_map +
-		    (i * descriptor_size);
+		    (i * map_descriptor_size);
 		if (!(desc->attribute & EFI_MEMORY_WB))
 			continue;
 
@@ -173,8 +173,9 @@ efi_status_t bootstrap(void *efi_handle_in,
 	}
 
 	/* Deallocate memory holding the map. */
-	efi_system_table->boot_services->free_pool(memory_map);
-	memory_map = NULL;
+	efi_system_table->boot_services->free_pages(memory_map,
+	    ALIGN_UP(memory_map_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE);
+	memory_map = 0;
 
 	if (!memory_base_found) {
 		printf("Error: Memory map does not contain any usable RAM.\n");
@@ -221,36 +222,42 @@ efi_status_t bootstrap(void *efi_handle_in,
 	void *dest[COMPONENTS];
 	uint64_t top = inflated_base;
 	size_t cnt = 0;
-	bootinfo.cnt = 0;
-	for (size_t i = 0; i < min(COMPONENTS, TASKMAP_MAX_RECORDS); i++) {
-		if (i > 0) {
-			bootinfo.tasks[bootinfo.cnt].addr = (void *) top;
-			bootinfo.tasks[bootinfo.cnt].size =
-			    components[i].inflated;
-
-			str_cpy(bootinfo.tasks[bootinfo.cnt].name,
-			    BOOTINFO_TASK_NAME_BUFLEN, components[i].name);
-
-			bootinfo.cnt++;
-		}
-
+	for (size_t i = 0; i < COMPONENTS; i++) {
 		dest[i] = (void *) top;
 		top += components[i].inflated;
 		top = ALIGN_UP(top, PAGE_SIZE);
 		cnt++;
 	}
 
-	/* Allocate memory for the inflated components. */
+	/*
+	 * Allocate memory for the inflated components and one page for the
+	 * bootinfo.
+	 */
 	alloc_pages = (ALIGN_UP(top, EFI_PAGE_SIZE) -
-	    ALIGN_DOWN(inflated_base, EFI_PAGE_SIZE)) / EFI_PAGE_SIZE;
+	    ALIGN_DOWN(inflated_base, EFI_PAGE_SIZE)) / EFI_PAGE_SIZE + 1;
 	alloc_addr = inflated_base;
 	status = efi_system_table->boot_services->allocate_pages(
 	    EFI_ALLOCATE_ADDRESS, EFI_LOADER_CODE, alloc_pages, &alloc_addr);
 	if (status != EFI_SUCCESS) {
 		printf("Error: Unable to allocate memory for inflated "
-		    "components, status code: %lx.\n", status);
+		    "components and bootinfo, status code: %" PRIx64 ".\n",
+		    status);
 		goto fail;
 	}
+
+	bootinfo = (void *) alloc_addr + (alloc_pages - 1) * EFI_PAGE_SIZE;
+	printf(" %p|%p: boot info structure\n", bootinfo, bootinfo);
+
+	memset(bootinfo, 0, sizeof(*bootinfo));
+	bootinfo->cnt = cnt;
+
+	/*
+	 * Statically check that information about all components can be
+	 * recorded in the bootinfo.
+	 */
+#if COMPONENTS >= TASKMAP_MAX_RECORDS
+#error TASKMAP_MAX_RECORDS too small
+#endif
 
 	printf("\nInflating components ... ");
 
@@ -268,18 +275,44 @@ efi_status_t bootstrap(void *efi_handle_in,
 		}
 		/* Ensure visibility of the component. */
 		ensure_visibility(dest[i - 1], components[i - 1].inflated);
+
+		/* Store information about the component in the bootinfo. */
+		if (i > 1) {
+			bootinfo->tasks[i - 1].addr = components[i - 1].start;
+			bootinfo->tasks[i - 1].size =
+			    components[i - 1].inflated;
+
+			str_cpy(bootinfo->tasks[i - 1].name,
+			    BOOTINFO_TASK_NAME_BUFLEN, components[i - 1].name);
+		}
 	}
 
 	printf(".\n");
 
-	/* TODO */
+	/* Get final memory map. Place it explicitly after the bootinfo page. */
+	bootinfo->memory_map = (uint64_t) bootinfo + EFI_PAGE_SIZE;
+	status = efi_get_memory_map(efi_system_table, EFI_ALLOCATE_ADDRESS,
+	    EFI_LOADER_DATA, (efi_v1_memdesc_t **) &bootinfo->memory_map,
+	    &bootinfo->memory_map_size, &map_key,
+	    &bootinfo->map_descriptor_size, &map_descriptor_version);
+	if (status != EFI_SUCCESS) {
+		printf("Error: Unable to obtain final memory map, status code: "
+		    "%" PRIx64 ".\n", status);
+		goto fail;
+	}
 
 	printf("Booting the kernel...\n");
-	jump_to_kernel((void *) inflated_base, &bootinfo);
+
+	/* Exit boot services. This is a point of no return. */
+	efi_system_table->boot_services->exit_boot_services(efi_handle_in,
+	    map_key);
+
+	jump_to_kernel((void *) inflated_base, bootinfo);
 
 fail:
-	if (memory_map != NULL)
-		efi_system_table->boot_services->free_pool(memory_map);
+	if (memory_map != 0)
+		efi_system_table->boot_services->free_pages(memory_map,
+		    ALIGN_UP(memory_map_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE);
 
 	if (alloc_addr != 0)
 		efi_system_table->boot_services->free_pages(alloc_addr,

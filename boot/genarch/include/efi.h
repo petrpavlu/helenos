@@ -115,8 +115,8 @@ typedef struct {
 
 typedef struct efi_simple_text_output_protocol {
 	void *reset;
-	efi_status_t (*output_string)(
-	    struct efi_simple_text_output_protocol *this, int16_t *string);
+	efi_status_t (*output_string)(struct efi_simple_text_output_protocol *,
+	    int16_t *);
 	void *test_string;
 	void *query_mode;
 	void *set_mode;
@@ -131,15 +131,13 @@ typedef struct {
 	efi_table_header_t hdr;
 	void *raise_TPL;
 	void *restore_TPL;
-	efi_status_t (*allocate_pages)(efi_allocate_type_t type,
-	    efi_memory_type_t memory_type, sysarg_t pages, uint64_t *memory);
-	efi_status_t (*free_pages)(uint64_t memory, sysarg_t pages);
-	efi_status_t (*get_memory_map)(sysarg_t *memory_map_size,
-	    efi_v1_memdesc_t *memory_map, sysarg_t *map_key,
-	    sysarg_t *descriptor_size, uint32_t *descriptor_version);
-	efi_status_t (*allocate_pool)(efi_memory_type_t type, sysarg_t size,
-	    void **buffer);
-	efi_status_t (*free_pool)(void *buffer);
+	efi_status_t (*allocate_pages)(efi_allocate_type_t, efi_memory_type_t,
+	    sysarg_t, uint64_t *);
+	efi_status_t (*free_pages)(uint64_t, sysarg_t);
+	efi_status_t (*get_memory_map)(sysarg_t *, efi_v1_memdesc_t *,
+	    sysarg_t *, sysarg_t *, uint32_t *);
+	efi_status_t (*allocate_pool)(efi_memory_type_t, sysarg_t, void **);
+	efi_status_t (*free_pool)(void *);
 	void *create_event;
 	void *set_timer;
 	void *wait_for_event;
@@ -159,7 +157,7 @@ typedef struct {
 	void *start_image;
 	void *exit;
 	void *unload_image;
-	void *exit_boot_services;
+	efi_status_t (*exit_boot_services)(void *, sysarg_t);
 	void *get_next_monotonic_count;
 	void *stall;
 	void *set_watchdog_timer;
@@ -198,7 +196,8 @@ typedef struct {
 #define EFI_PAGE_SIZE	4096
 
 extern void *efi_vendor_table_find(efi_system_table_t *, efi_guid_t);
-extern efi_status_t efi_get_memory_map(efi_system_table_t *, sysarg_t *,
-    efi_v1_memdesc_t **, sysarg_t *, sysarg_t *, uint32_t *);
+extern efi_status_t efi_get_memory_map(efi_system_table_t *,
+    efi_allocate_type_t, efi_memory_type_t, efi_v1_memdesc_t **, sysarg_t *,
+    sysarg_t *, sysarg_t *, uint32_t *);
 
 #endif

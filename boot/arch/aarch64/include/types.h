@@ -38,7 +38,6 @@
 
 #include <arch/common.h>
 
-/* REVISIT */
 #define TASKMAP_MAX_RECORDS        32
 #define BOOTINFO_TASK_NAME_BUFLEN  32
 
@@ -58,8 +57,17 @@ typedef struct {
 } task_t;
 
 typedef struct {
+	/** Number of boot tasks. */
 	size_t cnt;
+	/** Boot task data. */
 	task_t tasks[TASKMAP_MAX_RECORDS];
+
+	/** UEFI memory map. */
+	uint64_t memory_map;
+	/* Total size of the UEFI memory map in bytes. */
+	sysarg_t memory_map_size;
+	/* Size of one entry in the UEFI memory map. */
+	sysarg_t map_descriptor_size;
 } bootinfo_t;
 
 #endif
