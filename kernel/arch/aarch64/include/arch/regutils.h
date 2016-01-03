@@ -70,16 +70,34 @@
 
 #endif /* __ASM__*/
 
+/* TTBR0_EL1 */
 SPECIAL_REG_GEN_WRITE(TTBR0_EL1)
 #define TTBR0_EL1_ASID_SHIFT  48
 
+/* DAIF */
 SPECIAL_REG_GEN_READ(DAIF)
 SPECIAL_REG_GEN_WRITE(DAIF)
 #define DAIF_IRQ_BIT_SHIFT  7  /* I flag */
 #define DAIF_IRQ_BIT  (1 << DAIF_IRQ_BIT_SHIFT)
 
+/* SPSR */
 #define SPSR_MODE_MASK  0x1f
 #define SPSR_MODE_AARCH64_EL0T  0x00  /* AArch64, Exception Level 0, SP_EL0 */
+
+/* CurrentEL */
+SPECIAL_REG_GEN_READ(CurrentEL)
+#define CURRENT_EL_EL0  0x0
+#define CURRENT_EL_EL1  0x4
+#define CURRENT_EL_EL2  0x8
+#define CURRENT_EL_EL3  0xc
+
+/* SCTLR_EL1 */
+#define SCTLR_EL1_M_BIT_SHIFT  0  /* M flag */
+#define SCTLR_EL1_M_BIT  (1 << SCTLR_EL1_M_BIT_SHIFT)
+
+/* SCTLR_EL2 */
+#define SCTLR_EL2_M_BIT_SHIFT  0  /* M flag */
+#define SCTLR_EL2_M_BIT  (1 << SCTLR_EL2_M_BIT_SHIFT)
 
 /* TLBI VAE1IS and TLBI ASIDE1IS parameter. */
 #define TLBI_ASID_SHIFT  48
