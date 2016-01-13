@@ -110,8 +110,11 @@ sec_table:
 	.long 0xe0000020
 
 start:
-	/* x0 is the image handle. */
-	/* x1 is a pointer to the UEFI system table. */
+	/*
+	 * Parameters:
+	 * x0 is the image handle.
+	 * x1 is a pointer to the UEFI system table.
+	 */
 
 	/*
 	 * Stay on the UEFI stack. Its size is at least 128 kB, plenty for this
@@ -136,8 +139,11 @@ get_bdata_end:
 	ret
 
 jump_to_kernel:
-	/* x0 is kernel entry point. */
-	/* x1 is pointer to the bootinfo structure. */
+	/*
+	 * Parameters:
+	 * x0 is kernel entry point.
+	 * x1 is pointer to the bootinfo structure.
+	 */
 
 	/* Disable MMU (removes the identity mapping provided by UEFI). */
 	mrs x2, sctlr_el1

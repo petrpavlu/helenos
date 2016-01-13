@@ -30,7 +30,8 @@ BFD_NAME = elf64-littleaarch64
 BFD_ARCH = aarch64
 BFD = binary
 
-GCC_CFLAGS += -fno-omit-frame-pointer -march=armv8-a+nofp+nosimd -mgeneral-regs-only
+GCC_CFLAGS += -fno-omit-frame-pointer -march=armv8-a+nofp+nosimd \
+	-mgeneral-regs-only
 
 BITS = 64
 ENDIANESS = LE
