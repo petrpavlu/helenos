@@ -45,7 +45,7 @@ ipl_t interrupts_disable(void)
 
 	DAIF_write(daif | DAIF_IRQ_BIT);
 
-	return (daif >> DAIF_IRQ_BIT_SHIFT) & 1;
+	return (daif >> DAIF_IRQ_SHIFT) & 1;
 }
 
 /** Enable interrupts.
@@ -58,7 +58,7 @@ ipl_t interrupts_enable(void)
 
 	DAIF_write(daif & ~DAIF_IRQ_BIT);
 
-	return (daif >> DAIF_IRQ_BIT_SHIFT) & 1;
+	return (daif >> DAIF_IRQ_SHIFT) & 1;
 }
 
 /** Restore interrupt priority level.
@@ -70,7 +70,7 @@ void interrupts_restore(ipl_t ipl)
 	uintptr_t daif = DAIF_read();
 
 	DAIF_write((daif & ~DAIF_IRQ_BIT) |
-	    ((ipl & 1) << DAIF_IRQ_BIT_SHIFT));
+	    ((ipl & 1) << DAIF_IRQ_SHIFT));
 }
 
 /** Read interrupt priority level.
