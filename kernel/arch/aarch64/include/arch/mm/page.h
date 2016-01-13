@@ -39,7 +39,10 @@
 #include <arch/mm/frame.h>
 #include <mm/mm.h>
 #include <trace.h>
+
+#ifndef __ASM__
 #include <typedefs.h>
+#endif
 
 #define PAGE_WIDTH  FRAME_WIDTH
 #define PAGE_SIZE   FRAME_SIZE
@@ -50,6 +53,9 @@
 #define PA2KA(x)  (((uintptr_t) (x)) + UINT64_C(0xffffffff80000000))
 
 #endif /* __ASM__ */
+
+/** Log2 size of each translation table entry. */
+#define PTL_ENTRY_SIZE_SHIFT  3
 
 /* Number of entries in each level. */
 #define PTL0_ENTRIES_ARCH  512
@@ -63,11 +69,23 @@
 #define PTL2_FRAMES_ARCH  1
 #define PTL3_FRAMES_ARCH  1
 
+/* Starting bit of virtual address portion translated in each level. */
+#define PTL0_VA_SHIFT  39
+#define PTL1_VA_SHIFT  30
+#define PTL2_VA_SHIFT  21
+#define PTL3_VA_SHIFT  12
+
+/* Size mask of virtual address portion translated in each level. */
+#define PTL0_VA_MASK  0x1ff
+#define PTL1_VA_MASK  0x1ff
+#define PTL2_VA_MASK  0x1ff
+#define PTL3_VA_MASK  0x1ff
+
 /* Macros calculating indices into page tables for each level. */
-#define PTL0_INDEX_ARCH(vaddr)  (((vaddr) >> 39) & 0x1ffU)
-#define PTL1_INDEX_ARCH(vaddr)  (((vaddr) >> 30) & 0x1ffU)
-#define PTL2_INDEX_ARCH(vaddr)  (((vaddr) >> 21) & 0x1ffU)
-#define PTL3_INDEX_ARCH(vaddr)  (((vaddr) >> 12) & 0x1ffU)
+#define PTL0_INDEX_ARCH(vaddr)  (((vaddr) >> PTL0_VA_SHIFT) & PTL0_VA_MASK)
+#define PTL1_INDEX_ARCH(vaddr)  (((vaddr) >> PTL1_VA_SHIFT) & PTL1_VA_MASK)
+#define PTL2_INDEX_ARCH(vaddr)  (((vaddr) >> PTL2_VA_SHIFT) & PTL2_VA_MASK)
+#define PTL3_INDEX_ARCH(vaddr)  (((vaddr) >> PTL3_VA_SHIFT) & PTL3_VA_MASK)
 
 /* Get PTE address accessors for each level. */
 #define GET_PTL1_ADDRESS_ARCH(ptl0, i) \
@@ -152,17 +170,24 @@
  */
 #define PTE_AP_USER_LIMITED_KERNEL_LIMITED  3
 
-/* Memory types. MAIR_EL1 index 0 is unused, which assures that if a page
- * table entry is non-null then it is valid (PTE_VALID_ARCH() return true). */
+/*
+ * Memory types. MAIR_EL1 index 0 is unused, which assures that if a page
+ * table entry is non-null then it is valid (PTE_VALID_ARCH() returns true).
+ */
 
 /** Write-Back Cacheable Normal memory, Inner shareable, Read-write cache
  * allocation. Defined in MAIR_EL1 index 1. */
+#define MAIR_EL1_NORMAL_MEMORY_ATTR  0xff
 #define MAIR_EL1_NORMAL_MEMORY_INDEX  1
 
 /** Device-nGnRE memory (Device non-Gathering, non-Reordering, Early Write
  * Acknowledgement). Equivalent to the Device memory type in earlier versions
  * of the architecture. Defined in MAIR_EL1 index 2. */
+#define MAIR_EL1_DEVICE_MEMORY_ATTR  0x04
 #define MAIR_EL1_DEVICE_MEMORY_INDEX  2
+
+/** Bit width of one memory attribute field in MAIR_EL1. */
+#define MAIR_EL1_ATTR_SHIFT  8
 
 /* Level 0, 1, 2 descriptor types. */
 
@@ -178,8 +203,8 @@
 #define PTE_L3_TYPE_PAGE  1
 
 /** HelenOS descriptor type. Table for level 0, 1, 2 page translation tables,
- * page for level 3 tables. Block descriptors are not by HelenOS during normal
- * processing. */
+ * page for level 3 tables. Block descriptors are not used by HelenOS during
+ * normal processing. */
 #define PTE_L0123_TYPE_HELENOS  1
 
 /* Page table entry access macros. */
@@ -190,11 +215,20 @@
 /** Shift to access the resulting address in a page table entry. */
 #define PTE_OUTPUT_ADDRESS_SHIFT  12
 
-/** Shift to access the type field in a page table entry. */
+/** Shift to access the access bit in a page table entry. */
+#define PTE_ACCESS_SHIFT  10
+
+/** Shift to access the attr_index field in a page table entry. */
+#define PTE_ATTR_INDEX_SHIFT  2
+
+/** Shift to access the type bit in a page table entry. */
 #define PTE_TYPE_SHIFT  1
 
-/** Shift to access the present field in a page table entry. */
+/** Shift to access the present bit in a page table entry. */
 #define PTE_PRESENT_SHIFT  0
+
+/** The present bit in a page table entry. */
+#define PTE_PRESENT_BIT  (1 << PTE_PRESENT_SHIFT)
 
 #ifndef __ASM__
 
