@@ -138,7 +138,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 
 	/* Validate the exception level. */
 	current_el = CurrentEL_read();
-	if (current_el != CURRENT_EL_EL1 && current_el != CURRENT_EL_EL2) {
+	if (current_el != CURRENT_EL_EL1) {
 		printf("Error: Unexpected CurrentEL value %0#18" PRIx64 ".\n",
 		    current_el);
 		status = EFI_UNSUPPORTED;

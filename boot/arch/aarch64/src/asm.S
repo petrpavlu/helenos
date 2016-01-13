@@ -139,24 +139,10 @@ jump_to_kernel:
 	/* x0 is kernel entry point. */
 	/* x1 is pointer to the bootinfo structure. */
 
-	/* Disable MMU. */
-	mrs x2, CurrentEL
-	cmp x2, #CURRENT_EL_EL1
-	beq 1f
+	/* Disable MMU (removes the identity mapping provided by UEFI). */
+	mrs x2, sctlr_el1
+	bic x2, x2, #SCTLR_EL1_M_BIT
+	msr sctlr_el1, x2
+	isb
 
-	/* Exception level 2. */
-	mrs x2, SCTLR_EL2
-	mov x3, SCTLR_EL2_M_BIT
-	bic x2, x2, x3
-	msr SCTLR_EL2, x2
-	b 2f
-
-1:
-	/* Exception level 1. */
-	mrs x2, SCTLR_EL1
-	mov x3, SCTLR_EL1_M_BIT
-	bic x2, x2, x3
-	msr SCTLR_EL1, x2
-
-2:
 	br x0

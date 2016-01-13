@@ -92,12 +92,8 @@ SPECIAL_REG_GEN_READ(CurrentEL)
 #define CURRENT_EL_EL3  0xc
 
 /* SCTLR_EL1 */
-#define SCTLR_EL1_M_BIT_SHIFT  0  /* M flag */
-#define SCTLR_EL1_M_BIT  (1 << SCTLR_EL1_M_BIT_SHIFT)
-
-/* SCTLR_EL2 */
-#define SCTLR_EL2_M_BIT_SHIFT  0  /* M flag */
-#define SCTLR_EL2_M_BIT  (1 << SCTLR_EL2_M_BIT_SHIFT)
+#define SCTLR_EL1_M_SHIFT  0  /* M flag */
+#define SCTLR_EL1_M_BIT  (1 << SCTLR_EL1_M_SHIFT)
 
 /* TLBI VAE1IS and TLBI ASIDE1IS parameter. */
 #define TLBI_ASID_SHIFT  48
