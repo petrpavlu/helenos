@@ -250,14 +250,18 @@ kernel_image_start:
 	ldr x2, =temp_stack
 	mov sp, x2
 
-	bl arch_pre_main
-
 	/* Create the first stack frame. */
 	mov x29, #0
 	mov x30, #0
 	stp x29, x30, [sp, #-16]!
 	mov x29, sp
 
+	/* PA2KA(bootinfo). */
+	.word 0xcb140021 /* sub x1, x1, x20 */
+	ldr x2, =KM_AARCH64_IDENTITY_START
+	.word 0x8b020021 /* add x1, x1, x2 */
+
+	bl arch_pre_main
 	bl main_bsp
 
 .section K_DATA_START, "ax"
