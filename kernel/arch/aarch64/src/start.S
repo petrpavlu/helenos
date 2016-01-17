@@ -239,6 +239,13 @@ kernel_image_start:
 	br x2
 1:
 
+	/* Disable access to low addresses. */
+	mov x2, #0
+	msr ttbr0_el1, x2
+	isb
+	tlbi vmalle1is
+	dsb ish
+
 	/* Jump on a temporary stack. */
 	ldr x2, =temp_stack
 	mov sp, x2
