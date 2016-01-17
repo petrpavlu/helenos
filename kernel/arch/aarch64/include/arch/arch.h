@@ -36,69 +36,7 @@
 #ifndef KERN_aarch64_ARCH_H_
 #define KERN_aarch64_ARCH_H_
 
-#include <config.h>
-#include <typedefs.h>
-
-#define BOOTINFO_TASK_NAME_BUFLEN  32
-#define TASKMAP_MAX_RECORDS        32
-#define MEMMAP_MAX_RECORDS        128
-
-/** Task structure.
- *
- * Must be in sync with the task structure used by the boot loader.
- */
-typedef struct {
-	void *addr;
-	size_t size;
-	char name[BOOTINFO_TASK_NAME_BUFLEN];
-} utask_t;
-
-/** Task map structure.
- *
- * Must be in sync with the taskmap structure used by the boot loader.
- */
-typedef struct {
-	size_t cnt;
-	utask_t tasks[TASKMAP_MAX_RECORDS];
-} taskmap_t;
-
-/** Memory zone types.
- *
- * Must be in sync with the memtype enum used by the boot loader.
- */
-typedef enum {
-	MEMTYPE_UNUSABLE,
-	MEMTYPE_AVAILABLE,
-	MEMTYPE_ACPI_RECLAIM
-} memtype_t;
-
-/** Memory area.
- *
- * Must be in sync with the memzone structure used by the boot loader.
- */
-typedef struct {
-	memtype_t type;
-	void *start;
-	size_t size;
-} memzone_t;
-
-/** System memory map.
- *
- * Must be in sync with the memmap structure used by the boot loader.
- */
-typedef struct {
-	size_t cnt;
-	memzone_t zones[MEMMAP_MAX_RECORDS];
-} memmap_t;
-
-/** Bootinfo structure.
- *
- * Must be in sync with the bootinfo structure used by the boot loader.
- */
-typedef struct {
-	taskmap_t taskmap;
-	memmap_t memmap;
-} bootinfo_t;
+#include <arch/boot/boot.h>
 
 extern void arch_pre_main(void *entry, bootinfo_t *bootinfo);
 
