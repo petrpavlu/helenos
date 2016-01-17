@@ -38,8 +38,9 @@
 
 #include <arch/common.h>
 
-#define TASKMAP_MAX_RECORDS        32
 #define BOOTINFO_TASK_NAME_BUFLEN  32
+#define TASKMAP_MAX_RECORDS        32
+#define MEMMAP_MAX_RECORDS        128
 
 typedef uint64_t size_t;
 typedef uint64_t uintptr_t;
@@ -47,6 +48,7 @@ typedef uint64_t sysarg_t;
 
 typedef uint64_t pfn_t;
 
+/** Task structure. */
 typedef struct {
 	/** Address where the task was placed. */
 	void *addr;
@@ -56,18 +58,48 @@ typedef struct {
 	char name[BOOTINFO_TASK_NAME_BUFLEN];
 } task_t;
 
+/** Task map structure. */
 typedef struct {
 	/** Number of boot tasks. */
 	size_t cnt;
 	/** Boot task data. */
 	task_t tasks[TASKMAP_MAX_RECORDS];
+} taskmap_t;
 
-	/** UEFI memory map. */
-	uint64_t memory_map;
-	/* Total size of the UEFI memory map in bytes. */
-	sysarg_t memory_map_size;
-	/* Size of one entry in the UEFI memory map. */
-	sysarg_t map_descriptor_size;
+/** Memory zone types. */
+typedef enum {
+	/** Unusuable memory. */
+	MEMTYPE_UNUSABLE,
+	/** Usable memory. */
+	MEMTYPE_AVAILABLE,
+	/** Memory that can be used after ACPI is enabled. */
+	MEMTYPE_ACPI_RECLAIM
+} memtype_t;
+
+/** Memory area. */
+typedef struct {
+	/** Type of the memory. */
+	memtype_t type;
+	/** Address of the area. */
+	void *start;
+	/** Size of the area. */
+	size_t size;
+} memzone_t;
+
+/** System memory map. */
+typedef struct {
+	/** Number of memory zones. */
+	size_t cnt;
+	/** Memory zones. */
+	memzone_t zones[MEMMAP_MAX_RECORDS];
+} memmap_t;
+
+/** Bootinfo structure. */
+typedef struct {
+	/** Task map. */
+	taskmap_t taskmap;
+	/** Memory map. */
+	memmap_t memmap;
 } bootinfo_t;
 
 #endif

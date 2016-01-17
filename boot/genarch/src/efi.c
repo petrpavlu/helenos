@@ -29,7 +29,6 @@
 #include <genarch/efi.h>
 #include <arch/types.h>
 #include <typedefs.h>
-#include <align.h>
 
 void *efi_vendor_table_find(efi_system_table_t *st, efi_guid_t guid)
 {
@@ -44,34 +43,29 @@ void *efi_vendor_table_find(efi_system_table_t *st, efi_guid_t guid)
 }
 
 efi_status_t efi_get_memory_map(efi_system_table_t *st,
-    efi_allocate_type_t allocate_type, efi_memory_type_t memory_type,
-    efi_v1_memdesc_t **memory_map, sysarg_t *memory_map_size, sysarg_t *map_key,
+    sysarg_t *memory_map_size, efi_v1_memdesc_t **memory_map, sysarg_t *map_key,
     sysarg_t *descriptor_size, uint32_t *descriptor_version)
 {
 	efi_status_t status;
-	sysarg_t pages = 1;
 
-	while (1) {
+	*memory_map_size = 8 * sizeof(**memory_map);
+
+	do {
 		/* Allocate space for the memory map. */
-		status = st->boot_services->allocate_pages(allocate_type,
-		    memory_type, pages, (uint64_t *) memory_map);
+		status = st->boot_services->allocate_pool(EFI_LOADER_DATA,
+		    *memory_map_size, (void **) memory_map);
 		if (status != EFI_SUCCESS)
 			return status;
 
 		/* Try to obtain the map. */
-		*memory_map_size = pages * EFI_PAGE_SIZE;
 		status = st->boot_services->get_memory_map(memory_map_size,
 		    *memory_map, map_key, descriptor_size, descriptor_version);
 		if (status == EFI_SUCCESS)
 			return status;
 
 		/* An error occurred, release the allocated memory. */
-		st->boot_services->free_pages((uint64_t) *memory_map, pages);
-		if (status != EFI_BUFFER_TOO_SMALL)
-			return status;
+		st->boot_services->free_pool(*memory_map);
+	} while (status == EFI_BUFFER_TOO_SMALL);
 
-		/* Try with a bigger buffer. */
-		pages = ALIGN_UP(*memory_map_size, EFI_PAGE_SIZE) /
-		    EFI_PAGE_SIZE;
-	}
+	return status;
 }

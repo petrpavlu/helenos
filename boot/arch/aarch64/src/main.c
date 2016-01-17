@@ -78,6 +78,37 @@ static inline void ensure_visibility(void *addr, size_t size)
 		);
 }
 
+/** Translate given UEFI memory type to the bootinfo memory type.
+ *
+ * @param type UEFI memory type.
+ */
+static memtype_t get_memtype(uint32_t type)
+{
+	switch (type)
+	{
+	case EFI_RESERVED:
+	case EFI_RUNTIME_SERVICES_CODE:
+	case EFI_RUNTIME_SERVICES_DATA:
+	case EFI_UNUSABLE_MEMORY:
+	case EFI_ACPI_MEMORY_NVS:
+	case EFI_MEMORY_MAPPED_IO:
+	case EFI_MEMORY_MAPPED_IO_PORT_SPACE:
+	case EFI_PAL_CODE:
+		return MEMTYPE_UNUSABLE;
+	case EFI_LOADER_CODE:
+	case EFI_LOADER_DATA:
+	case EFI_BOOT_SERVICES_CODE:
+	case EFI_BOOT_SERVICES_DATA:
+	case EFI_CONVENTIONAL_MEMORY:
+	case EFI_PERSISTENT_MEMORY:
+		return MEMTYPE_AVAILABLE;
+	case EFI_ACPI_RECLAIM_MEMORY:
+		return MEMTYPE_ACPI_RECLAIM;
+	}
+
+	return MEMTYPE_UNUSABLE;
+}
+
 /** Send a byte to the UEFI console output.
  *
  * @param byte Byte to send.
@@ -109,13 +140,22 @@ efi_status_t bootstrap(void *efi_handle_in,
 {
 	efi_status_t status;
 	uintptr_t current_el;
-	uint64_t memory_map = 0;
-	sysarg_t memory_map_size = 0;
-	sysarg_t map_key;
-	sysarg_t map_descriptor_size;
-	uint32_t map_descriptor_version;
+	uint64_t memmap = 0;
+	sysarg_t memmap_size;
+	sysarg_t memmap_key;
+	sysarg_t memmap_descriptor_size;
+	uint32_t memmap_descriptor_version;
 	uint64_t alloc_addr = 0;
 	sysarg_t alloc_pages = 0;
+
+	/*
+	 * Bootinfo structure is dynamically allocated in the AArch64 port. It
+	 * is placed directly after the inflated components. This assures that
+	 * if the kernel identity maps the first gigabyte of the main memory in
+	 * the kernel/upper address space then it can access the bootinfo
+	 * because the inflated components and bootinfo can always fit in this
+	 * area.
+	 */
 	bootinfo_t *bootinfo;
 
 	efi_system_table = efi_system_table_in;
@@ -146,10 +186,9 @@ efi_status_t bootstrap(void *efi_handle_in,
 	}
 
 	/* Obtain memory map. */
-	status = efi_get_memory_map(efi_system_table, EFI_ALLOCATE_ANY_PAGES,
-	    EFI_LOADER_DATA, (efi_v1_memdesc_t **) &memory_map,
-	    &memory_map_size, &map_key, &map_descriptor_size,
-	    &map_descriptor_version);
+	status = efi_get_memory_map(efi_system_table, &memmap_size,
+	    (efi_v1_memdesc_t **) &memmap, &memmap_key, &memmap_descriptor_size,
+	    &memmap_descriptor_version);
 	if (status != EFI_SUCCESS) {
 		printf("Error: Unable to obtain initial memory map, status "
 		    "code: %" PRIx64 ".\n", status);
@@ -157,27 +196,23 @@ efi_status_t bootstrap(void *efi_handle_in,
 	}
 
 	/* Find start of usable RAM. */
-	bool memory_base_found = false;
-	uint64_t memory_base;
-	for (sysarg_t i = 0; i < memory_map_size / map_descriptor_size; i++) {
-		efi_v1_memdesc_t *desc = (void *) memory_map +
-		    (i * map_descriptor_size);
-		if (!(desc->attribute & EFI_MEMORY_WB))
+	uint64_t memory_base = (uint64_t) -1;
+	for (sysarg_t i = 0; i < memmap_size / memmap_descriptor_size; i++) {
+		efi_v1_memdesc_t *desc = (void *) memmap +
+		    (i * memmap_descriptor_size);
+		if (get_memtype(desc->type) != MEMTYPE_AVAILABLE ||
+		    !(desc->attribute & EFI_MEMORY_WB))
 			continue;
 
-		if (!memory_base_found) {
-			memory_base = desc->phys_start;
-			memory_base_found = true;
-		} else if (desc->phys_start < memory_base)
+		if (desc->phys_start < memory_base)
 			memory_base = desc->phys_start;
 	}
 
 	/* Deallocate memory holding the map. */
-	efi_system_table->boot_services->free_pages(memory_map,
-	    ALIGN_UP(memory_map_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE);
-	memory_map = 0;
+	efi_system_table->boot_services->free_pool((void *) memmap);
+	memmap = 0;
 
-	if (!memory_base_found) {
+	if (memory_base == (uint64_t) -1) {
 		printf("Error: Memory map does not contain any usable RAM.\n");
 		status = EFI_UNSUPPORTED;
 		goto fail;
@@ -229,12 +264,10 @@ efi_status_t bootstrap(void *efi_handle_in,
 		cnt++;
 	}
 
-	/*
-	 * Allocate memory for the inflated components and one page for the
-	 * bootinfo.
-	 */
+	/* Allocate memory for the inflated components and for the bootinfo. */
 	alloc_pages = (ALIGN_UP(top, EFI_PAGE_SIZE) -
-	    ALIGN_DOWN(inflated_base, EFI_PAGE_SIZE)) / EFI_PAGE_SIZE + 1;
+	    ALIGN_DOWN(inflated_base, EFI_PAGE_SIZE)) / EFI_PAGE_SIZE +
+	    ALIGN_UP(sizeof(*bootinfo), EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
 	alloc_addr = inflated_base;
 	status = efi_system_table->boot_services->allocate_pages(
 	    EFI_ALLOCATE_ADDRESS, EFI_LOADER_CODE, alloc_pages, &alloc_addr);
@@ -249,7 +282,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	printf(" %p|%p: boot info structure\n", bootinfo, bootinfo);
 
 	memset(bootinfo, 0, sizeof(*bootinfo));
-	bootinfo->cnt = cnt;
+	bootinfo->taskmap.cnt = cnt;
 
 	/*
 	 * Statically check that information about all components can be
@@ -278,41 +311,85 @@ efi_status_t bootstrap(void *efi_handle_in,
 
 		/* Store information about the component in the bootinfo. */
 		if (i > 1) {
-			bootinfo->tasks[i - 1].addr = components[i - 1].start;
-			bootinfo->tasks[i - 1].size =
+			bootinfo->taskmap.tasks[i - 1].addr =
+			    components[i - 1].start;
+			bootinfo->taskmap.tasks[i - 1].size =
 			    components[i - 1].inflated;
 
-			str_cpy(bootinfo->tasks[i - 1].name,
+			str_cpy(bootinfo->taskmap.tasks[i - 1].name,
 			    BOOTINFO_TASK_NAME_BUFLEN, components[i - 1].name);
 		}
 	}
 
 	printf(".\n");
 
-	/* Get final memory map. Place it explicitly after the bootinfo page. */
-	bootinfo->memory_map = (uint64_t) bootinfo + EFI_PAGE_SIZE;
-	status = efi_get_memory_map(efi_system_table, EFI_ALLOCATE_ADDRESS,
-	    EFI_LOADER_DATA, (efi_v1_memdesc_t **) &bootinfo->memory_map,
-	    &bootinfo->memory_map_size, &map_key,
-	    &bootinfo->map_descriptor_size, &map_descriptor_version);
+	/* Get final memory map. */
+	status = efi_get_memory_map(efi_system_table, &memmap_size,
+	    (efi_v1_memdesc_t **) &memmap, &memmap_key, &memmap_descriptor_size,
+	    &memmap_descriptor_version);
 	if (status != EFI_SUCCESS) {
 		printf("Error: Unable to obtain final memory map, status code: "
 		    "%" PRIx64 ".\n", status);
 		goto fail;
 	}
 
+	/* Convert the UEFI memory map to the bootinfo representation. */
+	cnt = 0;
+	memtype_t current_type = MEMTYPE_UNUSABLE;
+	void *current_start = 0;
+	size_t current_size = 0;
+	sysarg_t memmap_items_count = memmap_size / memmap_descriptor_size;
+	for (sysarg_t i = 0; i < memmap_items_count; i++) {
+		efi_v1_memdesc_t *desc = (void *) memmap +
+		    (i * memmap_descriptor_size);
+
+		/* Get type of the new area. */
+		memtype_t type;
+		if (!(desc->attribute & EFI_MEMORY_WB))
+			type = MEMTYPE_UNUSABLE;
+		else
+			type = get_memtype(desc->type);
+
+		/* Try to merge the new area with the previous one. */
+		if (type == current_type &&
+		    (uint64_t)current_start + current_size == desc->phys_start) {
+			current_size += desc->pages + EFI_PAGE_SIZE;
+			if (i != memmap_items_count - 1)
+				continue;
+		}
+
+		/* Record the previous area. */
+		if (current_type != MEMTYPE_UNUSABLE) {
+			if (cnt >= MEMMAP_MAX_RECORDS) {
+				printf("Error: Too many usable memory "
+				    "areas.\n");
+				status = EFI_UNSUPPORTED;
+				goto fail;
+			}
+			bootinfo->memmap.zones[cnt].type = current_type;
+			bootinfo->memmap.zones[cnt].start = current_start;
+			bootinfo->memmap.zones[cnt].size = current_size;
+			cnt++;
+		}
+
+		/* Remember the new area. */
+		current_type = type;
+		current_start = (void *) desc->phys_start;
+		current_size = desc->pages * EFI_PAGE_SIZE;
+	}
+	bootinfo->memmap.cnt = cnt;
+
 	printf("Booting the kernel...\n");
 
 	/* Exit boot services. This is a point of no return. */
 	efi_system_table->boot_services->exit_boot_services(efi_handle_in,
-	    map_key);
+	    memmap_key);
 
 	jump_to_kernel((void *) inflated_base, bootinfo);
 
 fail:
-	if (memory_map != 0)
-		efi_system_table->boot_services->free_pages(memory_map,
-		    ALIGN_UP(memory_map_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE);
+	if (memmap != 0)
+		efi_system_table->boot_services->free_pool((void *) memmap);
 
 	if (alloc_addr != 0)
 		efi_system_table->boot_services->free_pages(alloc_addr,
