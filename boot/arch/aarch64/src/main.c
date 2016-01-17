@@ -57,7 +57,7 @@ static efi_system_table_t *efi_system_table;
  * @param addr Address of the first instruction.
  * @param size Size of the instruction block (in bytes).
  */
-static inline void ensure_visibility(void *addr, size_t size)
+static void ensure_visibility(void *addr, size_t size)
 {
 	for (uintptr_t a = (uintptr_t) addr; a < (uintptr_t) addr + size;
 	    a += 4)
