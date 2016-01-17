@@ -30,7 +30,7 @@
  * @{
  */
 /** @file
- * @brief aarch64 FPU context.
+ * @brief AArch64 FPU context.
  */
 
 #include <fpu_context.h>

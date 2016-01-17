@@ -45,7 +45,7 @@
 /** Physical memory map received from the bootcode. */
 memmap_t memmap;
 
-/** Perform aarch64 specific initialization before main_bsp() is called. */
+/** Perform AArch64 specific initialization before main_bsp() is called. */
 void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 {
 	/* Copy init task info. */
@@ -69,7 +69,7 @@ void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 	}
 }
 
-/** Perform aarch64 specific tasks needed before the memory management is
+/** Perform AArch64 specific tasks needed before the memory management is
  * initialized.
  */
 void arch_pre_mm_init(void)
@@ -77,7 +77,7 @@ void arch_pre_mm_init(void)
 	/* REVISIT */
 }
 
-/** Perform aarch64 specific tasks needed before the memory management is
+/** Perform AArch64 specific tasks needed before the memory management is
  * initialized.
  */
 void arch_post_mm_init(void)
@@ -94,19 +94,19 @@ void arch_post_mm_init(void)
 	/* REVISIT */
 }
 
-/** Perform aarch64 specific tasks needed before the multiprocessing is
+/** Perform AArch64 specific tasks needed before the multiprocessing is
  * initialized.
  */
 void arch_pre_smp_init(void)
 {
 }
 
-/** Perform aarch64 specific tasks needed after the multiprocessing is
+/** Perform AArch64 specific tasks needed after the multiprocessing is
  * initialized.
  */
 void arch_post_smp_init(void)
 {
-	/* Currently the only supported platform for aarch64 is 'arm'. */
+	/* Currently the only supported platform for AArch64 is 'arm'. */
 	static const char *platform = "arm";
 
 	sysinfo_set_item_data("platform", NULL, (void *) platform,
@@ -121,7 +121,7 @@ void calibrate_delay_loop(void)
 	/* REVISIT */
 }
 
-/** Perform aarch64 specific tasks needed after cpu is initialized. */
+/** Perform AArch64 specific tasks needed after cpu is initialized. */
 void arch_post_cpu_init(void)
 {
 	/* REVISIT */
@@ -145,20 +145,20 @@ void userspace(uspace_arg_t *kernel_uarg)
 		;
 }
 
-/** Perform aarch64 specific tasks needed before the new task is run. */
+/** Perform AArch64 specific tasks needed before the new task is run. */
 void before_task_runs_arch(void)
 {
 	/* REVISIT */
 }
 
-/** Perform aarch64 specific tasks needed before the new thread is scheduled.
+/** Perform AArch64 specific tasks needed before the new thread is scheduled.
  */
 void before_thread_runs_arch(void)
 {
 	/* REVISIT */
 }
 
-/** Perform aarch64 specific tasks before a thread stops running. */
+/** Perform AArch64 specific tasks before a thread stops running. */
 void after_thread_ran_arch(void)
 {
 	/* REVISIT */
@@ -186,7 +186,7 @@ void *arch_construct_function(fncptr_t *fptr, void *addr, void *caller)
 	return addr;
 }
 
-/** Perform aarch64 specific tasks to initialize IRQ processing. */
+/** Perform AArch64 specific tasks to initialize IRQ processing. */
 void irq_initialize_arch(irq_t *irq __attribute__((unused)))
 {
 }
