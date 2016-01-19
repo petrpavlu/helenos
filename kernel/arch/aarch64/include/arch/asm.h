@@ -59,7 +59,7 @@ NO_TRACE static inline uintptr_t get_stack_base(void)
 		"mov %[v], sp\n"
 		"and %[v], %[v], %[size]\n"
 		: [v] "=&r" (v)
-		: [size] "r" (~(STACK_SIZE - 1))
+		: [size] "r" (~((uint64_t) STACK_SIZE - 1))
 	);
 
 	return v;
