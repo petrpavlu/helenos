@@ -310,7 +310,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 		ensure_visibility(dest[i - 1], components[i - 1].inflated);
 
 		/* Store information about the component in the bootinfo. */
-		if (i > 1) {
+		if (i > 0) {
 			bootinfo->taskmap.tasks[i - 1].addr =
 			    components[i - 1].start;
 			bootinfo->taskmap.tasks[i - 1].size =
