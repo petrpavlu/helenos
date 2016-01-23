@@ -42,9 +42,6 @@
 #include <sysinfo/sysinfo.h>
 #include <userspace.h>
 
-/** Physical memory map received from the bootcode. */
-memmap_t memmap;
-
 /** Perform AArch64 specific initialization before main_bsp() is called. */
 void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 {
@@ -54,7 +51,8 @@ void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 
 	size_t i;
 	for (i = 0; i < init.cnt; i++) {
-		init.tasks[i].paddr = KA2PA(bootinfo->taskmap.tasks[i].addr);
+		init.tasks[i].paddr =
+		    (uintptr_t) bootinfo->taskmap.tasks[i].addr;
 		init.tasks[i].size = bootinfo->taskmap.tasks[i].size;
 		str_cpy(init.tasks[i].name, CONFIG_TASK_NAME_BUFLEN,
 		    bootinfo->taskmap.tasks[i].name);

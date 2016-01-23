@@ -39,27 +39,79 @@
 #include <align.h>
 #include <macros.h>
 
+/** Physical memory map received from the bootcode. */
+memmap_t memmap;
+
+/** Print memory layout. */
+void physmem_print(void)
+{
+	printf("[base            ] [size            ] [type      ]\n");
+
+	size_t i;
+	for (i = 0; i < memmap.cnt; i++) {
+		const char *type;
+		switch (memmap.zones[i].type) {
+			case MEMTYPE_AVAILABLE:
+				type = "available";
+				break;
+			case MEMTYPE_ACPI_RECLAIM:
+				type = "ACPI reclaim";
+				break;
+			default:
+				type = "unusable";
+				break;
+		}
+
+		printf("%p %#0zx %s\n", memmap.zones[i].start,
+		    memmap.zones[i].size, type);
+	}
+}
+
+/** Create memory zones according to information stored in memmap.
+ *
+ * Walk the memory map and create frame zones according to it.
+ */
 static void frame_common_arch_init(bool low)
 {
-	/* REVISIT */
-	uintptr_t base;
-	size_t size;
+	size_t i;
 
-	base = ALIGN_UP(0, FRAME_SIZE);
-	size = ALIGN_DOWN(0xf0000000, FRAME_SIZE);
+	for (i = 0; i < memmap.cnt; i++) {
+		if (memmap.zones[i].type != MEMTYPE_AVAILABLE)
+			continue;
 
-	if (!frame_adjust_zone_bounds(low, &base, &size))
-		return;
+		/* To be safe, make the available zone possibly smaller. */
+		uintptr_t base = ALIGN_UP((uintptr_t) memmap.zones[i].start,
+		    FRAME_SIZE);
+		size_t size = ALIGN_DOWN(memmap.zones[i].size -
+		    (base - (uintptr_t) memmap.zones[i].start), FRAME_SIZE);
 
-	if (low) {
-		zone_create(ADDR2PFN(base), SIZE2FRAMES(size),
-		    0,
-		    ZONE_AVAILABLE | ZONE_LOWMEM);
-	} else {
-		pfn_t conf = zone_external_conf_alloc(SIZE2FRAMES(size));
-		if (conf != 0)
-			zone_create(ADDR2PFN(base), SIZE2FRAMES(size), conf,
-			    ZONE_AVAILABLE | ZONE_HIGHMEM);
+		if (!frame_adjust_zone_bounds(low, &base, &size))
+			continue;
+
+		pfn_t confdata;
+		pfn_t pfn = ADDR2PFN(base);
+		size_t count = SIZE2FRAMES(size);
+
+		if (low) {
+			/* Determine where to place confdata. */
+			if (pfn == 0) {
+				/*
+				 * Avoid placing confdata at the NULL address.
+				 */
+				if (count == 1)
+					continue;
+				confdata = 1;
+			} else
+				confdata = pfn;
+
+			zone_create(pfn, count, confdata,
+			    ZONE_AVAILABLE | ZONE_LOWMEM);
+		} else {
+			confdata = zone_external_conf_alloc(count);
+			if (confdata != 0)
+				zone_create(pfn, count, confdata,
+				    ZONE_AVAILABLE | ZONE_HIGHMEM);
+		}
 	}
 }
 
@@ -70,6 +122,14 @@ void frame_low_arch_init(void)
 		return;
 
 	frame_common_arch_init(true);
+
+	/*
+	 * On AArch64, physical memory can start on a non-zero address. The
+	 * generic frame_init() only marks PFN 0 as not free, so we must mark
+	 * the physically first frame not free explicitly here, no matter what
+	 * is its address.
+	 */
+	frame_mark_unavailable(ADDR2PFN(physmem_base), 1);
 }
 
 /** Create high memory zones. */

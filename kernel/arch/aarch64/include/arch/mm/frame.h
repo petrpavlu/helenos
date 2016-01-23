@@ -36,6 +36,8 @@
 #ifndef KERN_aarch64_FRAME_H_
 #define KERN_aarch64_FRAME_H_
 
+#include <arch/boot/boot.h>
+
 #define FRAME_WIDTH  12  /* 4KB frames */
 #define FRAME_SIZE   (1 << FRAME_WIDTH)
 
@@ -45,7 +47,9 @@
 
 extern void frame_low_arch_init(void);
 extern void frame_high_arch_init(void);
-#define physmem_print()
+extern void physmem_print(void);
+
+extern memmap_t memmap;
 
 #endif /* __ASM__ */
 

@@ -353,7 +353,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 		/* Try to merge the new area with the previous one. */
 		if (type == current_type &&
 		    (uint64_t)current_start + current_size == desc->phys_start) {
-			current_size += desc->pages + EFI_PAGE_SIZE;
+			current_size += desc->pages * EFI_PAGE_SIZE;
 			if (i != memmap_items_count - 1)
 				continue;
 		}

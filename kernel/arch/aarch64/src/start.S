@@ -34,8 +34,6 @@
 .section K_TEXT_START, "ax"
 
 .global kernel_image_start
-.global exc_stack
-.global supervisor_sp
 
 kernel_image_start:
 	/*
@@ -46,8 +44,11 @@ kernel_image_start:
 	 * MMU must be disabled at this point.
 	 */
 
-	/* Get address of the main memory. */
+	/* Get address of the main memory and remember it. */
 	adrp x20, kernel_image_start - BOOT_OFFSET
+	adrp x2, physmem_base
+	/* add x2, x2, #:lo12:physmem_base */
+	str x20, [x2]
 
 	/*
 	 * Set up address translation that identity maps the gigabyte area that
@@ -266,7 +267,8 @@ kernel_image_start:
 
 .section K_DATA_START, "ax"
 
-	.align 12
+	/* Page tables. */
+.align 12
 lower_page_table_level0:
 	.space 4096
 lower_page_table_level1:
@@ -276,5 +278,13 @@ upper_page_table_level0:
 upper_page_table_level1:
 	.space 4096
 
+	/* Physical memory base address. */
+.align 12
+.global physmem_base
+physmem_base:
+	.quad 0
+
+	/* Temporary stack. */
+.align 10
 	.space 1024
 temp_stack:
