@@ -145,9 +145,9 @@ show_usage() {
 	echo " $0 [--no-install] [--helenos-target] <platform>"
 	echo
 	echo "Possible target platforms are:"
-	echo " aarch64    ARM64"
 	echo " amd64      AMD64 (x86-64, x64)"
 	echo " arm32      ARM"
+	echo " arm64      AArch64"
 	echo " ia32       IA-32 (x86, i386)"
 	echo " ia64       IA-64 (Itanium)"
 	echo " mips32     MIPS little-endian 32b"
@@ -343,10 +343,6 @@ prepare() {
 
 set_target_from_platform() {
 	case "$1" in
-		"aarch64")
-			LINUX_TARGET="aarch64-linux-gnu"
-			HELENOS_TARGET="aarch64-helenos"
-			;;
 		"amd64")
 			LINUX_TARGET="amd64-linux-gnu"
 			HELENOS_TARGET="amd64-helenos"
@@ -354,6 +350,10 @@ set_target_from_platform() {
 		"arm32")
 			LINUX_TARGET="arm-linux-gnueabi"
 			HELENOS_TARGET="arm-helenos-gnueabi"
+			;;
+		"arm64")
+			LINUX_TARGET="aarch64-linux-gnu"
+			HELENOS_TARGET="aarch64-helenos"
 			;;
 		"ia32")
 			LINUX_TARGET="i686-pc-linux-gnu"
@@ -565,16 +565,16 @@ if [ "$#" -lt "1" ]; then
 fi
 
 case "$1" in
-	aarch64|amd64|arm32|ia32|ia64|mips32|mips32eb|mips64|ppc32|ppc64| \
+	amd64|arm32|arm64|ia32|ia64|mips32|mips32eb|mips64|ppc32|ppc64| \
 	    sparc32|sparc64)
 		prepare
 		build_target "$1"
 		;;
 	"all")
 		prepare
-		build_target "aarch64"
 		build_target "amd64"
 		build_target "arm32"
+		build_target "arm64"
 		build_target "ia32"
 		build_target "ia64"
 		build_target "mips32"
@@ -587,9 +587,9 @@ case "$1" in
 		;;
 	"parallel")
 		prepare
-		build_target "aarch64" &
 		build_target "amd64" &
 		build_target "arm32" &
+		build_target "arm64" &
 		build_target "ia32" &
 		build_target "ia64" &
 		build_target "mips32" &
@@ -603,11 +603,11 @@ case "$1" in
 		;;
 	"2-way")
 		prepare
-		build_target "aarch64" &
 		build_target "amd64" &
+		build_target "arm32" &
 		wait
 		
-		build_target "arm32" &
+		build_target "arm64" &
 		build_target "ia32" &
 		wait
 		
