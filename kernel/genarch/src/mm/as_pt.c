@@ -77,7 +77,7 @@ pte_t *ptl0_create(unsigned int flags)
 	
 	if (flags & FLAG_AS_KERNEL)
 		memsetb(dst_ptl0, PTL0_SIZE, 0);
-	else {
+	else if (!KERNEL_SEPARATE_PTL0) {
 		/*
 		 * Copy the kernel address space portion to new PTL0.
 		 */
