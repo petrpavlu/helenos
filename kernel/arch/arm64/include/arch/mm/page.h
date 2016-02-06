@@ -293,7 +293,7 @@ NO_TRACE static inline unsigned int get_pt_level012_flags(pte_t *pt, size_t i)
 	pte_t *p = &pt[i];
 
 	return (1 << PAGE_CACHEABLE_SHIFT) |
-	    (p->present << PAGE_PRESENT_SHIFT) | (1 << PAGE_USER_SHIFT) |
+	    (!p->present << PAGE_PRESENT_SHIFT) | (1 << PAGE_USER_SHIFT) |
 	    (1 << PAGE_READ_SHIFT) | (1 << PAGE_WRITE_SHIFT) |
 	    (1 << PAGE_EXEC_SHIFT);
 }
@@ -316,7 +316,7 @@ NO_TRACE static inline unsigned int get_pt_level3_flags(pte_t *pt, size_t i)
 	    (!user && !p->privileged_execute_never));
 
 	return (cacheable << PAGE_CACHEABLE_SHIFT) |
-	    (p->present << PAGE_PRESENT_SHIFT) | (user << PAGE_USER_SHIFT) |
+	    (!p->present << PAGE_PRESENT_SHIFT) | (user << PAGE_USER_SHIFT) |
 	    (1 << PAGE_READ_SHIFT) | (write << PAGE_WRITE_SHIFT) |
 	    (exec << PAGE_EXEC_SHIFT) | (!p->not_global << PAGE_GLOBAL_SHIFT);
 }
