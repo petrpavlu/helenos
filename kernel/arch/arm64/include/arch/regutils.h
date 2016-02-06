@@ -58,7 +58,8 @@
 	static inline void name##_write(uintptr_t regn) \
 	{ \
 		asm volatile ( \
-			"msr " #name ", %[regn]" \
+			"msr " #name ", %[regn]\n" \
+			"isb\n" \
 			:: [regn] "r" (regn) \
 		); \
 	}
