@@ -255,12 +255,10 @@ efi_status_t bootstrap(void *efi_handle_in,
 	 */
 	void *dest[COMPONENTS];
 	uint64_t top = inflated_base;
-	size_t cnt = 0;
 	for (size_t i = 0; i < COMPONENTS; i++) {
 		dest[i] = (void *) top;
 		top += components[i].inflated;
 		top = ALIGN_UP(top, PAGE_SIZE);
-		cnt++;
 	}
 
 	/* Allocate memory for the inflated components and for the bootinfo. */
@@ -279,21 +277,32 @@ efi_status_t bootstrap(void *efi_handle_in,
 
 	bootinfo = (void *) alloc_addr + (alloc_pages - 1) * EFI_PAGE_SIZE;
 	printf(" %p|%p: boot info structure\n", bootinfo, bootinfo);
-
 	memset(bootinfo, 0, sizeof(*bootinfo));
-	bootinfo->taskmap.cnt = cnt;
 
 	/*
 	 * Statically check that information about all components can be
 	 * recorded in the bootinfo.
 	 */
-#if COMPONENTS >= TASKMAP_MAX_RECORDS
+#if COMPONENTS - 1 > TASKMAP_MAX_RECORDS
 #error TASKMAP_MAX_RECORDS too small
 #endif
 
+	/*
+	 * Store information about the components in the bootinfo (excluding the
+	 * kernel component).
+	 */
+	bootinfo->taskmap.cnt = COMPONENTS - 1;
+	for (size_t i = 0; i < bootinfo->taskmap.cnt; i++) {
+		bootinfo->taskmap.tasks[i].addr = dest[i + 1];
+		bootinfo->taskmap.tasks[i].size = components[i + 1].inflated;
+
+		str_cpy(bootinfo->taskmap.tasks[i].name,
+		    BOOTINFO_TASK_NAME_BUFLEN, components[i + 1].name);
+	}
+
 	printf("\nInflating components ... ");
 
-	for (size_t i = cnt; i > 0; i--) {
+	for (size_t i = COMPONENTS; i > 0; i--) {
 		printf("%s ", components[i - 1].name);
 
 		int err = inflate(components[i - 1].start,
@@ -307,17 +316,6 @@ efi_status_t bootstrap(void *efi_handle_in,
 		}
 		/* Ensure visibility of the component. */
 		ensure_visibility(dest[i - 1], components[i - 1].inflated);
-
-		/* Store information about the component in the bootinfo. */
-		if (i > 0) {
-			bootinfo->taskmap.tasks[i - 1].addr =
-			    components[i - 1].start;
-			bootinfo->taskmap.tasks[i - 1].size =
-			    components[i - 1].inflated;
-
-			str_cpy(bootinfo->taskmap.tasks[i - 1].name,
-			    BOOTINFO_TASK_NAME_BUFLEN, components[i - 1].name);
-		}
 	}
 
 	printf(".\n");
@@ -333,7 +331,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	}
 
 	/* Convert the UEFI memory map to the bootinfo representation. */
-	cnt = 0;
+	size_t cnt = 0;
 	memtype_t current_type = MEMTYPE_UNUSABLE;
 	void *current_start = 0;
 	size_t current_size = 0;
