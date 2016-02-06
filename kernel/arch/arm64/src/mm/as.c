@@ -37,6 +37,7 @@
 #include <arch/regutils.h>
 #include <genarch/mm/page_pt.h>
 #include <mm/as.h>
+#include <mm/asid.h>
 
 /** Architecture dependent address space init.
  *
@@ -60,8 +61,11 @@ void as_install_arch(as_t *as)
 	uintptr_t val;
 
 	val = (uintptr_t)as->genarch.page_table;
-	val |= (uintptr_t)as->asid << TTBR0_EL1_ASID_SHIFT;
-        TTBR0_EL1_write(val);
+	if (as->asid != ASID_KERNEL) {
+		val |= (uintptr_t)as->asid << TTBR0_EL1_ASID_SHIFT;
+		TTBR0_EL1_write(val);
+	} else
+		TTBR1_EL1_write(val);
 }
 
 /** @}
