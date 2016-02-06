@@ -246,33 +246,7 @@ extern uintptr_t physmem_base;
  * * Level 3 tables store 4kB page descriptors.
  */
 typedef struct {
-	/* Next-level table attributes. */
-	unsigned non_secure_table : 1;
-	unsigned access_permission_table : 2;
-	unsigned unprivileged_execute_never_table : 1;
-	unsigned privileged_execute_never_table : 1;
-
-	unsigned : 4;
-
-	/* Upper block and page attributes. */
-	unsigned unprivileged_execute_never : 1;
-	unsigned privileged_execute_never : 1;
-	unsigned contiguous : 1;
-
-	unsigned : 4;
-
-	uint64_t output_address : 36;
-
-	/* Lower block and page attributes. */
-	unsigned not_global : 1;
-	unsigned access : 1;
-	unsigned shareability : 2;
-	unsigned access_permission : 2;
-	unsigned non_secure : 1;
-	unsigned attr_index : 3;
-
 	/* Common bits. */
-	unsigned type : 1;
 	/** Flag indicating entry contains valid data and can be used for page
 	 * translation.
 	 *
@@ -280,6 +254,33 @@ typedef struct {
 	 * but it has the `present' (valid+active) sense in HelenOS.
 	 */
 	unsigned present : 1;
+	unsigned type : 1;
+
+	/* Lower block and page attributes. */
+	unsigned attr_index : 3;
+	unsigned non_secure : 1;
+	unsigned access_permission : 2;
+	unsigned shareability : 2;
+	unsigned access : 1;
+	unsigned not_global : 1;
+
+	/* Common output address. */
+	uint64_t output_address : 36;
+
+	unsigned : 4;
+
+	/* Upper block and page attributes. */
+	unsigned contiguous : 1;
+	unsigned privileged_execute_never : 1;
+	unsigned unprivileged_execute_never : 1;
+
+	unsigned : 4;
+
+	/* Next-level table attributes. */
+	unsigned privileged_execute_never_table : 1;
+	unsigned unprivileged_execute_never_table : 1;
+	unsigned access_permission_table : 2;
+	unsigned non_secure_table : 1;
 } __attribute__ ((packed)) pte_t;
 
 /** Returns level 0, 1, 2 page table entry flags.
