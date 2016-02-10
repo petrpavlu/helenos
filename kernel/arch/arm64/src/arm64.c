@@ -75,6 +75,11 @@ void arch_pre_mm_init(void)
 	/* REVISIT */
 }
 
+/* REVISIT HACK PL011 */
+#include <genarch/drivers/pl011/pl011.h>
+#include <console/console.h>
+pl011_uart_t uart;
+
 /** Perform ARM64 specific tasks needed before the memory management is
  * initialized.
  */
@@ -89,7 +94,11 @@ void arch_post_mm_init(void)
 	/* Merge all memory zones to 1 big zone. */
 	zone_merge_all();
 
-	/* REVISIT */
+/* REVISIT HACK PL011 */
+#define ICP_UART0_IRQ  1
+#define ICP_UART  0x09000000
+	if (pl011_uart_init(&uart, ICP_UART0_IRQ, ICP_UART))
+		stdout_wire(&uart.outdev);
 }
 
 /** Perform ARM64 specific tasks needed before the multiprocessing is
