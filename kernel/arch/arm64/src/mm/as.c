@@ -62,7 +62,7 @@ void as_install_arch(as_t *as)
 
 	val = (uintptr_t)as->genarch.page_table;
 	if (as->asid != ASID_KERNEL) {
-		val |= (uintptr_t)as->asid << TTBR0_EL1_ASID_SHIFT;
+		val |= (uintptr_t)as->asid << TTBR0_ASID_SHIFT;
 		TTBR0_EL1_write(val);
 	} else
 		TTBR1_EL1_write(val);

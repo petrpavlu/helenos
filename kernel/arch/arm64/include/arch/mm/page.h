@@ -42,7 +42,7 @@
 
 #ifndef __ASM__
 #include <typedefs.h>
-#endif
+#endif /* __ASM__ */
 
 #define PAGE_WIDTH  FRAME_WIDTH
 #define PAGE_SIZE   FRAME_SIZE

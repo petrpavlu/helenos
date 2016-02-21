@@ -34,6 +34,7 @@
 .section K_TEXT_START, "ax"
 
 .global kernel_image_start
+.global physmem_base
 
 kernel_image_start:
 	/*
@@ -280,7 +281,6 @@ upper_page_table_level1:
 
 	/* Physical memory base address. */
 .align 12
-.global physmem_base
 physmem_base:
 	.quad 0
 

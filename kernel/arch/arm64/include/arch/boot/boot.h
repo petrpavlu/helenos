@@ -98,7 +98,7 @@ typedef struct {
 	memmap_t memmap;
 } bootinfo_t;
 
-#endif
+#endif /* __ASM__ */
 
 #endif
 
