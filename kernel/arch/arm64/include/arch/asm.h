@@ -39,6 +39,8 @@
 #include <config.h>
 #include <trace.h>
 
+extern char exc_vector;
+
 /** CPU specific way to sleep cpu. */
 NO_TRACE static inline void cpu_sleep(void)
 {

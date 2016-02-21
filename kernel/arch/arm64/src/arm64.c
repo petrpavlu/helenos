@@ -35,6 +35,7 @@
 
 #include <abi/errno.h>
 #include <arch.h>
+#include <arch/exception.h>
 #include <ddi/irq.h>
 #include <interrupt.h>
 #include <proc/scheduler.h>
@@ -72,7 +73,11 @@ void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
  */
 void arch_pre_mm_init(void)
 {
-	/* REVISIT */
+	if (config.cpu_active != 1)
+		return;
+
+	/* Initialize exception dispatch table. */
+	exception_init();
 }
 
 /* REVISIT HACK PL011 */

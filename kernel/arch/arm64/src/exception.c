@@ -33,8 +33,182 @@
  * @brief Exception handlers and exception initialization routines.
  */
 
+#include <arch/asm.h>
+#include <arch/exception.h>
 #include <interrupt.h>
+#include <log.h>
 #include <print.h>
+
+static void current_el_sp_sel0_synch_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, Synch exception",
+	    CPU->id);
+}
+
+static void current_el_sp_sel0_irq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, IRQ exception",
+	    CPU->id);
+}
+
+static void current_el_sp_sel0_fiq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, FIQ exception",
+	    CPU->id);
+}
+
+static void current_el_sp_sel0_serror_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, SError exception",
+	    CPU->id);
+}
+
+static void current_el_sp_selx_synch_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, Synch exception",
+	    CPU->id);
+}
+
+static void current_el_sp_selx_irq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, IRQ exception",
+	    CPU->id);
+}
+
+static void current_el_sp_selx_fiq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, FIQ exception",
+	    CPU->id);
+}
+
+static void current_el_sp_selx_serror_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, SError exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch64_synch_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, Synch exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch64_irq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, IRQ exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch64_fiq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, FIQ exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch64_serror_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, SError exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch32_synch_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, Synch exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch32_irq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, IRQ exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch32_fiq_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, FIQ exception",
+	    CPU->id);
+}
+
+static void lower_el_aarch32_serror_exception(unsigned int exc_no,
+    istate_t *istate)
+{
+	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, SError exception",
+	    CPU->id);
+}
+
+/** Initializes exception handling.
+ *
+ * Installs low-level exception handlers and then registers exceptions and their
+ * handlers to kernel exception dispatcher.
+ */
+void exception_init(void)
+{
+	exc_register(EXC_CURRENT_EL_SP_SEL0_SYNCH,
+	    "current EL, SP_SEL0, Synchronous", true,
+	    (iroutine_t) current_el_sp_sel0_synch_exception);
+	exc_register(EXC_CURRENT_EL_SP_SEL0_IRQ,
+	    "current EL, SP_SEL0, IRQ", true,
+	    (iroutine_t) current_el_sp_sel0_irq_exception);
+	exc_register(EXC_CURRENT_EL_SP_SEL0_FIQ,
+	    "current EL, SP_SEL0, FIQ", true,
+	    (iroutine_t) current_el_sp_sel0_fiq_exception);
+	exc_register(EXC_CURRENT_EL_SP_SEL0_SERROR,
+	    "current EL, SP_SEL0, SError", true,
+	    (iroutine_t) current_el_sp_sel0_serror_exception);
+	exc_register(EXC_CURRENT_EL_SP_SELX_SYNCH,
+	    "current EL, SP_SELx, Synchronous", true,
+	    (iroutine_t) current_el_sp_selx_synch_exception);
+	exc_register(EXC_CURRENT_EL_SP_SELX_IRQ,
+	    "current EL, SP_SELx, IRQ", true,
+	    (iroutine_t) current_el_sp_selx_irq_exception);
+	exc_register(EXC_CURRENT_EL_SP_SELX_FIQ,
+	    "current EL, SP_SELx, FIQ", true,
+	    (iroutine_t) current_el_sp_selx_fiq_exception);
+	exc_register(EXC_CURRENT_EL_SP_SELX_SERROR,
+	    "current EL, SP_SELx, SError", true,
+	    (iroutine_t) current_el_sp_selx_serror_exception);
+	exc_register(EXC_LOWER_EL_AARCH64_SYNCH,
+	    "lower EL, AArch64, Synchronous", true,
+	    (iroutine_t) lower_el_aarch64_synch_exception);
+	exc_register(EXC_LOWER_EL_AARCH64_IRQ,
+	    "lower EL, AArch64, IRQ", true,
+	    (iroutine_t) lower_el_aarch64_irq_exception);
+	exc_register(EXC_LOWER_EL_AARCH64_FIQ,
+	    "lower EL, AArch64, FIQ", true,
+	    (iroutine_t) lower_el_aarch64_fiq_exception);
+	exc_register(EXC_LOWER_EL_AARCH64_SERROR,
+	    "lower EL, AArch64, SError", true,
+	    (iroutine_t) lower_el_aarch64_serror_exception);
+	exc_register(EXC_LOWER_EL_AARCH32_SYNCH,
+	    "lower EL, AArch32, Synchronous", true,
+	    (iroutine_t) lower_el_aarch32_synch_exception);
+	exc_register(EXC_LOWER_EL_AARCH32_IRQ,
+	    "lower EL, AArch32, IRQ", true,
+	    (iroutine_t) lower_el_aarch32_irq_exception);
+	exc_register(EXC_LOWER_EL_AARCH32_FIQ,
+	    "lower EL, AArch32, FIQ", true,
+	    (iroutine_t) lower_el_aarch32_fiq_exception);
+	exc_register(EXC_LOWER_EL_AARCH32_SERROR,
+	    "lower EL, AArch32, SError", true,
+	    (iroutine_t) lower_el_aarch32_serror_exception);
+
+	VBAR_EL1_write(((uintptr_t) &exc_vector));
+}
 
 /** Print #istate_t structure content.
  *
