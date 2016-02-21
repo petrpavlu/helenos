@@ -146,8 +146,58 @@ sysarg_t sys_tls_set(uintptr_t addr)
  */
 void userspace(uspace_arg_t *kernel_uarg)
 {
-	/* REVISIT */
+	/* Prepare return to EL0. */
+	SPSR_EL1_write((SPSR_EL1_read() & ~SPSR_MODE_MASK) |
+	    SPSR_MODE_ARM64_EL0T);
 
+	/* Set program entry. */
+	ELR_EL1_write((uintptr_t) kernel_uarg->uspace_entry);
+
+	/* Set user stack. */
+	SP_EL0_write(((uintptr_t) kernel_uarg->uspace_stack +
+	    kernel_uarg->uspace_stack_size));
+
+	asm volatile (
+		/*
+		 * Clear all general-purpose registers, except x0 that holds an
+		 * argument for the user space.
+		 */
+		"mov x0, %[uspace_uarg]\n"
+		"mov x1, #0\n"
+		"mov x2, #0\n"
+		"mov x3, #0\n"
+		"mov x4, #0\n"
+		"mov x5, #0\n"
+		"mov x6, #0\n"
+		"mov x7, #0\n"
+		"mov x8, #0\n"
+		"mov x9, #0\n"
+		"mov x10, #0\n"
+		"mov x11, #0\n"
+		"mov x12, #0\n"
+		"mov x13, #0\n"
+		"mov x14, #0\n"
+		"mov x15, #0\n"
+		"mov x16, #0\n"
+		"mov x17, #0\n"
+		"mov x18, #0\n"
+		"mov x19, #0\n"
+		"mov x20, #0\n"
+		"mov x21, #0\n"
+		"mov x22, #0\n"
+		"mov x23, #0\n"
+		"mov x24, #0\n"
+		"mov x25, #0\n"
+		"mov x26, #0\n"
+		"mov x27, #0\n"
+		"mov x28, #0\n"
+		"mov x29, #0\n"
+		"mov x30, #0\n"
+		"eret\n"
+		:: [uspace_uarg] "r" (kernel_uarg->uspace_uarg)
+	);
+
+	/* Unreachable. */
 	while (1)
 		;
 }
