@@ -36,119 +36,134 @@
 #include <arch/asm.h>
 #include <arch/exception.h>
 #include <interrupt.h>
-#include <log.h>
 #include <print.h>
 
 static void current_el_sp_sel0_synch_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, Synch exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SEL0, Synch, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_sel0_irq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, IRQ exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SEL0, IRQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_sel0_fiq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, FIQ exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SEL0, FIQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_sel0_serror_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SEL0, SError exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SEL0, SError, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64
+	    ".", (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_selx_synch_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, Synch exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SELx, Synch, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_selx_irq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, IRQ exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SELx, IRQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_selx_fiq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, FIQ exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SELx, FIQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void current_el_sp_selx_serror_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Current EL, SP_SELx, SError exception",
-	    CPU->id);
+	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
+	    "SP_SELx, SError, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64
+	    ".", (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch64_synch_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, Synch exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch64, "
+	    "Synch, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch64_irq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, IRQ exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch64, "
+	    "IRQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch64_fiq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, FIQ exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch64, "
+	    "FIQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch64_serror_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch64, SError exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch64, "
+	    "SError, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch32_synch_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, Synch exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch32, "
+	    "Synch, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch32_irq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, IRQ exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch32, "
+	    "IRQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch32_fiq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, FIQ exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch32, "
+	    "FIQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 static void lower_el_aarch32_serror_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	log(LF_ARCH, LVL_DEBUG, "cpu%d: Lower EL, AArch32, SError exception",
-	    CPU->id);
+	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch32, "
+	    "SError, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
+	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
 }
 
 /** Initializes exception handling.
