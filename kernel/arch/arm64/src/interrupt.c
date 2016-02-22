@@ -79,7 +79,7 @@ void interrupts_restore(ipl_t ipl)
  */
 ipl_t interrupts_read(void)
 {
-	return DAIF_read() & DAIF_IRQ_BIT;
+	return (DAIF_read() >> DAIF_IRQ_SHIFT) & 1;
 }
 
 /** Check interrupts state.
