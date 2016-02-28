@@ -89,6 +89,33 @@ SPECIAL_REG_GEN_WRITE(ELR_EL1)
 
 /* ESR */
 SPECIAL_REG_GEN_READ(ESR_EL1)
+#define ESR_EC_SHIFT  26
+#define ESR_EC_MASK  (0x3f << ESR_EC_SHIFT)
+
+
+/** Instruction abort from Lower Exception level. */
+#define ESR_EC_IA_LOWER_EL  0x20
+/** Data abort from Lower Exception level. */
+#define ESR_EC_DA_LOWER_EL  0x24
+/** Data abort from Current Exception level. */
+#define ESR_EC_DA_CURRENT_EL  0x25
+
+/** Instruction/data Fault Status Code. */
+#define ESR_IDFSC_SHIFT  0
+#define ESR_IDFSC_MASK  (0x3f << ESR_IDFSC_SHIFT)
+
+/** Instruction/data abort, translation fault, zeroth level. */
+#define ESR_IDA_IDFSC_TF0  0x4
+/** Instruction/data abort, translation fault, first level. */
+#define ESR_IDA_IDFSC_TF1  0x5
+/** Instruction/data abort, translation fault, second level. */
+#define ESR_IDA_IDFSC_TF2  0x6
+/** Instruction/data abort, translation fault, third level. */
+#define ESR_IDA_IDFSC_TF3  0x7
+
+/** Data abort, Write not Read. */
+#define ESR_DA_WNR_SHIFT  6
+#define ESR_DA_WNR_BIT  (1 << ESR_DA_WNR_SHIFT)
 
 /* FAR */
 SPECIAL_REG_GEN_READ(FAR_EL1)

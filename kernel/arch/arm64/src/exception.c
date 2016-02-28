@@ -35,6 +35,8 @@
 
 #include <arch/asm.h>
 #include <arch/exception.h>
+#include <arch/regutils.h>
+#include <mm/as.h>
 #include <interrupt.h>
 #include <print.h>
 
@@ -73,6 +75,26 @@ static void current_el_sp_sel0_serror_exception(unsigned int exc_no,
 static void current_el_sp_selx_synch_exception(unsigned int exc_no,
     istate_t *istate)
 {
+	uintptr_t esr_el1 = ESR_EL1_read();
+	uintptr_t far_el1 = FAR_EL1_read();
+
+	switch ((esr_el1 & ESR_EC_MASK) >> ESR_EC_SHIFT) {
+	case ESR_EC_DA_CURRENT_EL:
+		/* Data abort. */
+		switch ((esr_el1 & ESR_IDFSC_MASK) >> ESR_IDFSC_SHIFT) {
+		case ESR_IDA_IDFSC_TF0:
+		case ESR_IDA_IDFSC_TF1:
+		case ESR_IDA_IDFSC_TF2:
+		case ESR_IDA_IDFSC_TF3: {
+			/* Translation fault. */
+			pf_access_t access = (esr_el1 & ESR_DA_WNR_BIT) ?
+			    PF_ACCESS_WRITE : PF_ACCESS_READ;
+			as_page_fault(far_el1, access, istate);
+			return;
+		}
+		}
+	}
+
 	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
 	    "SP_SELx, Synch, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
 	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
@@ -105,9 +127,37 @@ static void current_el_sp_selx_serror_exception(unsigned int exc_no,
 static void lower_el_aarch64_synch_exception(unsigned int exc_no,
     istate_t *istate)
 {
+	uintptr_t esr_el1 = ESR_EL1_read();
+	uintptr_t far_el1 = FAR_EL1_read();
+	bool exec = false;
+
+	switch ((esr_el1 & ESR_EC_MASK) >> ESR_EC_SHIFT) {
+	case ESR_EC_IA_LOWER_EL:
+		/* Instruction abort. */
+		exec = true;
+	case ESR_EC_DA_LOWER_EL:
+		/* Data abort. */
+		switch ((esr_el1 & ESR_IDFSC_MASK) >> ESR_IDFSC_SHIFT) {
+		case ESR_IDA_IDFSC_TF0:
+		case ESR_IDA_IDFSC_TF1:
+		case ESR_IDA_IDFSC_TF2:
+		case ESR_IDA_IDFSC_TF3: {
+			/* Translation fault. */
+			pf_access_t access;
+			if (exec)
+				access = PF_ACCESS_EXEC;
+			else
+				access = (esr_el1 & ESR_DA_WNR_BIT) ?
+				    PF_ACCESS_WRITE : PF_ACCESS_READ;
+			as_page_fault(far_el1, access, istate);
+			return;
+		}
+		}
+	}
+
 	fault_from_uspace(istate, "Unhandled exception from Lower EL, AArch64, "
 	    "Synch, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
-	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
+	    (uint32_t) esr_el1, far_el1);
 }
 
 static void lower_el_aarch64_irq_exception(unsigned int exc_no,
