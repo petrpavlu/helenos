@@ -40,17 +40,12 @@
 
 memcpy_from_uspace:
 memcpy_to_uspace:
-	/* Completely un-optimized memcpy(). */
-	/*
-	 * TODO Improve this code when HelenOS uses newer binutils which have a
-	 * fixed GNU assembler.
-	 */
-
+	/* Simple (un-optimized) memcpy(). */
 	cbz x2, 2f
 	mov x3, x0
 1:
-	ldrb w4, [x3], #1
-	strb w4, [x1], #1
+	ldrb w4, [x1], #1
+	strb w4, [x3], #1
 	subs x2, x2, #1
 	b.ne 1b
 
