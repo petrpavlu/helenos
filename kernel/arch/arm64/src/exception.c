@@ -290,30 +290,29 @@ void exception_init(void)
 void istate_decode(istate_t *istate)
 {
 	printf("x0 =%0#18" PRIx64 "\tx1 =%0#18" PRIx64 "\t"
-	    "x2 =%0#18" PRIx64 "\tx3 =%0#18" PRIx64 "\n",
-	    istate->x0, istate->x1, istate->x2, istate->x3);
-	printf("x4 =%0#18" PRIx64 "\tx5 =%0#18" PRIx64 "\t"
-	    "x6 =%0#18" PRIx64 "\tx7 =%0#18" PRIx64 "\n",
-	    istate->x4, istate->x5, istate->x6, istate->x7);
-	printf("x8 =%0#18" PRIx64 "\tx9 =%0#18" PRIx64 "\t"
-	    "x10=%0#18" PRIx64 "\tx11=%0#18" PRIx64 "\n",
-	    istate->x8, istate->x9, istate->x10, istate->x11);
+	    "x2 =%0#18" PRIx64 "\n", istate->x0, istate->x1, istate->x2);
+	printf("x3 =%0#18" PRIx64 "\tx4 =%0#18" PRIx64 "\t"
+	    "x5 =%0#18" PRIx64 "\n", istate->x3, istate->x4, istate->x5);
+	printf("x6 =%0#18" PRIx64 "\tx7 =%0#18" PRIx64 "\t"
+	    "x8 =%0#18" PRIx64 "\n", istate->x6, istate->x7, istate->x8);
+	printf("x9 =%0#18" PRIx64 "\tx10=%0#18" PRIx64 "\t"
+	    "x11=%0#18" PRIx64 "\n", istate->x9, istate->x10, istate->x11);
 	printf("x12=%0#18" PRIx64 "\tx13=%0#18" PRIx64 "\t"
-	    "x14=%0#18" PRIx64 "\tx15=%0#18" PRIx64 "\n",
-	    istate->x12, istate->x13, istate->x14, istate->x15);
-	printf("x16=%0#18" PRIx64 "\tx17=%0#18" PRIx64 "\t"
-	    "x18=%0#18" PRIx64 "\tx19=%0#18" PRIx64 "\n",
-	    istate->x16, istate->x17, istate->x18, istate->x19);
-	printf("x20=%0#18" PRIx64 "\tx21=%0#18" PRIx64 "\t"
-	    "x22=%0#18" PRIx64 "\tx23=%0#18" PRIx64 "\n",
-	    istate->x20, istate->x21, istate->x22, istate->x23);
+	    "x14=%0#18" PRIx64 "\n", istate->x12, istate->x13, istate->x14);
+	printf("x15=%0#18" PRIx64 "\tx16=%0#18" PRIx64 "\t"
+	    "x17=%0#18" PRIx64 "\n", istate->x15, istate->x16, istate->x17);
+	printf("x18=%0#18" PRIx64 "\tx19=%0#18" PRIx64 "\t"
+	    "x20=%0#18" PRIx64 "\n", istate->x18, istate->x19, istate->x20);
+	printf("x21=%0#18" PRIx64 "\tx22=%0#18" PRIx64 "\t"
+	    "x23=%0#18" PRIx64 "\n", istate->x21, istate->x22, istate->x23);
 	printf("x24=%0#18" PRIx64 "\tx25=%0#18" PRIx64 "\t"
-	    "x26=%0#18" PRIx64 "\tx27=%0#18" PRIx64 "\n",
-	    istate->x24, istate->x25, istate->x26, istate->x27);
-	printf("x28=%0#18" PRIx64 "\tx29=%0#18" PRIx64 "\t"
-	    "x30=%0#18" PRIx64 "\n", istate->x28, istate->x29, istate->x30);
-	printf("sp =%0#18" PRIx64 "\tpc =%0#18" PRIx64 "\t"
-	    "spsr=%0#18" PRIx64 "\n", istate->sp, istate->pc, istate->spsr);
+	    "x26=%0#18" PRIx64 "\n", istate->x24, istate->x25, istate->x26);
+	printf("x27=%0#18" PRIx64 "\tx28=%0#18" PRIx64 "\t"
+	    "x29=%0#18" PRIx64 "\n", istate->x27, istate->x28, istate->x29);
+	printf("x30=%0#18" PRIx64 "\tsp =%0#18" PRIx64 "\t"
+	    "pc =%0#18" PRIx64 "\n", istate->x30, istate->sp, istate->pc);
+	printf("spsr=%0#18" PRIx64 "\ttpidr=%0#18" PRIx64 "\n", istate->spsr,
+	    istate->tpidr);
 }
 
 /** @}

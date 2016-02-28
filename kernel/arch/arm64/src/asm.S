@@ -75,116 +75,119 @@ handler_\i:
 	 */
 
 	/* Static checks for the following code. */
-#if ISTATE_OFFSET_X1 + ISTATE_SIZE_X1 != ISTATE_OFFSET_X2
-#error x1 and x2 are not successive in istate_t
+#if ISTATE_OFFSET_X0 + ISTATE_SIZE_X0 != ISTATE_OFFSET_X1
+#error x0 and x1 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X3 + ISTATE_SIZE_X3 != ISTATE_OFFSET_X4
-#error x3 and x4 are not successive in istate_t
+#if ISTATE_OFFSET_X2 + ISTATE_SIZE_X2 != ISTATE_OFFSET_X3
+#error x2 and x3 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X5 + ISTATE_SIZE_X5 != ISTATE_OFFSET_X6
-#error x5 and x6 are not successive in istate_t
+#if ISTATE_OFFSET_X4 + ISTATE_SIZE_X4 != ISTATE_OFFSET_X5
+#error x4 and x5 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X7 + ISTATE_SIZE_X7 != ISTATE_OFFSET_X8
-#error x7 and x8 are not successive in istate_t
+#if ISTATE_OFFSET_X6 + ISTATE_SIZE_X6 != ISTATE_OFFSET_X7
+#error x6 and x7 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X9 + ISTATE_SIZE_X9 != ISTATE_OFFSET_X10
-#error x9 and x10 are not successive in istate_t
+#if ISTATE_OFFSET_X8 + ISTATE_SIZE_X8 != ISTATE_OFFSET_X9
+#error x8 and x9 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X11 + ISTATE_SIZE_X11 != ISTATE_OFFSET_X12
-#error x11 and x12 are not successive in istate_t
+#if ISTATE_OFFSET_X10 + ISTATE_SIZE_X10 != ISTATE_OFFSET_X11
+#error x10 and x11 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X13 + ISTATE_SIZE_X13 != ISTATE_OFFSET_X14
-#error x13 and x14 are not successive in istate_t
+#if ISTATE_OFFSET_X12 + ISTATE_SIZE_X12 != ISTATE_OFFSET_X13
+#error x12 and x13 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X15 + ISTATE_SIZE_X15 != ISTATE_OFFSET_X16
-#error x15 and x16 are not successive in istate_t
+#if ISTATE_OFFSET_X14 + ISTATE_SIZE_X14 != ISTATE_OFFSET_X15
+#error x14 and x15 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X17 + ISTATE_SIZE_X17 != ISTATE_OFFSET_X18
-#error x17 and x18 are not successive in istate_t
+#if ISTATE_OFFSET_X16 + ISTATE_SIZE_X16 != ISTATE_OFFSET_X17
+#error x16 and x17 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X19 + ISTATE_SIZE_X19 != ISTATE_OFFSET_X20
-#error x19 and x20 are not successive in istate_t
+#if ISTATE_OFFSET_X18 + ISTATE_SIZE_X18 != ISTATE_OFFSET_X19
+#error x18 and x19 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X21 + ISTATE_SIZE_X21 != ISTATE_OFFSET_X22
-#error x21 and x22 are not successive in istate_t
+#if ISTATE_OFFSET_X20 + ISTATE_SIZE_X20 != ISTATE_OFFSET_X21
+#error x20 and x21 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X23 + ISTATE_SIZE_X23 != ISTATE_OFFSET_X24
-#error x23 and x24 are not successive in istate_t
+#if ISTATE_OFFSET_X22 + ISTATE_SIZE_X22 != ISTATE_OFFSET_X23
+#error x22 and x23 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X25 + ISTATE_SIZE_X25 != ISTATE_OFFSET_X26
-#error x25 and x26 are not successive in istate_t
+#if ISTATE_OFFSET_X24 + ISTATE_SIZE_X24 != ISTATE_OFFSET_X25
+#error x24 and x25 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X27 + ISTATE_SIZE_X27 != ISTATE_OFFSET_X28
-#error x27 and x28 are not successive in istate_t
+#if ISTATE_OFFSET_X26 + ISTATE_SIZE_X26 != ISTATE_OFFSET_X27
+#error x26 and x27 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X29 + ISTATE_SIZE_X29 != ISTATE_OFFSET_X30
-#error x29 and x30 are not successive in istate_t
-#endif
-#if ISTATE_OFFSET_PC + ISTATE_SIZE_PC != ISTATE_OFFSET_X0
-#error pc and x0 are not successive in istate_t
+#if ISTATE_OFFSET_X28 + ISTATE_SIZE_X28 != ISTATE_OFFSET_X29
+#error x28 and x29 are not successive in istate_t
 #endif
 #if ISTATE_OFFSET_SPSR + ISTATE_SIZE_SPSR != ISTATE_OFFSET_SP
 #error spsr and sp are not successive in istate_t
 #endif
+#if ISTATE_OFFSET_PC + ISTATE_SIZE_PC != ISTATE_OFFSET_TPIDR
+#error pc and tpidr are not successive in istate_t
+#endif
 
 	/* Save current state. */
-	.word 0xd10443ff /* sub sp, sp, #ISTATE_SIZE */ /* 0x00 */
-	stp x1, x2, [sp, #ISTATE_OFFSET_X1]     /* 0x04 */
-	stp x3, x4, [sp, #ISTATE_OFFSET_X3]     /* 0x08 */
-	stp x5, x6, [sp, #ISTATE_OFFSET_X5]     /* 0x0c */
-	stp x7, x8, [sp, #ISTATE_OFFSET_X7]     /* 0x10 */
-	stp x9, x10, [sp, #ISTATE_OFFSET_X9]    /* 0x14 */
-	stp x11, x12, [sp, #ISTATE_OFFSET_X11]  /* 0x18 */
-	stp x13, x14, [sp, #ISTATE_OFFSET_X13]  /* 0x1c */
-	stp x15, x16, [sp, #ISTATE_OFFSET_X15]  /* 0x20 */
-	stp x17, x18, [sp, #ISTATE_OFFSET_X17]  /* 0x24 */
-	stp x19, x20, [sp, #ISTATE_OFFSET_X19]  /* 0x28 */
-	stp x21, x22, [sp, #ISTATE_OFFSET_X21]  /* 0x2c */
-	stp x23, x24, [sp, #ISTATE_OFFSET_X23]  /* 0x30 */
-	stp x25, x26, [sp, #ISTATE_OFFSET_X25]  /* 0x34 */
-	stp x27, x28, [sp, #ISTATE_OFFSET_X27]  /* 0x38 */
-	stp x29, x30, [sp, #ISTATE_OFFSET_X29]  /* 0x3c */
+	.word 0xd10463ff /* sub sp, sp, #ISTATE_SIZE */ /* 0x00 */
+	stp x0, x1, [sp, #ISTATE_OFFSET_X0]     /* 0x04 */
+	stp x2, x3, [sp, #ISTATE_OFFSET_X2]     /* 0x08 */
+	stp x4, x5, [sp, #ISTATE_OFFSET_X4]     /* 0x0c */
+	stp x6, x7, [sp, #ISTATE_OFFSET_X6]     /* 0x10 */
+	stp x8, x9, [sp, #ISTATE_OFFSET_X8]     /* 0x14 */
+	stp x10, x11, [sp, #ISTATE_OFFSET_X10]  /* 0x18 */
+	stp x12, x13, [sp, #ISTATE_OFFSET_X12]  /* 0x1c */
+	stp x14, x15, [sp, #ISTATE_OFFSET_X14]  /* 0x20 */
+	stp x16, x17, [sp, #ISTATE_OFFSET_X16]  /* 0x24 */
+	stp x18, x19, [sp, #ISTATE_OFFSET_X18]  /* 0x28 */
+	stp x20, x21, [sp, #ISTATE_OFFSET_X20]  /* 0x2c */
+	stp x22, x23, [sp, #ISTATE_OFFSET_X22]  /* 0x30 */
+	stp x24, x25, [sp, #ISTATE_OFFSET_X24]  /* 0x34 */
+	stp x26, x27, [sp, #ISTATE_OFFSET_X26]  /* 0x38 */
+	stp x28, x29, [sp, #ISTATE_OFFSET_X28]  /* 0x3c */
+	str x30, [sp, #ISTATE_OFFSET_X30]       /* 0x40 */
 
-	mrs x1, elr_el1                         /* 0x40 */
-	stp x1, x0, [sp, #ISTATE_OFFSET_PC]     /* 0x44 */
+	mrs x0, spsr_el1                        /* 0x44 */
+	mrs x1, sp_el0                          /* 0x48 */
+	stp x0, x1, [sp, #ISTATE_OFFSET_SPSR]   /* 0x4c */
 
-	mrs x0, spsr_el1                        /* 0x48 */
-	mrs x1, sp_el0                          /* 0x4c */
-	stp x0, x1, [sp, #ISTATE_OFFSET_SPSR]   /* 0x50 */
+	mrs x0, elr_el1                         /* 0x50 */
+	mrs x1, tpidr_el0                       /* 0x54 */
+	stp x0, x1, [sp, #ISTATE_OFFSET_PC]     /* 0x58 */
 
-	mov x0, #\i                             /* 0x54 */
-	mov x1, sp                              /* 0x58 */
-	bl exc_dispatch                         /* 0x5c */
+	mov x0, #\i                             /* 0x5c */
+	mov x1, sp                              /* 0x60 */
+	bl exc_dispatch                         /* 0x64 */
 
 	/* Restore previous state. */
-	ldp x0, x1, [sp, #ISTATE_OFFSET_SPSR]   /* 0x60 */
-	msr spsr_el1, x0                        /* 0x64 */
-	msr sp_el0, x1                          /* 0x68 */
+	ldp x0, x1, [sp, #ISTATE_OFFSET_SPSR]   /* 0x68 */
+	msr spsr_el1, x0                        /* 0x6c */
+	msr sp_el0, x1                          /* 0x70 */
 
-	ldp x1, x0, [sp, #ISTATE_OFFSET_PC]     /* 0x6c */
-	msr elr_el1, x1                         /* 0x70 */
-
-	ldp x1, x2, [sp, #ISTATE_OFFSET_X1]     /* 0x74 */
-	ldp x3, x4, [sp, #ISTATE_OFFSET_X3]     /* 0x78 */
+	ldp x0, x1, [sp, #ISTATE_OFFSET_PC]     /* 0x74 */
+	msr elr_el1, x0                         /* 0x78 */
 	b exc_restore_end                       /* 0x7c */
 .endm
 
 exc_restore_end:
 	/* Restore remaining registers and return from the exception handler. */
-	ldp x5, x6, [sp, #ISTATE_OFFSET_X5]
-	ldp x7, x8, [sp, #ISTATE_OFFSET_X7]
-	ldp x9, x10, [sp, #ISTATE_OFFSET_X9]
-	ldp x11, x12, [sp, #ISTATE_OFFSET_X11]
-	ldp x13, x14, [sp, #ISTATE_OFFSET_X13]
-	ldp x15, x16, [sp, #ISTATE_OFFSET_X15]
-	ldp x17, x18, [sp, #ISTATE_OFFSET_X17]
-	ldp x19, x20, [sp, #ISTATE_OFFSET_X19]
-	ldp x21, x22, [sp, #ISTATE_OFFSET_X21]
-	ldp x23, x24, [sp, #ISTATE_OFFSET_X23]
-	ldp x25, x26, [sp, #ISTATE_OFFSET_X25]
-	ldp x27, x28, [sp, #ISTATE_OFFSET_X27]
-	ldp x29, x30, [sp, #ISTATE_OFFSET_X29]
-	.word 0x910443ff /* add sp, sp, #ISTATE_SIZE */
+	msr tpidr_el0, x1
+	ldp x0, x1, [sp, #ISTATE_OFFSET_X0]
+	ldp x2, x3, [sp, #ISTATE_OFFSET_X2]
+	ldp x4, x5, [sp, #ISTATE_OFFSET_X4]
+	ldp x6, x7, [sp, #ISTATE_OFFSET_X6]
+	ldp x8, x9, [sp, #ISTATE_OFFSET_X8]
+	ldp x10, x11, [sp, #ISTATE_OFFSET_X10]
+	ldp x12, x13, [sp, #ISTATE_OFFSET_X12]
+	ldp x14, x15, [sp, #ISTATE_OFFSET_X14]
+	ldp x16, x17, [sp, #ISTATE_OFFSET_X16]
+	ldp x18, x19, [sp, #ISTATE_OFFSET_X18]
+	ldp x20, x21, [sp, #ISTATE_OFFSET_X20]
+	ldp x22, x23, [sp, #ISTATE_OFFSET_X22]
+	ldp x24, x25, [sp, #ISTATE_OFFSET_X24]
+	ldp x26, x27, [sp, #ISTATE_OFFSET_X26]
+	ldp x28, x29, [sp, #ISTATE_OFFSET_X28]
+	ldr x30, [sp, #ISTATE_OFFSET_X30]
+	.word 0x910463ff /* add sp, sp, #ISTATE_SIZE */
 	eret
 
 .align 11

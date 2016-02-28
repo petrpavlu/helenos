@@ -162,6 +162,9 @@ void userspace(uspace_arg_t *kernel_uarg)
 	SP_EL0_write(((uintptr_t) kernel_uarg->uspace_stack +
 	    kernel_uarg->uspace_stack_size));
 
+	/* Clear Thread ID register. */
+	TPIDR_EL0_write(0);
+
 	asm volatile (
 		/*
 		 * Clear all general-purpose registers, except x0 that holds an
