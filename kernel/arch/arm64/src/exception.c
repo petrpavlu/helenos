@@ -39,6 +39,7 @@
 #include <mm/as.h>
 #include <interrupt.h>
 #include <print.h>
+#include <syscall/syscall.h>
 
 static void current_el_sp_sel0_synch_exception(unsigned int exc_no,
     istate_t *istate)
@@ -132,6 +133,13 @@ static void lower_el_aarch64_synch_exception(unsigned int exc_no,
 	bool exec = false;
 
 	switch ((esr_el1 & ESR_EC_MASK) >> ESR_EC_SHIFT) {
+	case ESR_EC_SVC:
+		/* SVC instruction. */
+		interrupts_enable();
+		istate->x0 = syscall_handler(istate->x0, istate->x1, istate->x2,
+		    istate->x3, istate->x4, istate->x5, istate->x6);
+		interrupts_disable();
+		return;
 	case ESR_EC_IA_LOWER_EL:
 		/* Instruction abort. */
 		exec = true;

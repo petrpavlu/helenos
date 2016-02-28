@@ -92,6 +92,8 @@ SPECIAL_REG_GEN_READ(ESR_EL1)
 #define ESR_EC_SHIFT  26
 #define ESR_EC_MASK  (0x3f << ESR_EC_SHIFT)
 
+/** Exception from SVC instruction execution. */
+#define ESR_EC_SVC  0x15
 
 /** Instruction abort from Lower Exception level. */
 #define ESR_EC_IA_LOWER_EL  0x20
