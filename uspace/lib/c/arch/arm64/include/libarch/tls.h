@@ -69,8 +69,8 @@ static inline void __tcb_set(tcb_t *tcb)
 
 /** Returns TCB address.
  *
- * @return TCB address (starts before TLS which address is stored in r9
- * register).
+ * @return TCB address (starts before TLS which address is stored in the
+ * TPIDR_EL0 register).
  */
 static inline tcb_t *__tcb_get(void)
 {

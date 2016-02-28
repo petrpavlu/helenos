@@ -65,13 +65,17 @@
 #define smc_coherence(addr) \
 do { \
 	asm volatile ( \
-		/* Clean to Point of Unification to make the new instruction
-		 * visible to the instruction cache. */ \
+		/*
+		 * Clean to Point of Unification to make the new instruction
+		 * visible to the instruction cache.
+		 */ \
 		"dc cvau, %[a]\n" \
 		/* Ensure completion on all PEs. */ \
 		"dsb ish\n" \
-		/* Ensure instruction cache/branch predictor discards stale
-		 * data. */ \
+		/*
+		 * Ensure instruction cache/branch predictor discards stale
+		 * data.
+		 */ \
 		"ic ivau, %[a]\n" \
 		/* Ensure completion on all PEs. */ \
 		"dsb ish\n" \
