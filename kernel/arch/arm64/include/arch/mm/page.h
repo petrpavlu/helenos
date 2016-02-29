@@ -334,7 +334,6 @@ NO_TRACE static inline void set_pt_level012_flags(pte_t *pt, size_t i,
 
 	p->present = (flags & PAGE_PRESENT) != 0;
 	p->type = PTE_L012_TYPE_TABLE;
-	p->access = 1;
 }
 
 /** Sets flags of level 3 page table entry.
