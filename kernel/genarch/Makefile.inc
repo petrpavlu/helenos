@@ -129,6 +129,11 @@ ifeq ($(CONFIG_BCM2835_MAILBOX),y)
 		genarch/src/drivers/bcm2835/mbox.c
 endif
 
+ifeq ($(CONFIG_GICV2), y)
+	GENARCH_SOURCES += \
+		genarch/src/drivers/gicv2/gicv2.c
+endif
+
 ifeq ($(CONFIG_VIA_CUDA),y)
 	GENARCH_SOURCES += \
 		genarch/src/drivers/via-cuda/cuda.c
