@@ -36,6 +36,7 @@
 #include <abi/errno.h>
 #include <arch.h>
 #include <arch/exception.h>
+#include <arch/machine_func.h>
 #include <ddi/irq.h>
 #include <interrupt.h>
 #include <proc/scheduler.h>
@@ -66,6 +67,9 @@ void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 		memmap.zones[i].start = bootinfo->memmap.zones[i].start;
 		memmap.zones[i].size = bootinfo->memmap.zones[i].size;
 	}
+
+	/* Initialize machine_ops pointer. */
+	machine_ops_init();
 }
 
 /** Perform ARM64 specific tasks needed before the memory management is
@@ -80,11 +84,6 @@ void arch_pre_mm_init(void)
 	exception_init();
 }
 
-/* REVISIT HACK PL011 */
-#include <genarch/drivers/pl011/pl011.h>
-#include <console/console.h>
-pl011_uart_t uart;
-
 /** Perform ARM64 specific tasks needed before the memory management is
  * initialized.
  */
@@ -94,16 +93,13 @@ void arch_post_mm_init(void)
 		return;
 
 	/* Initialize IRQ routing. */
-	irq_init(0, 0);
+	irq_init(16, 16);
 
 	/* Merge all memory zones to 1 big zone. */
 	zone_merge_all();
 
-/* REVISIT HACK PL011 */
-#define ICP_UART0_IRQ  1
-#define ICP_UART  0x09000000
-	if (pl011_uart_init(&uart, ICP_UART0_IRQ, ICP_UART))
-		stdout_wire(&uart.outdev);
+	/* Initialize output device. */
+	machine_output_init();
 }
 
 /** Perform ARM64 specific tasks needed before the multiprocessing is
@@ -118,13 +114,14 @@ void arch_pre_smp_init(void)
  */
 void arch_post_smp_init(void)
 {
-	/* Currently the only supported platform for ARM64 is 'arm'. */
-	static const char *platform = "arm";
+	/* Set platform name. */
+	const char *platform = machine_get_platform_name();
 
 	sysinfo_set_item_data("platform", NULL, (void *) platform,
 	    str_size(platform));
 
-	/* REVISIT */
+	/* Initialize input device. */
+	machine_input_init();
 }
 
 /** Calibrate delay loop. */
