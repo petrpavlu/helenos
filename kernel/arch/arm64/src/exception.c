@@ -88,7 +88,7 @@ static void current_el_sp_selx_synch_exception(unsigned int exc_no,
 		case ESR_IDA_IDFSC_TF2:
 		case ESR_IDA_IDFSC_TF3: {
 			/* Translation fault. */
-			pf_access_t access = (esr_el1 & ESR_DA_WNR_BIT) ?
+			pf_access_t access = (esr_el1 & ESR_DA_WNR_FLAG) ?
 			    PF_ACCESS_WRITE : PF_ACCESS_READ;
 			as_page_fault(far_el1, access, istate);
 			return;
@@ -155,7 +155,7 @@ static void lower_el_aarch64_synch_exception(unsigned int exc_no,
 			if (exec)
 				access = PF_ACCESS_EXEC;
 			else
-				access = (esr_el1 & ESR_DA_WNR_BIT) ?
+				access = (esr_el1 & ESR_DA_WNR_FLAG) ?
 				    PF_ACCESS_WRITE : PF_ACCESS_READ;
 			as_page_fault(far_el1, access, istate);
 			return;

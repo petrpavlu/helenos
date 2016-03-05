@@ -232,7 +232,7 @@ extern uintptr_t physmem_base;
 #define PTE_PRESENT_SHIFT  0
 
 /** The present bit in a page table entry. */
-#define PTE_PRESENT_BIT  (1 << PTE_PRESENT_SHIFT)
+#define PTE_PRESENT_FLAG  (1 << PTE_PRESENT_SHIFT)
 
 #ifndef __ASM__
 

@@ -147,7 +147,7 @@ jump_to_kernel:
 
 	/* Disable MMU (removes the identity mapping provided by UEFI). */
 	mrs x2, sctlr_el1
-	bic x2, x2, #SCTLR_M_BIT
+	bic x2, x2, #SCTLR_M_FLAG
 	msr sctlr_el1, x2
 	isb
 

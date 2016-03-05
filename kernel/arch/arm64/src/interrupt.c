@@ -43,7 +43,7 @@ ipl_t interrupts_disable(void)
 {
 	uintptr_t daif = DAIF_read();
 
-	DAIF_write(daif | DAIF_IRQ_BIT);
+	DAIF_write(daif | DAIF_IRQ_FLAG);
 
 	return (daif >> DAIF_IRQ_SHIFT) & 1;
 }
@@ -56,7 +56,7 @@ ipl_t interrupts_enable(void)
 {
 	uintptr_t daif = DAIF_read();
 
-	DAIF_write(daif & ~DAIF_IRQ_BIT);
+	DAIF_write(daif & ~DAIF_IRQ_FLAG);
 
 	return (daif >> DAIF_IRQ_SHIFT) & 1;
 }
@@ -69,7 +69,7 @@ void interrupts_restore(ipl_t ipl)
 {
 	uintptr_t daif = DAIF_read();
 
-	DAIF_write((daif & ~DAIF_IRQ_BIT) |
+	DAIF_write((daif & ~DAIF_IRQ_FLAG) |
 	    ((ipl & 1) << DAIF_IRQ_SHIFT));
 }
 
@@ -88,7 +88,7 @@ ipl_t interrupts_read(void)
  */
 bool interrupts_disabled(void)
 {
-	return DAIF_read() & DAIF_IRQ_BIT;
+	return DAIF_read() & DAIF_IRQ_FLAG;
 }
 
 /** @}
