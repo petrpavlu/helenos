@@ -51,6 +51,22 @@ void machine_ops_init(void)
 #endif
 }
 
+/** Perform machine-specific initialization. */
+void machine_init(void)
+{
+	machine_ops->machine_init();
+}
+
+/** Interrupt exception handler.
+ *
+ * @param exc_no Interrupt exception number.
+ * @param istate Saved processor state.
+ */
+void machine_irq_exception(unsigned int exc_no, istate_t *istate)
+{
+	machine_ops->machine_irq_exception(exc_no, istate);
+}
+
 /** Configure the output device. */
 void machine_output_init(void)
 {
@@ -61,6 +77,12 @@ void machine_output_init(void)
 void machine_input_init(void)
 {
 	machine_ops->machine_input_init();
+}
+
+/** Get IRQ number range used by machine. */
+size_t machine_get_irq_count(void)
+{
+	return machine_ops->machine_get_irq_count();
 }
 
 /** Get platform identifier. */

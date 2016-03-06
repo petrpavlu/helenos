@@ -38,15 +38,23 @@
 #ifndef KERN_arm64_MACHINE_FUNC_H_
 #define KERN_arm64_MACHINE_FUNC_H_
 
+#include <arch/istate.h>
+
 struct arm_machine_ops {
+	void (*machine_init)(void);
+	void (*machine_irq_exception)(unsigned int, istate_t *);
 	void (*machine_output_init)(void);
 	void (*machine_input_init)(void);
+	size_t (*machine_get_irq_count)(void);
 	const char *(*machine_get_platform_name)(void);
 };
 
 extern void machine_ops_init(void);
+extern void machine_init(void);
+void machine_irq_exception(unsigned int, istate_t *);
 extern void machine_output_init(void);
 extern void machine_input_init(void);
+extern size_t machine_get_irq_count(void);
 extern const char *machine_get_platform_name(void);
 
 #endif

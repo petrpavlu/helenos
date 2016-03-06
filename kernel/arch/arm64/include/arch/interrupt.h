@@ -53,6 +53,7 @@ extern ipl_t interrupts_enable(void);
 extern void interrupts_restore(ipl_t ipl);
 extern ipl_t interrupts_read(void);
 extern bool interrupts_disabled(void);
+extern void interrupt_init(void);
 
 #endif
 

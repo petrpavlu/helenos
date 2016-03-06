@@ -37,7 +37,6 @@
 #include <arch.h>
 #include <arch/exception.h>
 #include <arch/machine_func.h>
-#include <ddi/irq.h>
 #include <interrupt.h>
 #include <proc/scheduler.h>
 #include <syscall/syscall.h>
@@ -77,11 +76,6 @@ void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
  */
 void arch_pre_mm_init(void)
 {
-	if (config.cpu_active != 1)
-		return;
-
-	/* Initialize exception dispatch table. */
-	exception_init();
 }
 
 /** Perform ARM64 specific tasks needed before the memory management is
@@ -92,8 +86,12 @@ void arch_post_mm_init(void)
 	if (config.cpu_active != 1)
 		return;
 
-	/* Initialize IRQ routing. */
-	irq_init(16, 16);
+	/* Do machine-specific initialization. */
+	machine_init();
+
+	/* Initialize exception dispatch table. */
+	exception_init();
+	interrupt_init();
 
 	/* Merge all memory zones to 1 big zone. */
 	zone_merge_all();

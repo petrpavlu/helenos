@@ -34,6 +34,8 @@
  */
 
 #include <arch/interrupt.h>
+#include <arch/machine_func.h>
+#include <ddi/irq.h>
 
 /** Disable interrupts.
  *
@@ -89,6 +91,13 @@ ipl_t interrupts_read(void)
 bool interrupts_disabled(void)
 {
 	return DAIF_read() & DAIF_IRQ_FLAG;
+}
+
+/** Initialize basic tables for exception dispatching. */
+void interrupt_init(void)
+{
+	size_t irq_count = machine_get_irq_count();
+	irq_init(irq_count, irq_count);
 }
 
 /** @}

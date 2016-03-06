@@ -41,8 +41,11 @@
 #define VIRT_UART_IRQ  1
 #define VIRT_UART  0x09000000
 
+static void virt_init(void);
+static void virt_irq_exception(unsigned int exc_no, istate_t *istate);
 static void virt_output_init(void);
 static void virt_input_init(void);
+size_t virt_get_irq_count(void);
 static const char *virt_get_platform_name(void);
 
 struct {
@@ -50,10 +53,28 @@ struct {
 } virt;
 
 struct arm_machine_ops virt_machine_ops = {
+	virt_init,
+	virt_irq_exception,
 	virt_output_init,
 	virt_input_init,
+	virt_get_irq_count,
 	virt_get_platform_name
 };
+
+static void virt_init(void)
+{
+	/* REVISIT */
+
+	/* Initialize interrupt controller. */
+
+	/* Initialize timer. */
+	/* REVISIT */
+}
+
+static void virt_irq_exception(unsigned int exc_no, istate_t *istate)
+{
+	/* REVISIT */
+}
 
 static void virt_output_init(void)
 {
@@ -71,6 +92,12 @@ static void virt_input_init(void)
 
 		pl011_uart_input_wire(&virt.uart, srln);
 	}
+}
+
+size_t virt_get_irq_count(void)
+{
+	/* REVISIT */
+	return 128;
 }
 
 const char *virt_get_platform_name(void)
