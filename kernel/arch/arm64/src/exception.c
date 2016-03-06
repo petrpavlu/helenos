@@ -35,6 +35,7 @@
 
 #include <arch/asm.h>
 #include <arch/exception.h>
+#include <arch/machine_func.h>
 #include <arch/regutils.h>
 #include <mm/as.h>
 #include <interrupt.h>
@@ -104,9 +105,7 @@ static void current_el_sp_selx_synch_exception(unsigned int exc_no,
 static void current_el_sp_selx_irq_exception(unsigned int exc_no,
     istate_t *istate)
 {
-	panic_badtrap(istate, exc_no, "Unhandled exception from Current EL, "
-	    "SP_SELx, IRQ, ESR_EL1=%0#10" PRIx32 ", FAR_EL1=%0#18" PRIx64 ".",
-	    (uint32_t) ESR_EL1_read(), FAR_EL1_read());
+	machine_irq_exception(exc_no, istate);
 }
 
 static void current_el_sp_selx_fiq_exception(unsigned int exc_no,

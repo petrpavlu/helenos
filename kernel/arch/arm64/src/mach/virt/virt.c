@@ -35,11 +35,15 @@
 
 #include <arch/mach/virt/virt.h>
 #include <console/console.h>
+#include <genarch/drivers/gicv2/gicv2.h>
 #include <genarch/drivers/pl011/pl011.h>
 #include <genarch/srln/srln.h>
+#include <mm/km.h>
 
-#define VIRT_UART_IRQ  1
-#define VIRT_UART  0x09000000
+#define VIRT_UART_IRQ  33
+#define VIRT_UART_ADDRESS      0x09000000
+#define VIRT_GIC_DIST_ADDRESS  0x08000000
+#define VIRT_GIC_CPU_ADDRESS   0x08010000
 
 static void virt_init(void);
 static void virt_irq_exception(unsigned int exc_no, istate_t *istate);
@@ -49,6 +53,7 @@ size_t virt_get_irq_count(void);
 static const char *virt_get_platform_name(void);
 
 struct {
+	gicv2_t gicv2;
 	pl011_uart_t uart;
 } virt;
 
@@ -63,9 +68,14 @@ struct arm_machine_ops virt_machine_ops = {
 
 static void virt_init(void)
 {
-	/* REVISIT */
-
 	/* Initialize interrupt controller. */
+	gicv2_distr_regs_t *distr = (void *) km_map(VIRT_GIC_DIST_ADDRESS,
+	    ALIGN_UP(sizeof(*distr), PAGE_SIZE),
+	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
+	gicv2_cpui_regs_t *cpui =  (void *) km_map(VIRT_GIC_CPU_ADDRESS,
+	    ALIGN_UP(sizeof(*cpui), PAGE_SIZE),
+	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
+	gicv2_init(&virt.gicv2, distr, cpui);
 
 	/* Initialize timer. */
 	/* REVISIT */
@@ -73,31 +83,44 @@ static void virt_init(void)
 
 static void virt_irq_exception(unsigned int exc_no, istate_t *istate)
 {
-	/* REVISIT */
+	unsigned inum, cpuid;
+	gicv2_inum_get(&virt.gicv2, &inum, &cpuid);
+
+	/* Dispatch the interrupt. */
+	irq_t *irq = irq_dispatch_and_lock(inum);
+	if (irq) {
+		/* The IRQ handler was found. */
+		irq->handler(irq);
+		irq_spinlock_unlock(&irq->lock, false);
+	} else {
+		/* Spurious interrupt.*/
+		printf("cpu%d: spurious interrupt (inum=%d)\n", CPU->id, inum);
+	}
+
+	/* Signal end of interrupt to the controller. */
+	gicv2_end(&virt.gicv2, inum, cpuid);
 }
 
 static void virt_output_init(void)
 {
-	if (pl011_uart_init(&virt.uart, VIRT_UART_IRQ, VIRT_UART))
+	if (pl011_uart_init(&virt.uart, VIRT_UART_IRQ, VIRT_UART_ADDRESS))
 		stdout_wire(&virt.uart.outdev);
 }
 
 static void virt_input_init(void)
 {
-	/* REVISIT */
 	srln_instance_t *srln_instance = srln_init();
 	if (srln_instance) {
 		indev_t *sink = stdin_wire();
 		indev_t *srln = srln_wire(srln_instance, sink);
-
 		pl011_uart_input_wire(&virt.uart, srln);
+                gicv2_enable(&virt.gicv2, VIRT_UART_IRQ);
 	}
 }
 
 size_t virt_get_irq_count(void)
 {
-	/* REVISIT */
-	return 128;
+	return gicv2_inum_get_total(&virt.gicv2);
 }
 
 const char *virt_get_platform_name(void)
