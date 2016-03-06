@@ -47,9 +47,9 @@ typedef struct {
 
 	/**< Interrupt controller type register. */
 	ioport32_t typer;
-#define GICV2D_TYPER_ITLINESNUMBER_SHIFT  0
-#define GICV2D_TYPER_ITLINESNUMBER_MASK \
-    (0x1f << GICV2D_TYPER_ITLINESNUMBER_SHIFT)
+#define GICV2D_TYPER_IT_LINES_NUMBER_SHIFT  0
+#define GICV2D_TYPER_IT_LINES_NUMBER_MASK \
+	(0x1f << GICV2D_TYPER_IT_LINES_NUMBER_SHIFT)
 
 	/**< Distributor implementer identification register. */
 	ioport32_t iidr;
@@ -113,6 +113,13 @@ typedef struct {
 	ioport32_t bpr;
 	/**< Interrupt acknowledge register. */
 	ioport32_t iar;
+#define GICV2C_IAR_INTERRUPT_ID_SHIFT  0
+#define GICV2C_IAR_INTERRUPT_ID_MASK \
+	(0x3ff << GICV2C_IAR_INTERRUPT_ID_SHIFT)
+#define GICV2C_IAR_CPUID_SHIFT  10
+#define GICV2C_IAR_CPUID_MASK \
+	(0x7 << GICV2C_IAR_CPUID_SHIFT)
+
 	/**< End of interrupt register. */
 	ioport32_t eoir;
 	/**< Running priority register. */
@@ -148,10 +155,16 @@ typedef struct {
 typedef struct {
 	gicv2_distr_regs_t *distr;
 	gicv2_cpui_regs_t *cpui;
-	unsigned int num_interrupts;
+	unsigned inum_total;
 } gicv2_t;
 
 extern void gicv2_init(gicv2_t *, gicv2_distr_regs_t *, gicv2_cpui_regs_t *);
+extern unsigned gicv2_inum_get_total(gicv2_t *);
+extern void gicv2_inum_get(gicv2_t *, unsigned *, unsigned *);
+extern void gicv2_end(gicv2_t *, unsigned, unsigned);
+extern void gicv2_clear(gicv2_t *, unsigned);
+extern void gicv2_enable(gicv2_t *, unsigned);
+extern void gicv2_disable(gicv2_t *, unsigned);
 
 #endif
 
