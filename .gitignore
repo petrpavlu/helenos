@@ -367,6 +367,7 @@ uspace/lib/c/arch/ia64/include/libarch/fibril_context.h
 uspace/lib/c/arch/ia64/include/libarch/istate_struct.h
 
 # ARM64 support.
+QEMU_EFI.fd
 boot/arch/arm64/_link.ld
 boot/arch/arm64/_link.ld.comp
 kernel/arch/arm64/_link.ld
@@ -388,3 +389,4 @@ boot/generic/include/genarch
 boot/pack/
 image.boot
 image.raw
+tags
