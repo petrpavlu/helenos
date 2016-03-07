@@ -1,7 +1,7 @@
 HelenOS-AArch64 is a project that adds support for the 64-bit ARM architecture
 (AArch64) to [HelenOS][HelenOS].
 
-To build and run this port, follow [official HelenOS build
+To build and run this port, follow [the official HelenOS build
 instructions][CompilingFromSource] with these deviations:
 
 1. Get the sources
