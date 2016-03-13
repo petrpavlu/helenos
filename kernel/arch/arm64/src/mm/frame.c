@@ -62,7 +62,7 @@ void physmem_print(void)
 				break;
 		}
 
-		printf("%p %#0zx %s\n", memmap.zones[i].start,
+		printf("%p %#018zx %s\n", memmap.zones[i].start,
 		    memmap.zones[i].size, type);
 	}
 }
