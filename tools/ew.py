@@ -97,7 +97,7 @@ def platform_to_qemu_options(platform, machine):
 			    'components/kernel/leg-virt-tianocore-edk2-' +
 			    'upstream/latest/QEMU-AARCH64/RELEASE_GCC49/' +
 			    'QEMU_EFI.fd\n')
-			sys.exit(1)
+			raise Exception
 		return 'system-aarch64', \
 		    '-M virt -cpu cortex-a57 -m 1024 -bios QEMU_EFI.fd'
 	elif platform == 'ia32':
