@@ -41,77 +41,77 @@
 
 /** GICv2 distributor register map. */
 typedef struct {
-	/**< Distributor control register. */
+	/** Distributor control register. */
 	ioport32_t ctlr;
 #define GICV2D_CTLR_ENABLE_FLAG  0x1
 
-	/**< Interrupt controller type register. */
+	/** Interrupt controller type register. */
 	ioport32_t typer;
 #define GICV2D_TYPER_IT_LINES_NUMBER_SHIFT  0
 #define GICV2D_TYPER_IT_LINES_NUMBER_MASK \
 	(0x1f << GICV2D_TYPER_IT_LINES_NUMBER_SHIFT)
 
-	/**< Distributor implementer identification register. */
+	/** Distributor implementer identification register. */
 	ioport32_t iidr;
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res_[5];
-	/**< Implementation defined registers. */
+	/** Implementation defined registers. */
 	ioport32_t impl_[8];
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res2_[16];
-	/**< Interrupt group registers. */
+	/** Interrupt group registers. */
 	ioport32_t igroupr[32];
-	/**< Interrupt set-enable registers. */
+	/** Interrupt set-enable registers. */
 	ioport32_t isenabler[32];
-	/**< Interrupt clear-enable registers. */
+	/** Interrupt clear-enable registers. */
 	ioport32_t icenabler[32];
-	/**< Interrupt set-pending registers. */
+	/** Interrupt set-pending registers. */
 	ioport32_t ispendr[32];
-	/**< Interrupt clear-pending registers. */
+	/** Interrupt clear-pending registers. */
 	ioport32_t icpendr[32];
-	/**< GICv2 interrupt set-active registers. */
+	/** GICv2 interrupt set-active registers. */
 	ioport32_t isactiver[32];
-	/**< Interrupt clear-active registers. */
+	/** Interrupt clear-active registers. */
 	ioport32_t icactiver[32];
-	/**< Interrupt priority registers. */
+	/** Interrupt priority registers. */
 	ioport32_t ipriorityr[255];
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res3_;
-	/**< Interrupt processor target registers. */
+	/** Interrupt processor target registers. */
 	ioport32_t itargetsr[255];
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res4_;
-	/**< Interrupt configuration registers. */
+	/** Interrupt configuration registers. */
 	ioport32_t icfgr[64];
-	/**< Implementation defined registers. */
+	/** Implementation defined registers. */
 	ioport32_t impl2_[64];
-	/**< Non-secure access control registers. */
+	/** Non-secure access control registers. */
 	ioport32_t nsacr[64];
-	/**< Software generated interrupt register. */
+	/** Software generated interrupt register. */
 	ioport32_t sgir;
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res5_[3];
-	/**< SGI clear-pending registers. */
+	/** SGI clear-pending registers. */
 	ioport32_t cpendsgir[4];
-	/**< SGI set-pending registers. */
+	/** SGI set-pending registers. */
 	ioport32_t spendsgir[4];
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res6_[40];
-	/**< Implementation defined identification registers. */
+	/** Implementation defined identification registers. */
 	ioport32_t impl3_[12];
 } gicv2_distr_regs_t;
 
 /* GICv2 CPU interface register map. */
 typedef struct {
-	/**< CPU interface control register. */
+	/** CPU interface control register. */
 	ioport32_t ctlr;
 #define GICV2C_CTLR_ENABLE_FLAG  0x1
 
-	/**< Interrupt priority mask register. */
+	/** Interrupt priority mask register. */
 	ioport32_t pmr;
-	/**< Binary point register. */
+	/** Binary point register. */
 	ioport32_t bpr;
-	/**< Interrupt acknowledge register. */
+	/** Interrupt acknowledge register. */
 	ioport32_t iar;
 #define GICV2C_IAR_INTERRUPT_ID_SHIFT  0
 #define GICV2C_IAR_INTERRUPT_ID_MASK \
@@ -120,35 +120,35 @@ typedef struct {
 #define GICV2C_IAR_CPUID_MASK \
 	(0x7 << GICV2C_IAR_CPUID_SHIFT)
 
-	/**< End of interrupt register. */
+	/** End of interrupt register. */
 	ioport32_t eoir;
-	/**< Running priority register. */
+	/** Running priority register. */
 	ioport32_t rpr;
-	/**< Highest priority pending interrupt register. */
+	/** Highest priority pending interrupt register. */
 	ioport32_t hppir;
-	/**< Aliased binary point register. */
+	/** Aliased binary point register. */
 	ioport32_t abpr;
-	/**< Aliased interrupt acknowledge register. */
+	/** Aliased interrupt acknowledge register. */
 	ioport32_t aiar;
-	/**< Aliased end of interrupt register. */
+	/** Aliased end of interrupt register. */
 	ioport32_t aeoir;
-	/**< Aliased highest priority pending interrupt register. */
+	/** Aliased highest priority pending interrupt register. */
 	ioport32_t ahppir;
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res_[5];
-	/**< Implementation defined registers. */
+	/** Implementation defined registers. */
 	ioport32_t impl_[36];
-	/**< Active priorities registers. */
+	/** Active priorities registers. */
 	ioport32_t apr[4];
-	/**< Non-secure active priorities registers. */
+	/** Non-secure active priorities registers. */
 	ioport32_t nsapr[4];
-	/**< Reserved. */
+	/** Reserved. */
 	ioport32_t res2_[3];
-	/**< CPU interface identification register. */
+	/** CPU interface identification register. */
 	ioport32_t iidr;
-	/**< Unallocated. */
+	/** Unallocated. */
 	ioport32_t unalloc_[960];
-	/**< Deactivate interrupt register. */
+	/** Deactivate interrupt register. */
 	ioport32_t dir;
 } gicv2_cpui_regs_t;
 
