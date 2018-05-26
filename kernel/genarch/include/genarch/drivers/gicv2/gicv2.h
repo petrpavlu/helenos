@@ -29,8 +29,7 @@
 /** @addtogroup genarch
  * @{
  */
-/**
- * @file
+/** @file
  * @brief ARM Generic Interrupt Controller, Architecture version 2.0.
  */
 
@@ -77,7 +76,8 @@ typedef struct {
 	ioport32_t ipriorityr[255];
 	/** Reserved. */
 	ioport32_t res3_;
-	/** Interrupt processor target registers. */
+	/** Interrupt processor target registers. First 8 words are read-only.
+	 */
 	ioport32_t itargetsr[255];
 	/** Reserved. */
 	ioport32_t res4_;
@@ -152,6 +152,7 @@ typedef struct {
 	ioport32_t dir;
 } gicv2_cpui_regs_t;
 
+/** GICv2 driver-specific device data. */
 typedef struct {
 	gicv2_distr_regs_t *distr;
 	gicv2_cpui_regs_t *cpui;
@@ -162,7 +163,6 @@ extern void gicv2_init(gicv2_t *, gicv2_distr_regs_t *, gicv2_cpui_regs_t *);
 extern unsigned gicv2_inum_get_total(gicv2_t *);
 extern void gicv2_inum_get(gicv2_t *, unsigned *, unsigned *);
 extern void gicv2_end(gicv2_t *, unsigned, unsigned);
-extern void gicv2_clear(gicv2_t *, unsigned);
 extern void gicv2_enable(gicv2_t *, unsigned);
 extern void gicv2_disable(gicv2_t *, unsigned);
 

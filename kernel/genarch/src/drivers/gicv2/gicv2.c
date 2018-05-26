@@ -29,11 +29,10 @@
 /** @addtogroup genarch
  * @{
  */
-/**
- * @file
+/** @file
  * @brief ARM Generic Interrupt Controller, Architecture version 2.0.
  *
- * This IRQC is present on the QEMU virt platform for ARM.
+ * This IRQ controller is present on the QEMU virt platform for ARM.
  */
 
 #include <arch/asm.h>
