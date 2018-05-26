@@ -51,6 +51,15 @@ ENDIANESS = LE
 # -mstrict-align option is therefore not needed.
 EXTRA_CFLAGS = -fpic
 
+ifeq ($(MACHINE), virt)
+	RD_DRVS_ESSENTIAL += \
+		char/pl011 \
+		char/sttykbd \
+		platform/arm64virt
+	RD_SRVS_ESSENTIAL += \
+		$(USPACE_PATH)/srv/hw/irc/gicv2/gicv2
+endif
+
 SOURCES = \
 	arch/$(BARCH)/src/asm.S \
 	arch/$(BARCH)/src/main.c \
