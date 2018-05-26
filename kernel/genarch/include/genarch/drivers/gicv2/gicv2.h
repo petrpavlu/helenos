@@ -45,17 +45,17 @@ typedef struct {
 #define GICV2D_CTLR_ENABLE_FLAG  0x1
 
 	/** Interrupt controller type register. */
-	ioport32_t typer;
+	const ioport32_t typer;
 #define GICV2D_TYPER_IT_LINES_NUMBER_SHIFT  0
 #define GICV2D_TYPER_IT_LINES_NUMBER_MASK \
 	(0x1f << GICV2D_TYPER_IT_LINES_NUMBER_SHIFT)
 
 	/** Distributor implementer identification register. */
-	ioport32_t iidr;
+	const ioport32_t iidr;
 	/** Reserved. */
 	ioport32_t res_[5];
 	/** Implementation defined registers. */
-	ioport32_t impl_[8];
+	ioport32_t impl[8];
 	/** Reserved. */
 	ioport32_t res2_[16];
 	/** Interrupt group registers. */
@@ -84,7 +84,7 @@ typedef struct {
 	/** Interrupt configuration registers. */
 	ioport32_t icfgr[64];
 	/** Implementation defined registers. */
-	ioport32_t impl2_[64];
+	ioport32_t impl2[64];
 	/** Non-secure access control registers. */
 	ioport32_t nsacr[64];
 	/** Software generated interrupt register. */
@@ -98,7 +98,7 @@ typedef struct {
 	/** Reserved. */
 	ioport32_t res6_[40];
 	/** Implementation defined identification registers. */
-	ioport32_t impl3_[12];
+	const ioport32_t impl3[12];
 } gicv2_distr_regs_t;
 
 /* GICv2 CPU interface register map. */
@@ -112,7 +112,7 @@ typedef struct {
 	/** Binary point register. */
 	ioport32_t bpr;
 	/** Interrupt acknowledge register. */
-	ioport32_t iar;
+	const ioport32_t iar;
 #define GICV2C_IAR_INTERRUPT_ID_SHIFT  0
 #define GICV2C_IAR_INTERRUPT_ID_MASK \
 	(0x3ff << GICV2C_IAR_INTERRUPT_ID_SHIFT)
@@ -123,21 +123,21 @@ typedef struct {
 	/** End of interrupt register. */
 	ioport32_t eoir;
 	/** Running priority register. */
-	ioport32_t rpr;
+	const ioport32_t rpr;
 	/** Highest priority pending interrupt register. */
-	ioport32_t hppir;
+	const ioport32_t hppir;
 	/** Aliased binary point register. */
 	ioport32_t abpr;
 	/** Aliased interrupt acknowledge register. */
-	ioport32_t aiar;
+	const ioport32_t aiar;
 	/** Aliased end of interrupt register. */
 	ioport32_t aeoir;
 	/** Aliased highest priority pending interrupt register. */
-	ioport32_t ahppir;
+	const ioport32_t ahppir;
 	/** Reserved. */
 	ioport32_t res_[5];
 	/** Implementation defined registers. */
-	ioport32_t impl_[36];
+	ioport32_t impl[36];
 	/** Active priorities registers. */
 	ioport32_t apr[4];
 	/** Non-secure active priorities registers. */
@@ -145,7 +145,7 @@ typedef struct {
 	/** Reserved. */
 	ioport32_t res2_[3];
 	/** CPU interface identification register. */
-	ioport32_t iidr;
+	const ioport32_t iidr;
 	/** Unallocated. */
 	ioport32_t unalloc_[960];
 	/** Deactivate interrupt register. */
