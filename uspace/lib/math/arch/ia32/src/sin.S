@@ -26,13 +26,12 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+#include <abi/asmtool.h>
 #include <libarch/x87.h>
 
 .text
 
-.global sin_f64
-
-sin_f64:
+FUNCTION_BEGIN(sin_f64)
 	# compute sine (no stack frame)
 	
 	fldl 4(%esp)
@@ -59,7 +58,9 @@ sin_f64:
 		andw $X87_STATUS_WORD_C2_MASK, %ax
 		jnz reduce
 	
-	fstpl %st(1)
+	fstp %st(1)
 	fsin
 	
 	ret
+FUNCTION_END(sin_f64)
+

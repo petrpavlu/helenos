@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup edit
+/** @addtogroup nterm
  * @{
  */
 /**
@@ -38,7 +38,7 @@
 
 #include <sys/types.h>
 
-extern int conn_open(const char *, const char *);
+extern int conn_open(const char *);
 extern int conn_send(void *, size_t);
 
 #endif

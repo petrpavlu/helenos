@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Jiri Svoboda
+ * Copyright (c) 2016 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,16 +38,27 @@
 #define TYPES_VBDS_H_
 
 #include <adt/list.h>
+#include <atomic.h>
 #include <bd_srv.h>
 #include <label.h>
 #include <loc.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <types/label.h>
 
 typedef sysarg_t vbds_part_id_t;
 
+typedef enum {
+	/** No flags */
+	vrf_none = 0,
+	/** Force removal */
+	vrf_force = 0x1
+} vbds_rem_flag_t;
+
 /** Partition */
 typedef struct {
+	/** Reader held during I/O */
+	fibril_rwlock_t lock;
 	/** Disk this partition belongs to */
 	struct vbds_disk *disk;
 	/** Link to vbds_disk_t.parts */
@@ -70,6 +81,8 @@ typedef struct {
 	aoff64_t block0;
 	/** Number of blocks */
 	aoff64_t nblocks;
+	/** Reference count */
+	atomic_t refcnt;
 } vbds_part_t;
 
 /** Disk */
@@ -86,6 +99,10 @@ typedef struct vbds_disk {
 	list_t parts; /* of vbds_part_t */
 	/** Block size */
 	size_t block_size;
+	/** Total number of blocks */
+	aoff64_t nblocks;
+	/** Used to mark disks still present during re-discovery */
+	bool present;
 } vbds_disk_t;
 
 #endif

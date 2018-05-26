@@ -32,11 +32,13 @@
 Emulator wrapper for running HelenOS
 """
 
-import os 
+import os
 import sys
-import subprocess 
+import subprocess
 import autotool
 import platform
+import thread
+import time
 
 overrides = {}
 
@@ -45,11 +47,13 @@ def is_override(str):
 		return overrides[str]
 	return False
 
-def cfg_get(platform, machine):
-	if machine == "":
+def cfg_get(platform, machine, processor):
+	if machine == "" or emulators[platform].has_key("run"):
 		return emulators[platform]
-	else:
+	elif processor == "" or emulators[platform][machine].has_key("run"):
 		return emulators[platform][machine]
+	else:
+		return emulators[platform][machine][processor]
 
 def run_in_console(cmd, title):
 	cmdline = 'xterm -T ' + '"' + title + '"' + ' -e ' + cmd
@@ -108,14 +112,17 @@ def platform_to_qemu_options(platform, machine):
 	elif platform == 'sparc64':
 		return 'system-sparc64', ''
 
-def qemu_bd_options():
-	if is_override('nohdd'):
-		return ''
-
+def hdisk_mk():
 	if not os.path.exists('hdisk.img'):
 		subprocess.call('tools/mkfat.py 1048576 uspace/dist/data hdisk.img', shell = True)
 
-	return ' -hda hdisk.img'
+def qemu_bd_options():
+	if is_override('nohdd'):
+		return ''
+	
+	hdisk_mk()
+	
+	return ' -drive file=hdisk.img,index=0,media=disk,format=raw'
 
 def qemu_nic_ne2k_options():
 	return ' -device ne2k_isa,irq=5,vlan=0'
@@ -154,8 +161,8 @@ def qemu_audio_options():
 		return ''
 	return ' -device intel-hda -device hda-duplex'
 
-def qemu_run(platform, machine):
-	cfg = cfg_get(platform, machine)
+def qemu_run(platform, machine, processor):
+	cfg = cfg_get(platform, machine, processor)
 	suffix, options = platform_to_qemu_options(platform, machine)
 	cmd = 'qemu-' + suffix
 
@@ -196,12 +203,36 @@ def qemu_run(platform, machine):
 		if not is_override('dryrun'):
 			subprocess.call(cmdline, shell = True)
 		
-def ski_run(platform, machine):
+def ski_run(platform, machine, processor):
 	run_in_console('ski -i contrib/conf/ski.conf', 'HelenOS/ia64 on ski')
 
-def msim_run(platform, machine):
+def msim_run(platform, machine, processor):
+	hdisk_mk()
 	run_in_console('msim -c contrib/conf/msim.conf', 'HelenOS/mips32 on msim')
 
+def gem5_console_thread():
+	# Wait a little bit so that gem5 can create the port
+	time.sleep(1)
+	term = os.environ['M5_PATH'] + '/gem5/util/term/m5term'
+	port = 3457
+	run_in_console(term + ' %d' % port, 'HelenOS/sun4v on gem5')
+
+def gem5_run(platform, machine, processor):
+	try:
+		gem5 = os.environ['M5_PATH'] + '/gem5/build/SPARC/gem5.fast'
+		if not os.path.exists(gem5):
+			raise Exception
+	except:
+		print("Did you forget to set M5_PATH?")
+		raise
+
+	thread.start_new_thread(gem5_console_thread, ())
+
+	cmdline = gem5 + ' ' + os.environ['M5_PATH'] + '/configs/example/fs.py --disk-image=' + os.path.abspath('image.iso')
+
+	print(cmdline)
+	if not is_override('dry_run'):
+		subprocess.call(cmdline, shell = True)
 
 emulators = {
 	'amd64' : {
@@ -257,9 +288,14 @@ emulators = {
 	},
 	'sparc64' : {
 		'generic' : {
-			'run' : qemu_run,
-			'image' : 'image.iso',
-			'audio' : False
+			'us' : {
+				'run' : qemu_run,
+				'image' : 'image.iso',
+				'audio' : False
+			},
+			'sun4v' : {
+				'run' : gem5_run,
+			}
 		}
 	},
 }
@@ -275,6 +311,10 @@ def usage():
 	print("-nonet\tDisable networking support, if applicable.")
 	print("-nosnd\tDisable sound, if applicable.")
 	print("-nousb\tDisable USB support, if applicable.")
+
+def fail(platform, machine):
+	print("Cannot start emulation for the chosen configuration. (%s/%s)" % (platform, machine))
+	
 
 def run():
 	expect_nic = False
@@ -329,12 +369,16 @@ def run():
 	else:
 		mach = ''
 
-	try:
-		emu_run = cfg_get(platform, mach)['run']
-	except:
-		print("Cannot start emulation for the chosen configuration. (%s/%s)" % (platform, mach))
-		return
+	if 'PROCESSOR' in config.keys():
+		processor = config['PROCESSOR']
+	else:
+		processor = ''
 
-	emu_run(platform, mach)
+	try:
+		emu_run = cfg_get(platform, mach, processor)['run']
+		emu_run(platform, mach, processor)
+	except:
+		fail(platform, mach)
+		return
 
 run()

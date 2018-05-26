@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Jiri Svoboda
+ * Copyright (c) 2016 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,13 @@
 
 static fibril_mutex_t vbds_disks_lock;
 static list_t vbds_disks; /* of vbds_disk_t */
+static fibril_mutex_t vbds_parts_lock;
 static list_t vbds_parts; /* of vbds_part_t */
 
 static category_id_t part_cid;
 
 static int vbds_disk_parts_add(vbds_disk_t *, label_t *);
-static int vbds_disk_parts_remove(vbds_disk_t *);
+static int vbds_disk_parts_remove(vbds_disk_t *, vbds_rem_flag_t);
 
 static int vbds_bd_open(bd_srvs_t *, bd_srv_t *);
 static int vbds_bd_close(bd_srv_t *);
@@ -88,12 +89,38 @@ static vbds_part_t *bd_srv_part(bd_srv_t *bd)
 	return (vbds_part_t *)bd->srvs->sarg;
 }
 
+static vbds_disk_t *vbds_disk_first(void)
+{
+	link_t *link;
+
+	link = list_first(&vbds_disks);
+	if (link == NULL)
+		return NULL;
+
+	return list_get_instance(link, vbds_disk_t, ldisks);
+}
+
+static vbds_disk_t *vbds_disk_next(vbds_disk_t *disk)
+{
+	link_t *link;
+
+	if (disk == NULL)
+		return NULL;
+
+	link = list_next(&disk->ldisks, &vbds_disks);
+	if (link == NULL)
+		return NULL;
+
+	return list_get_instance(link, vbds_disk_t, ldisks);
+}
+
 int vbds_disks_init(void)
 {
 	int rc;
 
 	fibril_mutex_initialize(&vbds_disks_lock);
 	list_initialize(&vbds_disks);
+	fibril_mutex_initialize(&vbds_parts_lock);
 	list_initialize(&vbds_parts);
 
 	rc = loc_category_get_id("partition", &part_cid, 0);
@@ -106,14 +133,17 @@ int vbds_disks_init(void)
 	return EOK;
 }
 
-/** Check for new disk devices */
+/** Check for new/removed disk devices */
 static int vbds_disks_check_new(void)
 {
 	bool already_known;
 	category_id_t disk_cat;
 	service_id_t *svcs;
 	size_t count, i;
+	vbds_disk_t *cur, *next;
 	int rc;
+
+	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_disks_check_new()");
 
 	fibril_mutex_lock(&vbds_disks_lock);
 
@@ -132,12 +162,16 @@ static int vbds_disks_check_new(void)
 		return EIO;
 	}
 
+	list_foreach(vbds_disks, ldisks, vbds_disk_t, disk)
+		disk->present = false;
+
 	for (i = 0; i < count; i++) {
 		already_known = false;
 
 		list_foreach(vbds_disks, ldisks, vbds_disk_t, disk) {
 			if (disk->svc_id == svcs[i]) {
 				already_known = true;
+				disk->present = true;
 				break;
 			}
 		}
@@ -150,7 +184,26 @@ static int vbds_disks_check_new(void)
 				log_msg(LOG_DEFAULT, LVL_ERROR, "Could not add "
 				    "disk.");
 			}
+		} else {
+			log_msg(LOG_DEFAULT, LVL_DEBUG, "Disk %lu already known",
+			    (unsigned long) svcs[i]);
 		}
+	}
+
+	cur = vbds_disk_first();
+	while (cur != NULL) {
+		next = vbds_disk_next(cur);
+		if (!cur->present) {
+			log_msg(LOG_DEFAULT, LVL_NOTE, "Disk '%lu' is gone",
+			    (unsigned long) cur->svc_id);
+			rc = vbds_disk_remove(cur->svc_id);
+			if (rc != EOK) {
+				log_msg(LOG_DEFAULT, LVL_ERROR, "Could not "
+				    "remove disk.");
+			}
+		}
+
+		cur = next;
 	}
 
 	fibril_mutex_unlock(&vbds_disks_lock);
@@ -170,19 +223,39 @@ static int vbds_disk_by_svcid(service_id_t sid, vbds_disk_t **rdisk)
 	return ENOENT;
 }
 
+static void vbds_part_add_ref(vbds_part_t *part)
+{
+	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_part_add_ref");
+	atomic_inc(&part->refcnt);
+}
+
+static void vbds_part_del_ref(vbds_part_t *part)
+{
+	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_part_del_ref");
+	if (atomic_predec(&part->refcnt) == 0) {
+		log_msg(LOG_DEFAULT, LVL_DEBUG2, " - free part");
+		free(part);
+	}
+}
+
 static int vbds_part_by_pid(vbds_part_id_t partid, vbds_part_t **rpart)
 {
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_part_by_pid(%zu)", partid);
+
+	fibril_mutex_lock(&vbds_parts_lock);
 
 	list_foreach(vbds_parts, lparts, vbds_part_t, part) {
 		log_msg(LOG_DEFAULT, LVL_DEBUG, "%zu == %zu ?", part->pid, partid);
 		if (part->pid == partid) {
 			log_msg(LOG_DEFAULT, LVL_DEBUG, "Found match.");
+			vbds_part_add_ref(part);
+			fibril_mutex_unlock(&vbds_parts_lock);
 			*rpart = part;
 			return EOK;
 		}
 	}
 
+	fibril_mutex_unlock(&vbds_parts_lock);
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "No match.");
 	return ENOENT;
 }
@@ -191,15 +264,20 @@ static int vbds_part_by_svcid(service_id_t svcid, vbds_part_t **rpart)
 {
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_part_by_svcid(%zu)", svcid);
 
+	fibril_mutex_lock(&vbds_parts_lock);
+
 	list_foreach(vbds_parts, lparts, vbds_part_t, part) {
 		log_msg(LOG_DEFAULT, LVL_DEBUG, "%zu == %zu ?", part->svc_id, svcid);
 		if (part->svc_id == svcid) {
 			log_msg(LOG_DEFAULT, LVL_DEBUG, "Found match.");
+			vbds_part_add_ref(part);
+			fibril_mutex_unlock(&vbds_parts_lock);
 			*rpart = part;
 			return EOK;
 		}
 	}
 
+	fibril_mutex_unlock(&vbds_parts_lock);
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "No match.");
 	return ENOENT;
 }
@@ -224,12 +302,15 @@ static int vbds_part_add(vbds_disk_t *disk, label_part_t *lpart,
 		return ENOMEM;
 	}
 
+	fibril_rwlock_initialize(&part->lock);
+
 	part->lpart = lpart;
 	part->disk = disk;
 	part->pid = ++vbds_part_id;
 	part->svc_id = psid;
 	part->block0 = lpinfo.block0;
 	part->nblocks = lpinfo.nblocks;
+	atomic_set(&part->refcnt, 1);
 
 	bd_srvs_init(&part->bds);
 	part->bds.ops = &vbds_bd_ops;
@@ -237,12 +318,16 @@ static int vbds_part_add(vbds_disk_t *disk, label_part_t *lpart,
 
 	if (lpinfo.pkind != lpk_extended) {
 		rc = vbds_part_svc_register(part);
-		if (rc != EOK)
+		if (rc != EOK) {
+			free(part);
 			return EIO;
+		}
 	}
 
 	list_append(&part->ldisk, &disk->parts);
+	fibril_mutex_lock(&vbds_parts_lock);
 	list_append(&part->lparts, &vbds_parts);
+	fibril_mutex_unlock(&vbds_parts_lock);
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_part_add -> %p", part);
 
@@ -253,17 +338,24 @@ static int vbds_part_add(vbds_disk_t *disk, label_part_t *lpart,
 
 /** Remove partition from our inventory leaving only the underlying liblabel
  * partition structure.
+ *
+ * @param part Partition
+ * @param flag If set to @c vrf_force, force removal even if partition is in use
+ * @param rlpart Place to store pointer to liblabel partition
  */
-static int vbds_part_remove(vbds_part_t *part, label_part_t **rlpart)
+static int vbds_part_remove(vbds_part_t *part, vbds_rem_flag_t flag,
+    label_part_t **rlpart)
 {
 	label_part_t *lpart;
 	int rc;
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_part_remove(%p)", part);
 
+	fibril_rwlock_write_lock(&part->lock);
 	lpart = part->lpart;
 
-	if (part->open_cnt > 0) {
+	if ((flag & vrf_force) == 0 && part->open_cnt > 0) {
+		fibril_rwlock_write_unlock(&part->lock);
 		log_msg(LOG_DEFAULT, LVL_DEBUG, "part->open_cnt = %d",
 		    part->open_cnt);
 		return EBUSY;
@@ -271,13 +363,20 @@ static int vbds_part_remove(vbds_part_t *part, label_part_t **rlpart)
 
 	if (part->svc_id != 0) {
 		rc = vbds_part_svc_unregister(part);
-		if (rc != EOK)
+		if (rc != EOK) {
+			fibril_rwlock_write_unlock(&part->lock);
 			return EIO;
+		}
 	}
 
 	list_remove(&part->ldisk);
+	fibril_mutex_lock(&vbds_parts_lock);
 	list_remove(&part->lparts);
-	free(part);
+	fibril_mutex_unlock(&vbds_parts_lock);
+
+	vbds_part_del_ref(part);
+	part->lpart = NULL;
+	fibril_rwlock_write_unlock(&part->lock);
 
 	if (rlpart != NULL)
 		*rlpart = lpart;
@@ -308,7 +407,7 @@ static int vbds_disk_parts_add(vbds_disk_t *disk, label_t *label)
 
 /** Remove all disk partitions from our inventory leaving only the underlying
  * liblabel partition structures. */
-static int vbds_disk_parts_remove(vbds_disk_t *disk)
+static int vbds_disk_parts_remove(vbds_disk_t *disk, vbds_rem_flag_t flag)
 {
 	link_t *link;
 	vbds_part_t *part;
@@ -317,7 +416,7 @@ static int vbds_disk_parts_remove(vbds_disk_t *disk)
 	link = list_first(&disk->parts);
 	while (link != NULL) {
 		part = list_get_instance(link, vbds_part_t, ldisk);
-		rc = vbds_part_remove(part, NULL);
+		rc = vbds_part_remove(part, flag, NULL);
 		if (rc != EOK)
 			return rc;
 
@@ -352,6 +451,7 @@ int vbds_disk_add(service_id_t sid)
 	vbds_disk_t *disk = NULL;
 	bool block_inited = false;
 	size_t block_size;
+	aoff64_t nblocks;
 	int rc;
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_disk_add(%zu)", sid);
@@ -389,6 +489,14 @@ int vbds_disk_add(service_id_t sid)
 		goto error;
 	}
 
+	rc = block_get_nblocks(sid, &nblocks);
+	if (rc != EOK) {
+		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed getting number of "
+		    "blocks of %s.", disk->svc_name);
+		rc = EIO;
+		goto error;
+	}
+
 	block_inited = true;
 
 	rc = label_open(sid, &label);
@@ -402,6 +510,8 @@ int vbds_disk_add(service_id_t sid)
 	disk->svc_id = sid;
 	disk->label = label;
 	disk->block_size = block_size;
+	disk->nblocks = nblocks;
+	disk->present = true;
 
 	list_initialize(&disk->parts);
 	list_append(&disk->ldisks, &vbds_disks);
@@ -433,7 +543,7 @@ int vbds_disk_remove(service_id_t sid)
 	if (rc != EOK)
 		return rc;
 
-	rc = vbds_disk_parts_remove(disk);
+	rc = vbds_disk_parts_remove(disk, vrf_force);
 	if (rc != EOK) {
 		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed removing disk.");
 		return rc;
@@ -497,6 +607,7 @@ int vbds_disk_info(service_id_t sid, vbd_disk_info_t *info)
 	info->ablock0 = linfo.ablock0;
 	info->anblocks = linfo.anblocks;
 	info->block_size = disk->block_size;
+	info->nblocks = disk->nblocks;
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_disk_info - block_size=%zu",
 	    info->block_size);
 	return EOK;
@@ -559,7 +670,7 @@ int vbds_label_create(service_id_t sid, label_type_t ltype)
 	}
 
 	/* Close dummy label first */
-	rc = vbds_disk_parts_remove(disk);
+	rc = vbds_disk_parts_remove(disk, vrf_none);
 	if (rc != EOK) {
 		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed removing disk.");
 		return rc;
@@ -608,7 +719,7 @@ int vbds_label_delete(service_id_t sid)
 	if (rc != EOK)
 		return rc;
 
-	rc = vbds_disk_parts_remove(disk);
+	rc = vbds_disk_parts_remove(disk, vrf_none);
 	if (rc != EOK) {
 		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed deleting label.");
 		return rc;
@@ -644,6 +755,12 @@ int vbds_part_get_info(vbds_part_id_t partid, vbd_part_info_t *pinfo)
 	if (rc != EOK)
 		return rc;
 
+	fibril_rwlock_read_lock(&part->lock);
+	if (part->lpart == NULL) {
+		fibril_rwlock_read_unlock(&part->lock);
+		return ENOENT;
+	}
+
 	label_part_get_info(part->lpart, &lpinfo);
 
 	pinfo->index = lpinfo.index;
@@ -651,6 +768,9 @@ int vbds_part_get_info(vbds_part_id_t partid, vbd_part_info_t *pinfo)
 	pinfo->block0 = lpinfo.block0;
 	pinfo->nblocks = lpinfo.nblocks;
 	pinfo->svc_id = part->svc_id;
+	vbds_part_del_ref(part);
+	fibril_rwlock_read_unlock(&part->lock);
+
 	return EOK;
 }
 
@@ -730,11 +850,12 @@ int vbds_part_delete(vbds_part_id_t partid)
 
 	disk = part->disk;
 
-	rc = vbds_part_remove(part, &lpart);
+	rc = vbds_part_remove(part, vrf_none, &lpart);
 	if (rc != EOK)
 		return rc;
 
 	rc = label_part_destroy(lpart);
+	vbds_part_del_ref(part);
 	if (rc != EOK) {
 		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed deleting partition");
 
@@ -784,7 +905,9 @@ static int vbds_bd_open(bd_srvs_t *bds, bd_srv_t *bd)
 	vbds_part_t *part = bd_srv_part(bd);
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_bd_open()");
+	fibril_rwlock_write_lock(&part->lock);
 	part->open_cnt++;
+	fibril_rwlock_write_unlock(&part->lock);
 	return EOK;
 }
 
@@ -793,7 +916,12 @@ static int vbds_bd_close(bd_srv_t *bd)
 	vbds_part_t *part = bd_srv_part(bd);
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_bd_close()");
+
+	/* Grabbing writer lock also forces all I/O to complete */
+
+	fibril_rwlock_write_lock(&part->lock);
 	part->open_cnt--;
+	fibril_rwlock_write_unlock(&part->lock);
 	return EOK;
 }
 
@@ -802,34 +930,49 @@ static int vbds_bd_read_blocks(bd_srv_t *bd, aoff64_t ba, size_t cnt,
 {
 	vbds_part_t *part = bd_srv_part(bd);
 	aoff64_t gba;
+	int rc;
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_bd_read_blocks()");
+	fibril_rwlock_read_lock(&part->lock);
 
-	if (cnt * part->disk->block_size < size)
+	if (cnt * part->disk->block_size < size) {
+		fibril_rwlock_read_unlock(&part->lock);
 		return EINVAL;
+	}
 
-	if (vbds_bsa_translate(part, ba, cnt, &gba) != EOK)
+	if (vbds_bsa_translate(part, ba, cnt, &gba) != EOK) {
+		fibril_rwlock_read_unlock(&part->lock);
 		return ELIMIT;
+	}
 
-	return block_read_direct(part->disk->svc_id, gba, cnt, buf);
+	rc = block_read_direct(part->disk->svc_id, gba, cnt, buf);
+	fibril_rwlock_read_unlock(&part->lock);
+
+	return rc;
 }
 
 static int vbds_bd_sync_cache(bd_srv_t *bd, aoff64_t ba, size_t cnt)
 {
 	vbds_part_t *part = bd_srv_part(bd);
 	aoff64_t gba;
+	int rc;
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_bd_sync_cache()");
+	fibril_rwlock_read_lock(&part->lock);
 
 	/* XXX Allow full-disk sync? */
 	if (ba != 0 || cnt != 0) {
-		if (vbds_bsa_translate(part, ba, cnt, &gba) != EOK)
+		if (vbds_bsa_translate(part, ba, cnt, &gba) != EOK) {
+			fibril_rwlock_read_unlock(&part->lock);
 			return ELIMIT;
+		}
 	} else {
 		gba = 0;
 	}
 
-	return block_sync_cache(part->disk->svc_id, gba, cnt);
+	rc = block_sync_cache(part->disk->svc_id, gba, cnt);
+	fibril_rwlock_read_unlock(&part->lock);
+	return rc;
 }
 
 static int vbds_bd_write_blocks(bd_srv_t *bd, aoff64_t ba, size_t cnt,
@@ -837,16 +980,24 @@ static int vbds_bd_write_blocks(bd_srv_t *bd, aoff64_t ba, size_t cnt,
 {
 	vbds_part_t *part = bd_srv_part(bd);
 	aoff64_t gba;
+	int rc;
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_bd_write_blocks()");
+	fibril_rwlock_read_lock(&part->lock);
 
-	if (cnt * part->disk->block_size < size)
+	if (cnt * part->disk->block_size < size) {
+		fibril_rwlock_read_unlock(&part->lock);
 		return EINVAL;
+	}
 
-	if (vbds_bsa_translate(part, ba, cnt, &gba) != EOK)
+	if (vbds_bsa_translate(part, ba, cnt, &gba) != EOK) {
+		fibril_rwlock_read_unlock(&part->lock);
 		return ELIMIT;
+	}
 
-	return block_write_direct(part->disk->svc_id, gba, cnt, buf);
+	rc = block_write_direct(part->disk->svc_id, gba, cnt, buf);
+	fibril_rwlock_read_unlock(&part->lock);
+	return rc;
 }
 
 static int vbds_bd_get_block_size(bd_srv_t *bd, size_t *rsize)
@@ -854,7 +1005,11 @@ static int vbds_bd_get_block_size(bd_srv_t *bd, size_t *rsize)
 	vbds_part_t *part = bd_srv_part(bd);
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_bd_get_block_size()");
+
+	fibril_rwlock_read_lock(&part->lock);
 	*rsize = part->disk->block_size;
+	fibril_rwlock_read_unlock(&part->lock);
+
 	return EOK;
 }
 
@@ -863,7 +1018,11 @@ static int vbds_bd_get_num_blocks(bd_srv_t *bd, aoff64_t *rnb)
 	vbds_part_t *part = bd_srv_part(bd);
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG2, "vbds_bd_get_num_blocks()");
+
+	fibril_rwlock_read_lock(&part->lock);
 	*rnb = part->nblocks;
+	fibril_rwlock_read_unlock(&part->lock);
+
 	return EOK;
 }
 
@@ -889,6 +1048,7 @@ void vbds_bd_conn(ipc_callid_t iid, ipc_call_t *icall, void *arg)
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_bd_conn() - call bd_conn");
 	bd_conn(iid, icall, &part->bds);
+	vbds_part_del_ref(part);
 }
 
 /** Translate block segment address with range checking. */
@@ -975,30 +1135,44 @@ static int vbds_part_indices_update(vbds_disk_t *disk)
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "vbds_part_indices_update()");
 
+	fibril_mutex_lock(&vbds_parts_lock);
+
 	/* First unregister services for partitions whose index has changed */
 	list_foreach(disk->parts, ldisk, vbds_part_t, part) {
+		fibril_rwlock_write_lock(&part->lock);
 		if (part->svc_id != 0 && part->lpart->index != part->reg_idx) {
 			rc = vbds_part_svc_unregister(part);
 			if (rc != EOK) {
+				fibril_rwlock_write_unlock(&part->lock);
+				fibril_mutex_unlock(&vbds_parts_lock);
 				log_msg(LOG_DEFAULT, LVL_ERROR, "Error "
 				    "un-registering partition.");
 				return EIO;
 			}
 		}
+
+		fibril_rwlock_write_unlock(&part->lock);
 	}
 
 	/* Now re-register those services under the new indices */
 	list_foreach(disk->parts, ldisk, vbds_part_t, part) {
+		fibril_rwlock_write_lock(&part->lock);
 		label_part_get_info(part->lpart, &lpinfo);
 		if (part->svc_id == 0 && lpinfo.pkind != lpk_extended) {
 			rc = vbds_part_svc_register(part);
 			if (rc != EOK) {
+				fibril_rwlock_write_unlock(&part->lock);
+				fibril_mutex_unlock(&vbds_parts_lock);
 				log_msg(LOG_DEFAULT, LVL_ERROR, "Error "
 				    "re-registering partition.");
 				return EIO;
 			}
 		}
+
+		fibril_rwlock_write_unlock(&part->lock);
 	}
+
+	fibril_mutex_unlock(&vbds_parts_lock);
 
 	return EOK;
 }
