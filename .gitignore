@@ -375,6 +375,7 @@ boot/arch/arm64/_link.ld.comp
 kernel/arch/arm64/_link.ld
 kernel/arch/arm64/include/arch/context_struct.h
 kernel/arch/arm64/include/arch/istate_struct.h
+uspace/drv/char/sttykbd/sttykbd
 uspace/lib/c/arch/arm64/_link-dlexe.ld
 uspace/lib/c/arch/arm64/_link-loader.ld
 uspace/lib/c/arch/arm64/_link-shlib.ld
