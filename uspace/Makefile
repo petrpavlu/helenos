@@ -139,8 +139,10 @@ DIRS = \
 	drv/block/ata_bd \
 	drv/block/ddisk \
 	drv/char/i8042 \
+	drv/char/pl011 \
 	drv/char/pl050 \
 	drv/char/ps2mouse \
+	drv/char/sttykbd \
 	drv/char/xtkbd \
 	drv/test/test1 \
 	drv/test/test2 \
