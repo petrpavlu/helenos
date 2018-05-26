@@ -381,6 +381,7 @@ uspace/lib/c/arch/arm64/_link-shlib.ld
 uspace/lib/c/arch/arm64/_link.ld
 uspace/lib/c/arch/arm64/include/libarch/fibril_context.h
 uspace/lib/c/arch/arm64/include/libarch/istate_struct.h
+uspace/srv/hw/irc/gicv2/gicv2
 
 # Additional generic files.
 *.co
