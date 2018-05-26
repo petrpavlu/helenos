@@ -210,6 +210,12 @@ ifeq ($(UARCH),arm32)
 		srv/hw/irc/icp-ic
 endif
 
+ifeq ($(UARCH),arm64)
+	DIRS += \
+		drv/platform/arm64virt \
+		srv/hw/irc/gicv2
+endif
+
 ## System libraries
 #
 
