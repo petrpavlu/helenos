@@ -111,19 +111,22 @@ static void virt_irq_exception(unsigned int exc_no, istate_t *istate)
 
 static void virt_output_init(void)
 {
-	if (pl011_uart_init(&virt.uart, VIRT_UART_IRQ, VIRT_UART_ADDRESS))
-		stdout_wire(&virt.uart.outdev);
+	if (!pl011_uart_init(&virt.uart, VIRT_UART_IRQ, VIRT_UART_ADDRESS))
+		return;
+
+	stdout_wire(&virt.uart.outdev);
 }
 
 static void virt_input_init(void)
 {
 	srln_instance_t *srln_instance = srln_init();
-	if (srln_instance) {
-		indev_t *sink = stdin_wire();
-		indev_t *srln = srln_wire(srln_instance, sink);
-		pl011_uart_input_wire(&virt.uart, srln);
-                gicv2_enable(&virt.gicv2, VIRT_UART_IRQ);
-	}
+	if (srln_instance == NULL)
+		return;
+
+	indev_t *sink = stdin_wire();
+	indev_t *srln = srln_wire(srln_instance, sink);
+	pl011_uart_input_wire(&virt.uart, srln);
+	gicv2_enable(&virt.gicv2, VIRT_UART_IRQ);
 }
 
 size_t virt_get_irq_count(void)
