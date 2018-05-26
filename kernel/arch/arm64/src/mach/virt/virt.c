@@ -39,11 +39,12 @@
 #include <genarch/drivers/pl011/pl011.h>
 #include <genarch/srln/srln.h>
 #include <mm/km.h>
+#include <sysinfo/sysinfo.h>
 
 #define VIRT_UART_IRQ  33
-#define VIRT_UART_ADDRESS      0x09000000
-#define VIRT_GIC_DIST_ADDRESS  0x08000000
-#define VIRT_GIC_CPU_ADDRESS   0x08010000
+#define VIRT_UART_ADDRESS       0x09000000
+#define VIRT_GIC_DISTR_ADDRESS  0x08000000
+#define VIRT_GIC_CPUI_ADDRESS   0x08010000
 
 static void virt_init(void);
 static void virt_irq_exception(unsigned int exc_no, istate_t *istate);
@@ -69,13 +70,20 @@ struct arm_machine_ops virt_machine_ops = {
 static void virt_init(void)
 {
 	/* Initialize interrupt controller. */
-	gicv2_distr_regs_t *distr = (void *) km_map(VIRT_GIC_DIST_ADDRESS,
+	gicv2_distr_regs_t *distr = (void *) km_map(VIRT_GIC_DISTR_ADDRESS,
 	    ALIGN_UP(sizeof(*distr), PAGE_SIZE),
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
-	gicv2_cpui_regs_t *cpui =  (void *) km_map(VIRT_GIC_CPU_ADDRESS,
+	gicv2_cpui_regs_t *cpui =  (void *) km_map(VIRT_GIC_CPUI_ADDRESS,
 	    ALIGN_UP(sizeof(*cpui), PAGE_SIZE),
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
 	gicv2_init(&virt.gicv2, distr, cpui);
+
+	/* Tell the userspace where GICv2 lives. */
+	sysinfo_set_item_val("gicv2", NULL, true);
+	sysinfo_set_item_val("gicv2.distr.address.physical", NULL,
+	    VIRT_GIC_DISTR_ADDRESS);
+	sysinfo_set_item_val("gicv2.cpui.address.physical", NULL,
+	    VIRT_GIC_CPUI_ADDRESS);
 
 	/* Initialize timer. */
 	/* REVISIT */
