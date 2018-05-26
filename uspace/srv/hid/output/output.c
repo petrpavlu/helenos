@@ -35,6 +35,7 @@
 #include "port/ega.h"
 #include "port/kchar.h"
 #include "port/niagara.h"
+#include "port/pl011.h"
 #include "port/ski.h"
 #include "output.h"
 
@@ -476,6 +477,7 @@ int main(int argc, char *argv[])
 	ega_init();
 	kchar_init();
 	niagara_init();
+	pl011_init();
 	ski_init();
 	
 	printf("%s: Accepting connections\n", NAME);

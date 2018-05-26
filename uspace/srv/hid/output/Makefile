@@ -35,6 +35,7 @@ SOURCES = \
 	port/ega.c \
 	port/kchar.c \
 	port/niagara.c \
+	port/pl011.c \
 	port/ski.c \
 	proto/vt100.c \
 	output.c
