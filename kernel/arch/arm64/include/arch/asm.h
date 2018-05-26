@@ -115,7 +115,7 @@ NO_TRACE static inline void pio_write_32(ioport32_t *port, uint32_t val)
  * @param port Port to read from.
  * @return Value read.
  */
-NO_TRACE static inline uint8_t pio_read_8(ioport8_t *port)
+NO_TRACE static inline uint8_t pio_read_8(const ioport8_t *port)
 {
 	return *port;
 }
@@ -125,7 +125,7 @@ NO_TRACE static inline uint8_t pio_read_8(ioport8_t *port)
  * @param port Port to read from.
  * @return Value read.
  */
-NO_TRACE static inline uint16_t pio_read_16(ioport16_t *port)
+NO_TRACE static inline uint16_t pio_read_16(const ioport16_t *port)
 {
 	return *port;
 }
@@ -135,7 +135,7 @@ NO_TRACE static inline uint16_t pio_read_16(ioport16_t *port)
  * @param port Port to read from.
  * @return Value read.
  */
-NO_TRACE static inline uint32_t pio_read_32(ioport32_t *port)
+NO_TRACE static inline uint32_t pio_read_32(const ioport32_t *port)
 {
 	return *port;
 }
