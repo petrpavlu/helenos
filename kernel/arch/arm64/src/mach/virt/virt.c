@@ -136,7 +136,7 @@ size_t virt_get_irq_count(void)
 
 const char *virt_get_platform_name(void)
 {
-	return "virt";
+	return "arm64virt";
 }
 
 /** @}
