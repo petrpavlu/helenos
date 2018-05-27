@@ -140,7 +140,7 @@ bool pl011_uart_init(pl011_uart_t *uart, inr_t interrupt, uintptr_t addr)
 	uart->parea.frames = 1;
 	uart->parea.unpriv = false;
 	uart->parea.mapped = false;
-	/* ddi_parea_register(&uart->parea); */
+	ddi_parea_register(&uart->parea);
 
 	if (!fb_exported) {
 		/*
