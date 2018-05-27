@@ -43,16 +43,39 @@
 #include <abi/errno.h>
 #include <arch.h>
 
-static int answer_preprocess(call_t *answer, ipc_data_t *olddata)
+static int pagein_request_process(call_t *call, answerbox_t *box)
 {
+	/*
+	 * Allow only requests from numerically higher task IDs to
+	 * numerically lower task IDs to prevent deadlock in
+	 * pagein_answer_preprocess() that could happen if two tasks
+	 * wanted to be each other's pager.
+	 */
+	if (call->sender->taskid <= TASK->taskid)
+		return ENOTSUP;
+	else
+		return EOK;
+}
+
+static int pagein_answer_preprocess(call_t *answer, ipc_data_t *olddata)
+{
+	/*
+	 * We only do the special handling below if the call was initiated by
+	 * the kernel. Otherwise a malicious task could use this mechanism to
+	 * hold memory frames forever.
+	 */
+	if (!answer->priv)
+		return EOK;
+
 	if (!IPC_GET_RETVAL(answer->data)) {
+
 		pte_t pte;
 		uintptr_t frame;
 
 		page_table_lock(AS, true);
 		bool found = page_mapping_find(AS, IPC_GET_ARG1(answer->data),
 		    false, &pte);
-		if (found) {
+		if (found & PTE_PRESENT(&pte)) {
 			frame = PTE_GET_FRAME(&pte);
 			pfn_t pfn = ADDR2PFN(frame);
 			if (find_zone(pfn, 1, 0) != (size_t) -1) {
@@ -75,9 +98,9 @@ static int answer_preprocess(call_t *answer, ipc_data_t *olddata)
 sysipc_ops_t ipc_m_page_in_ops = {
 	.request_preprocess = null_request_preprocess,
 	.request_forget = null_request_forget,
-	.request_process = null_request_process,
+	.request_process = pagein_request_process,
 	.answer_cleanup = null_answer_cleanup,
-	.answer_preprocess = answer_preprocess,
+	.answer_preprocess = pagein_answer_preprocess,
 	.answer_process = null_answer_process,
 };
 
