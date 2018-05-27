@@ -261,7 +261,7 @@ SYMBOL(kernel_image_start)
 	ldr x2, =KM_ARM64_IDENTITY_START
 	add x1, x1, x2
 
-	bl arch_pre_main
+	bl arm64_pre_main
 	bl main_bsp
 
 .section K_DATA_START, "ax"

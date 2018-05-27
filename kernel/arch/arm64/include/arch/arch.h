@@ -38,7 +38,7 @@
 
 #include <arch/boot/boot.h>
 
-extern void arch_pre_main(void *entry, bootinfo_t *bootinfo);
+extern void arm64_pre_main(void *entry, bootinfo_t *bootinfo);
 
 #endif
 

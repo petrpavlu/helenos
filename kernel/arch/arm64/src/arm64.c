@@ -35,6 +35,7 @@
 
 #include <abi/errno.h>
 #include <arch.h>
+#include <arch/arch.h>
 #include <arch/exception.h>
 #include <arch/machine_func.h>
 #include <interrupt.h>
@@ -43,8 +44,21 @@
 #include <sysinfo/sysinfo.h>
 #include <userspace.h>
 
+static void arm64_post_mm_init(void);
+static void arm64_post_cpu_init(void);
+static void arm64_post_smp_init(void);
+
+arch_ops_t arm64_ops = {
+	.post_mm_init = arm64_post_mm_init,
+	.post_cpu_init = arm64_post_cpu_init,
+	.post_smp_init = arm64_post_smp_init,
+};
+
+arch_ops_t *arch_ops = &arm64_ops;
+
+
 /** Perform ARM64 specific initialization before main_bsp() is called. */
-void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
+void arm64_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 {
 	/* Copy init task info. */
 	init.cnt = min3(bootinfo->taskmap.cnt, TASKMAP_MAX_RECORDS,
@@ -74,14 +88,7 @@ void arch_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 /** Perform ARM64 specific tasks needed before the memory management is
  * initialized.
  */
-void arch_pre_mm_init(void)
-{
-}
-
-/** Perform ARM64 specific tasks needed before the memory management is
- * initialized.
- */
-void arch_post_mm_init(void)
+void arm64_post_mm_init(void)
 {
 	if (config.cpu_active != 1)
 		return;
@@ -100,17 +107,10 @@ void arch_post_mm_init(void)
 	machine_output_init();
 }
 
-/** Perform ARM64 specific tasks needed before the multiprocessing is
- * initialized.
- */
-void arch_pre_smp_init(void)
-{
-}
-
 /** Perform ARM64 specific tasks needed after the multiprocessing is
  * initialized.
  */
-void arch_post_smp_init(void)
+void arm64_post_smp_init(void)
 {
 	/* Set platform name. */
 	const char *platform = machine_get_platform_name();
@@ -129,7 +129,7 @@ void calibrate_delay_loop(void)
 }
 
 /** Perform ARM64 specific tasks needed after cpu is initialized. */
-void arch_post_cpu_init(void)
+void arm64_post_cpu_init(void)
 {
 	/* REVISIT */
 }
