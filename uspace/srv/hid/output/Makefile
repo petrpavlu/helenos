@@ -29,6 +29,8 @@
 
 USPACE_PREFIX = ../../..
 BINARY = output
+LIBS = $(LIBDRV_PREFIX)/libdrv.a
+EXTRA_CFLAGS = -I$(LIBDRV_PREFIX)/include
 
 SOURCES = \
 	ctl/serial.c \
@@ -37,6 +39,7 @@ SOURCES = \
 	port/niagara.c \
 	port/pl011.c \
 	port/ski.c \
+	port/chardev.c \
 	proto/vt100.c \
 	output.c
 

@@ -1,7 +1,5 @@
-#!/bin/bash
-
 #
-# Copyright (c) 2014 Jakub Jermar
+# Copyright (c) 2010 Lenka Trochtova
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,32 +26,12 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-VERSION=2.8.0
-BASENAME=qemu-${VERSION}
-BASENAME_MASTER=qemu-master
-TARBALL=${BASENAME}.tar.bz2
-SOURCEDIR=${BASENAME}
-URL=http://wiki.qemu-project.org/download/${TARBALL}
-REPO=git://git.qemu.org/qemu.git
-MD5="17940dce063b6ce450a12e719a6c9c43"
+USPACE_PREFIX = ../../..
+LIBS = $(LIBDRV_PREFIX)/libdrv.a
+EXTRA_CFLAGS += -I$(LIBDRV_PREFIX)/include
+BINARY = sun4u
 
-if [ "$1" == "--master" ]; then
-	git clone ${REPO} ${BASENAME_MASTER}
-	cd ${BASENAME_MASTER}
-else
-	if [ ! -f ${TARBALL} ]; then
-		wget ${URL}
-	fi
-	
-	if [ "`md5sum ${TARBALL} | cut -f 1 -d " "`" != ${MD5} ]; then
-		echo Wrong MD5 checksum
-		exit
-	fi
-	
-	tar xvfj ${TARBALL}
-	cd ${SOURCEDIR}
-fi
+SOURCES = \
+	sun4u.c
 
-./configure --target-list=i386-softmmu,x86_64-softmmu,arm-softmmu,aarch64-softmmu,ppc-softmmu,sparc64-softmmu,mips-softmmu,mipsel-softmmu --audio-drv-list=pa
-make -j 4
-sudo make install
+include $(USPACE_PREFIX)/Makefile.common
