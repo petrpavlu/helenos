@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 Jiri Svoboda
+# Copyright (c) 2005 Jakub Jermar
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,17 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.globl entry_point_jmp
+#include <abi/asmtool.h>
 
-## void entry_point_jmp(void *entry_point, void *pcb);
-#
-# %o0	contains entry_point
-# %o1	contains pcb
-#
-# Jump to program entry point
-entry_point_jmp:
-	# Pass pcb pointer to entry point in %o1. As it is already
-	# there, no action is needed.
-	call %o0
+.text
+
+FUNCTION_BEGIN(cpu_sleep)
+	retl
 	nop
-	# FIXME: use branch instead of call
+FUNCTION_END(cpu_sleep)
+
+FUNCTION_BEGIN(cpu_halt)
+	ba %xcc, cpu_halt
+	nop
+FUNCTION_END(cpu_halt)
+

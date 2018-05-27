@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Martin Decky
+# Copyright (c) 2006 Jakub Jermar
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,21 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.text
+#include <abi/asmtool.h>
+
+.section .init, "ax"
+
+.org 0
+
+## User-space task entry point
+#
+# r2 contains the PCB pointer
+#
+SYMBOL(__entry)
+	alloc loc0 = ar.pfs, 0, 1, 2, 0
+	movl gp = __gp
 	
-.globl __thread_entry
+	# Pass PCB pointer as the first argument to __main
+	mov out0 = r2
+	br.call.sptk.many b0 = __main
 
-## User-space thread entry point for all but the first threads.
-#
-#
-__thread_entry:
-	#
-	# Create the first stack frame.
-	#
-	li %r4, 0
-	stw %r4, 0(%r1)
-	stwu %r1, -16(%r1)
-
-	b __thread_main
-
-.end __thread_entry

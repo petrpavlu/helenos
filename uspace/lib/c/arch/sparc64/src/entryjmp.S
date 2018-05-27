@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Martin Decky
+# Copyright (c) 2008 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,17 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.section .init, "ax"
+#include <abi/asmtool.h>
 
-.org 0
-
-.globl __entry
-
-## User-space task entry point
+## void entry_point_jmp(void *entry_point, void *pcb);
 #
-# r6 contains the PCB pointer
+# %o0	contains entry_point
+# %o1	contains pcb
 #
-__entry:
-	#
-	# Create the first stack frame.
-	#
-	li %r3, 0
-	stw %r3, 0(%r1)
-	stwu %r1, -16(%r1)
-	
-	# Pass the PCB pointer to __main() as the first argument.
-	# The first argument is passed in r3.
-	mr %r3, %r6
-	bl __main
+# Jump to program entry point
+SYMBOL(entry_point_jmp)
+	# Pass pcb pointer to entry point in %o1. As it is already
+	# there, no action is needed.
+	call %o0
+	nop
+	# fixme: use branch instead of call

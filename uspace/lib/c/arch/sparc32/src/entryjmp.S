@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2005 Jakub Jermar
+# Copyright (c) 2008 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,18 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.text
+#include <abi/asmtool.h>
 
-.global asm_delay_loop
-.global sys_tls_set
-.global cpu_halt
-
-sys_tls_set:
-	b sys_tls_set
-
-asm_delay_loop:
-	blr
-
-cpu_halt:
-	b cpu_halt
+## void entry_point_jmp(void *entry_point, void *pcb);
+#
+# %o0	contains entry_point
+# %o1	contains pcb
+#
+# Jump to program entry point
+FUNCTION_BEGIN(entry_point_jmp)
+	# Pass pcb pointer to entry point in %o1. As it is already
+	# there, no action is needed.
+	call %o0
+	nop
+	# FIXME: use branch instead of call
+FUNCTION_END(entry_point_jmp)

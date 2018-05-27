@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2005 Jakub Jermar
+# Copyright (c) 2008 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,20 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+#include <abi/asmtool.h>
+
 .text
+.explicit
 
-.global cpu_sleep
-.global sys_tls_set
+## void entry_point_jmp(void *entry_point, void *pcb);
+#
+# in0 (r32)	contains entry_point
+# in1 (r33)	contains pcb
+#
+# Jump to program entry point
+SYMBOL(entry_point_jmp)
+	# Pass pcb to the entry point in r2
 
-.global dummy
-
-cpu_sleep:		! not supported by architecture
-sys_tls_set:		! not needed on architecture
-
-dummy:
-	retl
-	nop
-
-.global cpu_halt
-cpu_halt:
-	ba %xcc, cpu_halt
-	nop
+	mov b6 = r32
+	mov r2 = r33 ;;
+	br b6 ;;

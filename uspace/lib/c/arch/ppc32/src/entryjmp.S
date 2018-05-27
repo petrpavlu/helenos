@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Jakub Jermar
+# Copyright (c) 2008 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,16 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.text
-	
-.globl __thread_entry
+#include <abi/asmtool.h>
 
-## User-space thread entry point for all but the first threads.
+## void entry_point_jmp(void *entry_point, void *pcb);
 #
+# %r3	contains entry_point
+# %r4	contains pcb
 #
-__thread_entry:
-	#
-	# Create the first stack frame.
-	#
-	save %sp, -176, %sp
-	flushw
-	add %g0, -0x7ff, %fp
-
-	#
-	# Propagate the input arguments to the new window.
-	#
-	mov %i0, %o0
-
-	sethi %hi(_gp), %l7
-	call __thread_main		! %o0 contains address of uarg
-	or %l7, %lo(_gp), %l7
-	
-	! not reached
-	
-.end __thread_entry
+# Jump to program entry point
+FUNCTION_BEGIN(entry_point_jmp)
+	mtctr %r3
+	mr %r6, %r4	# Pass pcb to the entry point in %r6
+	bctr
+FUNCTION_END(entry_point_jmp)

@@ -26,20 +26,26 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.section .init, "ax"
+#include <abi/asmtool.h>
 
-.org 0
+.text
 
-.globl __entry
-
-## User-space task entry point
+## User-space thread entry point for all but the first threads.
 #
-# r2 contains the PCB pointer
 #
-__entry:
-	alloc loc0 = ar.pfs, 0, 1, 2, 0
+SYMBOL(__thread_entry)
+	alloc loc0 = ar.pfs, 0, 1, 1, 0
+
 	movl gp = __gp
 	
-	# Pass PCB pointer as the first argument to __main
-	mov out0 = r2
-	br.call.sptk.many b0 = __main
+	#
+	# r8 contains address of uarg structure.
+	#
+	
+	mov out0 = r8
+	br.call.sptk.many b0 = __thread_main
+	
+	#
+	# Not reached.
+	#
+
