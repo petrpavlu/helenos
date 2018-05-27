@@ -40,7 +40,6 @@ DIRS = \
 	app/bnchmark \
 	app/corecfg \
 	app/devctl \
-	app/dltest \
 	app/dnscfg \
 	app/dnsres \
 	app/download \
@@ -168,6 +167,7 @@ DIRS = \
 	drv/nic/ar9271 \
 	drv/platform/icp
 
+
 ## Platform-specific hardware support
 #
 
@@ -219,6 +219,14 @@ ifeq ($(UARCH),arm64)
 		srv/hw/irc/gicv2
 endif
 
+## Dynamic linking tests
+#
+ifeq ($(CONFIG_BUILD_SHARED_LIBS),y)
+	DIRS += \
+		app/dltest \
+		app/dltests
+endif
+
 ## System libraries
 #
 
@@ -249,7 +257,6 @@ LIBS = \
 	lib/ext4 \
 	lib/trackmod \
 	lib/uri \
-	lib/urcu \
 	lib/usb \
 	lib/usbhost \
 	lib/usbdev \
