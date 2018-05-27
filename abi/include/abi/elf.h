@@ -66,6 +66,7 @@
 #define EM_IA_64        50   /* IA-64 */
 #define EM_X86_64       62   /* AMD64/EMT64 */
 #define EM_AARCH64      183  /* ARM 64-bit architecture */
+#define EM_RISCV        243  /* RISC-V */
 
 /**
  * ELF identification indexes
