@@ -142,6 +142,7 @@ static void lower_el_aarch64_synch_exception(unsigned int exc_no,
 	case ESR_EC_IA_LOWER_EL:
 		/* Instruction abort. */
 		exec = true;
+		/* Fallthrough */
 	case ESR_EC_DA_LOWER_EL:
 		/* Data abort. */
 		switch ((esr_el1 & ESR_IDFSC_MASK) >> ESR_IDFSC_SHIFT) {
