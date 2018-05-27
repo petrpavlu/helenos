@@ -34,6 +34,7 @@
 #include <arch/pm.h>
 #include <genarch/multiboot/multiboot.h>
 #include <arch/cpuid.h>
+#include <arch/cpu.h>
 
 #define START_STACK  (BOOT_OFFSET - BOOT_STACK_SIZE)
 
@@ -165,8 +166,8 @@ FUNCTION_BEGIN(map_kernel_pse)
 map_kernel_pse:
 	/* Paging features */
 	movl %cr4, %ecx
-	orl $(1 << 4), %ecx      /* PSE on */
-	andl $(~(1 << 5)), %ecx  /* PAE off */
+	orl $CR4_PSE, %ecx	/* PSE on */
+	andl $~CR4_PAE, %ecx	/* PAE off */
 	movl %ecx, %cr4
 	
 	movl $(page_directory + 0), %esi
@@ -175,7 +176,7 @@ map_kernel_pse:
 	xorl %ebx, %ebx
 	
 	floop_pse:
-		movl $((1 << 7) | (1 << 1) | (1 << 0)), %eax
+		movl $(PDE_4M | PDE_RW | PDE_P), %eax
 		orl %ebx, %eax
 		/* Mapping 0x00000000 + %ecx * 4M => 0x00000000 + %ecx * 4M */
 		movl %eax, (%esi, %ecx, 4)
@@ -190,7 +191,7 @@ map_kernel_pse:
 	movl %esi, %cr3
 	
 	movl %cr0, %ebx
-	orl $(1 << 31), %ebx  /* paging on */
+	orl $CR0_PG, %ebx	/* paging on */
 	movl %ebx, %cr0
 	ret
 FUNCTION_END(map_kernel_pse)
@@ -204,7 +205,7 @@ FUNCTION_END(map_kernel_pse)
 FUNCTION_BEGIN(map_kernel_non_pse)
 	/* Paging features */
 	movl %cr4, %ecx
-	andl $(~(1 << 5)), %ecx  /* PAE off */
+	andl $~CR4_PAE, %ecx  /* PAE off */
 	movl %ecx, %cr4
 	
 	call calc_kernel_end
@@ -219,18 +220,17 @@ FUNCTION_BEGIN(map_kernel_non_pse)
 		mov %ecx, %esi
 		
 		/* Align address down to 4k */
-		andl $(~4095), %esi
+		andl $(~(PAGE_SIZE - 1)), %esi
 		
 	use_kernel_end:
 		
 		/* Align address to 4k */
-		addl $4095, %esi
-		andl $(~4095), %esi
+		addl $(PAGE_SIZE - 1), %esi
+		andl $(~(PAGE_SIZE - 1)), %esi
 		
 		/* Allocate space for page tables */
 		movl %esi, pt_loc
-		movl $ballocs, %edi
-		andl $0x7fffffff, %edi
+		movl $KA2PA(ballocs), %edi
 		
 		movl %esi, (%edi)
 		addl $4, %edi
@@ -241,10 +241,10 @@ FUNCTION_BEGIN(map_kernel_non_pse)
 		xorl %ebx, %ebx
 		
 		floop_pt:
-			movl $((1 << 1) | (1 << 0)), %eax
+			movl $(PTE_RW | PTE_P), %eax
 			orl %ebx, %eax
 			movl %eax, (%esi, %ecx, 4)
-			addl $(4 * 1024), %ebx
+			addl $PAGE_SIZE, %ebx
 			
 			incl %ecx
 			cmpl $(512 * 1024), %ecx
@@ -258,7 +258,7 @@ FUNCTION_BEGIN(map_kernel_non_pse)
 		movl pt_loc, %ebx
 		
 		floop:
-			movl $((1 << 1) | (1 << 0)), %eax
+			movl $(PDE_RW | PDE_P), %eax
 			orl %ebx, %eax
 			
 			/* Mapping 0x00000000 + %ecx * 4M => 0x00000000 + %ecx * 4M */
@@ -266,7 +266,7 @@ FUNCTION_BEGIN(map_kernel_non_pse)
 			
 			/* Mapping 0x80000000 + %ecx * 4M => 0x00000000 + %ecx * 4M */
 			movl %eax, (%edi, %ecx, 4)
-			addl $(4 * 1024), %ebx
+			addl $PAGE_SIZE, %ebx
 			
 			incl %ecx
 			cmpl $512, %ecx
@@ -276,7 +276,7 @@ FUNCTION_BEGIN(map_kernel_non_pse)
 		movl %esi, %cr3
 		
 		movl %cr0, %ebx
-		orl $(1 << 31), %ebx  /* paging on */
+		orl $CR0_PG, %ebx  /* paging on */
 		movl %ebx, %cr0
 		
 		ret
@@ -284,20 +284,17 @@ FUNCTION_END(map_kernel_non_pse)
 
 /** Calculate unmapped address of the end of the kernel. */
 calc_kernel_end:
-	movl $hardcoded_load_address, %edi
-	andl $0x7fffffff, %edi
+	movl $KA2PA(hardcoded_load_address), %edi
 	movl (%edi), %esi
-	andl $0x7fffffff, %esi
+	leal KA2PA(0)(%esi), %esi
 	
-	movl $hardcoded_ktext_size, %edi
-	andl $0x7fffffff, %edi
+	movl $KA2PA(hardcoded_ktext_size), %edi
 	addl (%edi), %esi
-	andl $0x7fffffff, %esi
+	leal KA2PA(0)(%esi), %esi
 	
-	movl $hardcoded_kdata_size, %edi
-	andl $0x7fffffff, %edi
+	movl $KA2PA(hardcoded_kdata_size), %edi
 	addl (%edi), %esi
-	andl $0x7fffffff, %esi
+	leal KA2PA(0)(%esi), %esi
 	movl %esi, kernel_end
 	
 	ret
