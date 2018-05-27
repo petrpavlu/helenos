@@ -146,9 +146,9 @@ extern uintptr_t physmem_base;
 
 /* Macros for querying the last-level PTE entries. */
 #define PTE_VALID_ARCH(pte) \
-	(*((uint64_t *) (pte)) != 0)
+	(((pte_t *) (pte))->valid != 0)
 #define PTE_PRESENT_ARCH(pte) \
-	(((pte_t *) (pte))->present != 0)
+	(((pte_t *) (pte))->valid != 0)
 #define PTE_GET_FRAME_ARCH(pte) \
 	(((uintptr_t) ((pte_t *) (pte))->output_address) << FRAME_WIDTH)
 #define PTE_WRITABLE_ARCH(pte) \
@@ -253,7 +253,7 @@ typedef struct {
 	 * Note: The flag is called `valid' in the official ARM terminology
 	 * but it has the `present' (valid+active) sense in HelenOS.
 	 */
-	unsigned present : 1;
+	unsigned valid : 1;
 	unsigned type : 1;
 
 	/* Lower block and page attributes. */
@@ -293,7 +293,7 @@ NO_TRACE static inline unsigned int get_pt_level012_flags(pte_t *pt, size_t i)
 	pte_t *p = &pt[i];
 
 	return (1 << PAGE_CACHEABLE_SHIFT) |
-	    (!p->present << PAGE_PRESENT_SHIFT) | (1 << PAGE_USER_SHIFT) |
+	    (!p->valid << PAGE_PRESENT_SHIFT) | (1 << PAGE_USER_SHIFT) |
 	    (1 << PAGE_READ_SHIFT) | (1 << PAGE_WRITE_SHIFT) |
 	    (1 << PAGE_EXEC_SHIFT);
 }
@@ -316,7 +316,7 @@ NO_TRACE static inline unsigned int get_pt_level3_flags(pte_t *pt, size_t i)
 	    (!user && !p->privileged_execute_never));
 
 	return (cacheable << PAGE_CACHEABLE_SHIFT) |
-	    (!p->present << PAGE_PRESENT_SHIFT) | (user << PAGE_USER_SHIFT) |
+	    (!p->valid << PAGE_PRESENT_SHIFT) | (user << PAGE_USER_SHIFT) |
 	    (1 << PAGE_READ_SHIFT) | (write << PAGE_WRITE_SHIFT) |
 	    (exec << PAGE_EXEC_SHIFT) | (!p->not_global << PAGE_GLOBAL_SHIFT);
 }
@@ -332,7 +332,7 @@ NO_TRACE static inline void set_pt_level012_flags(pte_t *pt, size_t i,
 {
 	pte_t *p = &pt[i];
 
-	p->present = (flags & PAGE_PRESENT) != 0;
+	p->valid = (flags & PAGE_PRESENT) != 0;
 	p->type = PTE_L012_TYPE_TABLE;
 }
 
@@ -351,7 +351,7 @@ NO_TRACE static inline void set_pt_level3_flags(pte_t *pt, size_t i,
 		p->attr_index = MAIR_EL1_NORMAL_MEMORY_INDEX;
 	else
 		p->attr_index = MAIR_EL1_DEVICE_MEMORY_INDEX;
-	p->present = (flags & PAGE_PRESENT) != 0;
+	p->valid = (flags & PAGE_PRESENT) != 0;
 	p->type = PTE_L3_TYPE_PAGE;
 
 	/* Translate page permissions to access permissions. */
@@ -384,7 +384,7 @@ NO_TRACE static inline void set_pt_present(pte_t *pt, size_t i)
 {
 	pte_t *p = &pt[i];
 
-	p->present = 1;
+	p->valid = 1;
 }
 
 /** Gets the executable flag of page table entry.
