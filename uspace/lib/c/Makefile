@@ -44,7 +44,7 @@ EXTRA_OUTPUT = $(LINKER_SCRIPTS)
 EXTRA_CLEAN = $(COMMON_HEADER_ARCH) $(LINKER_SCRIPTS)
 LIBRARY = libc
 SLIBRARY = libc.so.0.0
-LSONAME = libc.so0
+LSONAME = libc.so.0
 
 LIBS = $(LIBURCU_PREFIX)/liburcu.a
 EXTRA_CFLAGS += -I$(LIBURCU_PREFIX)
@@ -78,6 +78,7 @@ GENERIC_SOURCES = \
 	generic/dnsr.c \
 	generic/dlfcn.c \
 	generic/elf/elf_load.c \
+	generic/elf/elf_mod.c \
 	generic/event.c \
 	generic/errno.c \
 	generic/loc.c \

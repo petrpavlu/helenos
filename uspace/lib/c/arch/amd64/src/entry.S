@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Jakub Jermar
+# Copyright (c) 2006 Ondrej Palkovsky
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,17 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.text
+#include <abi/asmtool.h>
 
-.globl __thread_entry
+.section .init, "ax"
 
-## User-space thread entry point for all but the first threads.
+.org 0
+
+## User-space task entry point
 #
+# %rdi contains the PCB pointer
 #
-__thread_entry:
+SYMBOL(__entry)
 	#
 	# Create the first stack frame.
 	#
@@ -41,10 +44,6 @@ __thread_entry:
 	pushq $0
 	movq %rsp, %rbp
 	
-	#
-	# RAX contains address of uarg
-	#
-	movq %rax, %rdi
-	call __thread_main
-	
-.end __thread_entry
+	# %rdi was deliberately chosen as the first argument is also in %rdi
+	# Pass PCB pointer to __main (no operation)
+	call __main

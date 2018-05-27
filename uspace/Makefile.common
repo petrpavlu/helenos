@@ -202,11 +202,11 @@ ifeq ($(STATIC_BUILD),y)
 		BASE_LIBS += $(LIBMATH_PREFIX)/libmath.a
 	endif
 else
-	BASE_LIBS = $(LIBC_PREFIX)/libc.so0 $(LIBSOFTINT_PREFIX)/libsofti.so0
+	BASE_LIBS = $(LIBC_PREFIX)/libc.so.0 $(LIBSOFTINT_PREFIX)/libsoftint.so.0
 	LFLAGS += -Bdynamic
 	LINKER_SCRIPT ?= $(LIBC_PREFIX)/arch/$(UARCH)/_link-dlexe.ld
 	ifeq ($(MATH),y)
-		BASE_LIBS += $(LIBMATH_PREFIX)/libmath.so0
+		BASE_LIBS += $(LIBMATH_PREFIX)/libmath.so.0
 	endif
 endif
 
@@ -269,7 +269,7 @@ CLANG_CFLAGS = $(INCLUDES_FLAGS) -O$(OPTIMIZATION) -imacros $(CONFIG_HEADER) \
 	-std=gnu99 -Werror-implicit-function-declaration -Wwrite-strings \
 	-integrated-as -pipe -g -target $(CLANG_TARGET) -D__$(ENDIANESS)__
 
-LIB_CFLAGS = $(CFLAGS) -fPIC -D__IN_SHARED_LIBC__
+LIB_CFLAGS = $(CFLAGS) -fPIC
 LIB_LFLAGS = $(LFLAGS) -shared -soname $(LSONAME) --whole-archive
 
 ifeq ($(CONFIG_DEBUG),y)

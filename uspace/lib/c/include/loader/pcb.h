@@ -68,7 +68,7 @@ typedef struct {
 	
 	/** Pointer to ELF dynamic section of the program. */
 	void *dynamic;
-	/** Pointer to dynamic linker state structure (runtime_env_t). */
+	/** Pointer to dynamic linker state structure (rtld_t). */
 	void *rtld_runtime;
 } pcb_t;
 

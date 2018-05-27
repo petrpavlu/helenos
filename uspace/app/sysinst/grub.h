@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Jiri Svoboda
+ * Copyright (c) 2014 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,32 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup sysinst
  * @{
  */
-/** @file
+/**
+ * @file
+ * @brief
  */
 
-#ifndef LIBC_RTLD_SYMBOL_H_
-#define LIBC_RTLD_SYMBOL_H_
+#ifndef GRUB_H
+#define GRUB_H
 
-#include <elf/elf.h>
-#include <rtld/rtld.h>
+enum {
+	grub_boot_machine_kernel_sector = 0x5c,
+	grub_boot_machine_boot_drive = 0x64
+};
 
-/** Symbol search flags */
-typedef enum {
-	/** No flags */
-	ssf_none = 0,
-	/** Do not search tree root */
-	ssf_noroot = 0x1
-} symbol_search_flags_t;
+enum {
+	/* 8086 segment (16*pa) where to load GRUB core image */
+	grub_boot_i386_pc_kernel_seg = 0x800
+};
 
-extern elf_symbol_t *symbol_bfs_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern elf_symbol_t *symbol_def_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern void *symbol_get_addr(elf_symbol_t *, module_t *);
+typedef struct {
+	uint64_t start;
+	uint16_t len;
+	uint16_t segment;
+} __attribute__ ((packed)) grub_boot_blocklist_t;
 
 #endif
 

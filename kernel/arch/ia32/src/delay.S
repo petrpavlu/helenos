@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 Jiri Svoboda
+# Copyright (c) 2001-2004 Jakub Jermar
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,27 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.globl entry_point_jmp
+#
+# Micro second delay loop functions.
+#
 
-## void entry_point_jmp(void *entry_point, void *pcb);
-#
-# %rdi	contains entry_point
-# %rsi	contains pcb
-#
-# Jump to program entry point
-entry_point_jmp:
-	# use standard amd32 prologue not to confuse anybody
-	push %rbp
-	movq %rsp, %rbp
-	
-	# pcb must be passed in %rdi, use %rdx as a scratch register
-	mov %rdi, %rdx
-	mov %rsi, %rdi
-	
-	# jump to entry point
-	jmp *%rdx
+#include <abi/asmtool.h>
+
+.text
+
+FUNCTION_BEGIN(asm_delay_loop)
+	movl 4(%esp),%ecx	# move argument to %ecx
+0:	lahf
+	dec %ecx
+	jnz 0b
+	ret
+FUNCTION_END(asm_delay_loop)
+
+FUNCTION_BEGIN(asm_fake_loop)
+	movl 4(%esp),%ecx	# move argument to %ecx
+0:	lahf
+	dec %ecx
+	jz 0b
+	ret
+FUNCTION_END(asm_fake_loop)
+

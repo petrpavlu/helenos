@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Jiri Svoboda
+ * Copyright (c) 2014 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup sysinst
  * @{
  */
-/** @file
+/**
+ * @file
+ * @brief
  */
 
-#ifndef LIBC_RTLD_SYMBOL_H_
-#define LIBC_RTLD_SYMBOL_H_
+#ifndef FUTIL_H
+#define FUTIL_H
 
-#include <elf/elf.h>
-#include <rtld/rtld.h>
+#include <ipc/loc.h>
+#include <sys/types.h>
 
-/** Symbol search flags */
-typedef enum {
-	/** No flags */
-	ssf_none = 0,
-	/** Do not search tree root */
-	ssf_noroot = 0x1
-} symbol_search_flags_t;
-
-extern elf_symbol_t *symbol_bfs_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern elf_symbol_t *symbol_def_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern void *symbol_get_addr(elf_symbol_t *, module_t *);
+extern int futil_copy_file(const char *, const char *);
+extern int futil_rcopy_contents(const char *, const char *);
+extern int futil_get_file(const char *, void **, size_t *);
 
 #endif
 

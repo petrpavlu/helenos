@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2005 Martin Decky
+# Copyright (c) 2008 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,20 @@
 
 #include <abi/asmtool.h>
 
-INTEL_CPUID_STANDARD = 1
-INTEL_SEP = 11
-
-.section .init, "ax"
-
-.org 0
-
-## User-space task entry point
+## void entry_point_jmp(void *entry_point, void *pcb);
 #
-# %edi contains the PCB pointer
+# %rdi	contains entry_point
+# %rsi	contains pcb
 #
-SYMBOL(__entry)
-	mov %ss, %ax
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %fs
-	# Do not set %gs, it contains descriptor that can see TLS
+# Jump to program entry point
+SYMBOL(entry_point_jmp)
+	# use standard amd32 prologue not to confuse anybody
+	push %rbp
+	movq %rsp, %rbp
 	
-#ifndef PROCESSOR_i486
-	# Detect the mechanism used for making syscalls
-	movl $(INTEL_CPUID_STANDARD), %eax
-	cpuid
-	bt $(INTEL_SEP), %edx
-	jnc 0f
-		leal __syscall_fast_func, %eax
-		movl $__syscall_fast, (%eax)
-	0:
-#endif
+	# pcb must be passed in %rdi, use %rdx as a scratch register
+	mov %rdi, %rdx
+	mov %rsi, %rdi
 	
-	#
-	# Create the first stack frame.
-	#
-	pushl $0
-	pushl $0
-	movl %esp, %ebp
-	
-	# Pass the PCB pointer to __main as the first argument
-	pushl %edi
-	call __main
+	# jump to entry point
+	jmp *%rdx

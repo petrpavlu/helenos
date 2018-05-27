@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 Jiri Svoboda
+# Copyright (c) 2006 Jakub Jermar
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,24 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.globl entry_point_jmp
+#include <abi/asmtool.h>
 
-## void entry_point_jmp(void *entry_point, void *pcb);
+.text
+
+## User-space thread entry point for all but the first threads.
 #
-# Jump to program entry point
-entry_point_jmp:
-	# Use standard ia32 prologue not to confuse anybody
-	push %ebp
-	movl %esp, %ebp
+#
+SYMBOL_BEGIN(__thread_entry)
+	#
+	# Create the first stack frame.
+	#
+	pushq $0
+	pushq $0
+	movq %rsp, %rbp
 	
-	# %eax := entry_point
-	movl 0x8(%ebp), %eax
-	
-	# %edi := pcb
-	# pcb is passed to the entry point in %edi
-	mov 0xc(%ebp), %edi
-	
-	# Save a tiny bit of stack space
-	pop %ebp
-	
-	jmp *%eax
+	#
+	# RAX contains address of uarg
+	#
+	movq %rax, %rdi
+	call __thread_main
+SYMBOL_END(__thread_entry)

@@ -41,6 +41,7 @@
 #ifdef CONFIG_RTLD
 
 #include <rtld/module.h>
+#include <rtld/rtld.h>
 #include <rtld/symbol.h>
 
 void *dlopen(const char *path, int flag)
@@ -55,10 +56,10 @@ void *dlopen(const char *path, int flag)
 	printf("dlopen(\"%s\", %d)\n", path, flag);
 
 	printf("module_find('%s')\n", path);
-	m = module_find(path);
+	m = module_find(runtime_env, path);
 	if (m == NULL) {
 		printf("NULL. module_load('%s')\n", path);
-		m = module_load(path);
+		m = module_load(runtime_env, path);
 		printf("module_load_deps(m)\n");
 		module_load_deps(m);
 		/* Now relocate. */
@@ -80,7 +81,7 @@ void *dlsym(void *mod, const char *sym_name)
 	module_t *sm;
 
 	printf("dlsym(0x%lx, \"%s\")\n", (long)mod, sym_name);
-	sd = symbol_bfs_find(sym_name, (module_t *) mod, &sm);
+	sd = symbol_bfs_find(sym_name, (module_t *) mod, ssf_none, &sm);
 	if (sd != NULL) {
 		return symbol_get_addr(sd, sm);
 	}

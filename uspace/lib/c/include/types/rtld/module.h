@@ -32,25 +32,34 @@
 /** @file
  */
 
-#ifndef LIBC_RTLD_SYMBOL_H_
-#define LIBC_RTLD_SYMBOL_H_
+#ifndef LIBC_TYPES_RTLD_MODULE_H_
+#define LIBC_TYPES_RTLD_MODULE_H_
 
-#include <elf/elf.h>
-#include <rtld/rtld.h>
+#include <adt/list.h>
+#include <sys/types.h>
 
-/** Symbol search flags */
-typedef enum {
-	/** No flags */
-	ssf_none = 0,
-	/** Do not search tree root */
-	ssf_noroot = 0x1
-} symbol_search_flags_t;
+typedef struct module {
+	dyn_info_t dyn;
+	size_t bias;
 
-extern elf_symbol_t *symbol_bfs_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern elf_symbol_t *symbol_def_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern void *symbol_get_addr(elf_symbol_t *, module_t *);
+	/** Containing rtld */
+	struct rtld *rtld;
+	/** Array of pointers to directly dependent modules */
+	struct module **deps;
+	/** Number of fields in deps */
+	size_t n_deps;
+
+	/** True iff relocations have already been processed in this module. */
+	bool relocated;
+
+	/** Link to list of all modules in runtime environment */
+	link_t modules_link;
+
+	/** Link to BFS queue. Only used when doing a BFS of the module graph */
+	link_t queue_link;
+	/** Tag for modules already processed during a BFS */
+	bool bfs_tag;
+} module_t;
 
 #endif
 

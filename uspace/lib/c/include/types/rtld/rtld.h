@@ -32,25 +32,27 @@
 /** @file
  */
 
-#ifndef LIBC_RTLD_SYMBOL_H_
-#define LIBC_RTLD_SYMBOL_H_
+#ifndef LIBC_TYPES_RTLD_RTLD_H_
+#define LIBC_TYPES_RTLD_RTLD_H_
 
-#include <elf/elf.h>
-#include <rtld/rtld.h>
+#include <adt/list.h>
+#include <elf/elf_mod.h>
+#include <sys/types.h>
 
-/** Symbol search flags */
-typedef enum {
-	/** No flags */
-	ssf_none = 0,
-	/** Do not search tree root */
-	ssf_noroot = 0x1
-} symbol_search_flags_t;
+#include <types/rtld/module.h>
 
-extern elf_symbol_t *symbol_bfs_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern elf_symbol_t *symbol_def_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern void *symbol_get_addr(elf_symbol_t *, module_t *);
+typedef struct rtld {
+	elf_dyn_t *rtld_dynamic;
+	module_t rtld;
+
+	module_t *program;
+
+	/** List of all loaded modules including rtld and the program */
+	list_t modules;
+
+	/** Temporary hack to place each module at different address. */
+	uintptr_t next_bias;
+} rtld_t;
 
 #endif
 

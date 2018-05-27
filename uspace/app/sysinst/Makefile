@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Ondrej Palkovsky
+# Copyright (c) 2014 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,20 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.section .init, "ax"
+USPACE_PREFIX = ../..
+LIBS = \
+    $(LIBBLOCK_PREFIX)/libblock.a \
+    $(LIBFDISK_PREFIX)/libfdisk.a \
 
-.org 0
+EXTRA_CFLAGS = \
+    -I$(LIBBLOCK_PREFIX) \
+    -I$(LIBFDISK_PREFIX)/include \
+    -Iinclude
 
-.globl __entry
+BINARY = sysinst
 
-## User-space task entry point
-#
-# %rdi contains the PCB pointer
-#
-__entry:
-	#
-	# Create the first stack frame.
-	#
-	pushq $0
-	pushq $0
-	movq %rsp, %rbp
-	
-	# %rdi was deliberately chosen as the first argument is also in %rdi
-	# Pass PCB pointer to __main (no operation)
-	call __main
+SOURCES = \
+	futil.c \
+	sysinst.c
+
+include $(USPACE_PREFIX)/Makefile.common

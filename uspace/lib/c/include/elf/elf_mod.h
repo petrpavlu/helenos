@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2006 Sergey Bondari
  * Copyright (c) 2008 Jiri Svoboda
  * All rights reserved.
  *
@@ -26,31 +27,72 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup generic
  * @{
  */
 /** @file
+ * @brief ELF loader structures and public functions.
  */
 
-#ifndef LIBC_RTLD_SYMBOL_H_
-#define LIBC_RTLD_SYMBOL_H_
+#ifndef ELF_MOD_H_
+#define ELF_MOD_H_
 
 #include <elf/elf.h>
-#include <rtld/rtld.h>
+#include <sys/types.h>
+#include <loader/pcb.h>
 
-/** Symbol search flags */
+/**
+ * ELF error return codes
+ */
+#define EE_OK			0	/* No error */
+#define EE_INVALID		1	/* Invalid ELF image */
+#define EE_MEMORY		2	/* Cannot allocate address space */
+#define EE_INCOMPATIBLE		3	/* ELF image is not compatible with current architecture */
+#define EE_UNSUPPORTED		4	/* Non-supported ELF (e.g. dynamic ELFs) */
+#define EE_LOADER		5	/* The image is actually a program loader. */
+#define EE_IRRECOVERABLE	6
+
 typedef enum {
-	/** No flags */
-	ssf_none = 0,
-	/** Do not search tree root */
-	ssf_noroot = 0x1
-} symbol_search_flags_t;
+	/** Leave all segments in RW access mode. */
+	ELDF_RW = 1
+} eld_flags_t;
 
-extern elf_symbol_t *symbol_bfs_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern elf_symbol_t *symbol_def_find(const char *, module_t *,
-    symbol_search_flags_t, module_t **);
-extern void *symbol_get_addr(elf_symbol_t *, module_t *);
+/**
+ * Some data extracted from the headers are stored here
+ */
+typedef struct {
+	/** Entry point */
+	entry_point_t entry;
+
+	/** ELF interpreter name or NULL if statically-linked */
+	const char *interp;
+
+	/** Pointer to the dynamic section */
+	void *dynamic;
+} elf_finfo_t;
+
+/**
+ * Holds information about an ELF binary being loaded.
+ */
+typedef struct {
+	/** Filedescriptor of the file from which we are loading */
+	int fd;
+
+	/** Difference between run-time addresses and link-time addresses */
+	uintptr_t bias;
+
+	/** Flags passed to the ELF loader. */
+	eld_flags_t flags;
+
+	/** A copy of the ELF file header */
+	elf_header_t *header;
+
+	/** Store extracted info here */
+	elf_finfo_t *info;
+} elf_ld_t;
+
+extern const char *elf_error(unsigned int);
+extern int elf_load_file(const char *, size_t, eld_flags_t, elf_finfo_t *);
 
 #endif
 
