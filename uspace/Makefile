@@ -144,6 +144,7 @@ DIRS = \
 	drv/char/pl011 \
 	drv/char/pl050 \
 	drv/char/ps2mouse \
+	drv/char/atkbd \
 	drv/char/sttykbd \
 	drv/char/xtkbd \
 	drv/test/test1 \
