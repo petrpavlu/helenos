@@ -134,12 +134,6 @@ void arch_post_cpu_init(void)
 	/* REVISIT */
 }
 
-/** Set thread-local storage pointer. Not used on ARM64. */
-sysarg_t sys_tls_set(uintptr_t addr)
-{
-	return EOK;
-}
-
 /** Change processor mode.
  *
  * @param kernel_uarg Userspace settings (entry point, stack, ...).
