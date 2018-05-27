@@ -123,7 +123,7 @@ handler_\i:
 #endif
 
 	/* Save current state. */
-	.word 0xd10463ff /* sub sp, sp, #ISTATE_SIZE */ /* 0x00 */
+	sub sp, sp, #ISTATE_SIZE                /* 0x00 */
 	stp x0, x1, [sp, #ISTATE_OFFSET_X0]     /* 0x04 */
 	stp x2, x3, [sp, #ISTATE_OFFSET_X2]     /* 0x08 */
 	stp x4, x5, [sp, #ISTATE_OFFSET_X4]     /* 0x0c */
@@ -182,7 +182,7 @@ exc_restore_end:
 	ldp x26, x27, [sp, #ISTATE_OFFSET_X26]
 	ldp x28, x29, [sp, #ISTATE_OFFSET_X28]
 	ldr x30, [sp, #ISTATE_OFFSET_X30]
-	.word 0x910463ff /* add sp, sp, #ISTATE_SIZE */
+	add sp, sp, #ISTATE_SIZE
 	eret
 
 .align 11

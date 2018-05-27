@@ -59,29 +59,29 @@ kernel_image_start:
 	/* Prepare the level 0 page table. */
 	adrp x2, lower_page_table_level0
 	lsr x3, x20, #PTL0_VA_SHIFT
-	.word 0x92402063 /* and x3, x3, #PTL0_VA_MASK */
-	.word 0x8b030c42 /* add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT */
+	and x3, x3, #PTL0_VA_MASK
+	add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT
 	mov x3, #( \
 	    1 << PTE_ACCESS_SHIFT | \
 	    PTE_L012_TYPE_TABLE << PTE_TYPE_SHIFT | \
 	    1 << PTE_PRESENT_SHIFT)
 	adrp x4, lower_page_table_level1
 	lsr x4, x4, #FRAME_WIDTH
-	.word 0xaa043063 /* orr x3, x3, x4, lsl #PTE_NEXT_LEVEL_ADDRESS_SHIFT */
+	orr x3, x3, x4, lsl #PTE_NEXT_LEVEL_ADDRESS_SHIFT
 	str x3, [x2]
 
 	/* Prepare the level 1 page table. */
 	adrp x2, lower_page_table_level1
 	lsr x3, x20, #PTL1_VA_SHIFT
-	.word 0x92402063 /* and x3, x3, #PTL1_VA_MASK */
-	.word 0x8b030c42 /* add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT */
+	and x3, x3, #PTL1_VA_MASK
+	add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT
 	mov x3, #( \
 	    1 << PTE_ACCESS_SHIFT | \
 	    MAIR_EL1_DEVICE_MEMORY_INDEX << PTE_ATTR_INDEX_SHIFT | \
 	    PTE_L012_TYPE_BLOCK << PTE_TYPE_SHIFT | \
 	    1 << PTE_PRESENT_SHIFT)
 	lsr x4, x20, #FRAME_WIDTH
-	.word 0xaa043063 /* orr x3, x3, x4, lsl #PTE_OUTPUT_ADDRESS_SHIFT */
+	orr x3, x3, x4, lsl #PTE_OUTPUT_ADDRESS_SHIFT
 	str x3, [x2]
 
 	/*
@@ -95,29 +95,29 @@ kernel_image_start:
 	/* Prepare the level 0 page table. */
 	adrp x2, upper_page_table_level0
 	lsr x3, x21, #PTL0_VA_SHIFT
-	.word 0x92402063 /* and x3, x3, #PTL0_VA_MASK */
-	.word 0x8b030c42 /* add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT */
+	and x3, x3, #PTL0_VA_MASK
+	add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT
 	mov x3, #( \
 	    1 << PTE_ACCESS_SHIFT | \
 	    PTE_L012_TYPE_TABLE << PTE_TYPE_SHIFT | \
 	    1 << PTE_PRESENT_SHIFT)
 	adrp x4, upper_page_table_level1
 	lsr x4, x4, #FRAME_WIDTH
-	.word 0xaa043063 /* orr x3, x3, x4, lsl #PTE_NEXT_LEVEL_ADDRESS_SHIFT */
+	orr x3, x3, x4, lsl #PTE_NEXT_LEVEL_ADDRESS_SHIFT
 	str x3, [x2]
 
 	/* Prepare the level 1 page table. */
 	adrp x2, upper_page_table_level1
 	lsr x3, x21, #PTL1_VA_SHIFT
-	.word 0x92402063 /* and x3, x3, #PTL1_VA_MASK */
-	.word 0x8b030c42 /* add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT */
+	and x3, x3, #PTL1_VA_MASK
+	add x2, x2, x3, lsl #PTL_ENTRY_SIZE_SHIFT
 	mov x3, #( \
 	    1 << PTE_ACCESS_SHIFT | \
 	    MAIR_EL1_DEVICE_MEMORY_INDEX << PTE_ATTR_INDEX_SHIFT | \
 	    PTE_L012_TYPE_BLOCK << PTE_TYPE_SHIFT | \
 	    1 << PTE_PRESENT_SHIFT)
 	lsr x4, x20, #FRAME_WIDTH
-	.word 0xaa043063 /* orr x3, x3, x4, lsl #PTE_OUTPUT_ADDRESS_SHIFT */
+	orr x3, x3, x4, lsl #PTE_OUTPUT_ADDRESS_SHIFT
 	str x3, [x2]
 
 	/* Make sure there are not any stale TLB entries. */
@@ -259,9 +259,9 @@ kernel_image_start:
 	mov x29, sp
 
 	/* PA2KA(bootinfo). */
-	.word 0xcb140021 /* sub x1, x1, x20 */
+	sub x1, x1, x20
 	ldr x2, =KM_ARM64_IDENTITY_START
-	.word 0x8b020021 /* add x1, x1, x2 */
+	add x1, x1, x2
 
 	bl arch_pre_main
 	bl main_bsp
