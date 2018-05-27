@@ -26,7 +26,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-.globl entry_point_jmp
+#include <abi/asmtool.h>
 
 ## void entry_point_jmp(void *entry_point, void *pcb);
 #
@@ -34,7 +34,7 @@
 # x1	contains pcb
 #
 # Jump to program entry point
-entry_point_jmp:
+SYMBOL(entry_point_jmp)
 	# Pass PCB in x0 to the entry point and jump to it.
 	mov x2, x0
 	mov x0, x1

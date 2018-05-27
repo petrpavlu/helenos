@@ -26,6 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <abi/asmtool.h>
 #include <arch/boot/boot.h>
 #include <arch/mm/km.h>
 #include <arch/mm/page.h>
@@ -33,10 +34,7 @@
 
 .section K_TEXT_START, "ax"
 
-.global kernel_image_start
-.global physmem_base
-
-kernel_image_start:
+SYMBOL(kernel_image_start)
 	/*
 	 * Parameters:
 	 * x0 is kernel entry point (kernel_image_start).
@@ -281,7 +279,7 @@ upper_page_table_level1:
 
 	/* Physical memory base address. */
 .align 12
-physmem_base:
+SYMBOL(physmem_base)
 	.quad 0
 
 	/* Temporary stack. */

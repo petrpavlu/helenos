@@ -26,15 +26,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <abi/asmtool.h>
 #include <arch/arch.h>
 #include <arch/regutils.h>
 
 .section BOOTSTRAP
-
-.global start
-.global jump_to_kernel
-.global get_bdata_start
-.global get_bdata_end
 
 .global bdata_start
 .global bdata_end
@@ -109,7 +105,7 @@ sec_table:
 	 *   IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE */
 	.long 0xe0000020
 
-start:
+SYMBOL(start)
 	/*
 	 * Parameters:
 	 * x0 is the image handle.
@@ -128,17 +124,19 @@ start:
 	adr x2, msdos_stub
 	b bootstrap
 
-get_bdata_start:
+FUNCTION_BEGIN(get_bdata_start)
 	adrp x0, bdata_start
 	add x0, x0, #:lo12:bdata_start
 	ret
+FUNCTION_END(get_bdata_start)
 
-get_bdata_end:
+FUNCTION_BEGIN(get_bdata_end)
 	adrp x0, bdata_end
 	add x0, x0, #:lo12:bdata_end
 	ret
+FUNCTION_END(get_bdata_end)
 
-jump_to_kernel:
+FUNCTION_BEGIN(jump_to_kernel)
 	/*
 	 * Parameters:
 	 * x0 is kernel entry point.
@@ -152,3 +150,4 @@ jump_to_kernel:
 	isb
 
 	br x0
+FUNCTION_END(jump_to_kernel)

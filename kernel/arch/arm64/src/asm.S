@@ -26,20 +26,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <abi/asmtool.h>
 #include <arch/exception.h>
 #include <arch/istate_struct.h>
 
 .text
 
-.global memcpy_from_uspace
-.global memcpy_to_uspace
-.global memcpy_from_uspace_failover_address
-.global memcpy_to_uspace_failover_address
-.global early_putchar
-.global exc_vector
-
-memcpy_from_uspace:
-memcpy_to_uspace:
+FUNCTION_BEGIN(memcpy_from_uspace)
+FUNCTION_BEGIN(memcpy_to_uspace)
 	/* Simple (un-optimized) memcpy(). */
 	cbz x2, 2f
 	mov x3, x0
@@ -51,15 +45,20 @@ memcpy_to_uspace:
 
 2:
 	ret
+FUNCTION_END(memcpy_from_uspace)
+FUNCTION_END(memcpy_to_uspace)
 
-memcpy_from_uspace_failover_address:
-memcpy_to_uspace_failover_address:
+FUNCTION_BEGIN(memcpy_from_uspace_failover_address)
+FUNCTION_BEGIN(memcpy_to_uspace_failover_address)
 	mov x0, #0
 	ret
+FUNCTION_END(memcpy_from_uspace_failover_address)
+FUNCTION_END(memcpy_to_uspace_failover_address)
 
 /* REVISIT */
-early_putchar:
+FUNCTION_BEGIN(early_putchar)
 	ret
+FUNCTION_END(early_putchar)
 
 /* Exception vector. */
 .macro handler i
@@ -186,7 +185,7 @@ exc_restore_end:
 	eret
 
 .align 11
-exc_vector:
+SYMBOL(exc_vector)
 .org exc_vector + 0x000
 	handler EXC_CURRENT_EL_SP_SEL0_SYNCH
 .org exc_vector + 0x080

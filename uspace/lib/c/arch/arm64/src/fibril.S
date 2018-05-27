@@ -26,12 +26,11 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+#include <abi/asmtool.h>
+
 .text
 
-.global context_save
-.global context_restore
-
-context_save:
+FUNCTION_BEGIN(context_save)
 	# Save callee-saved registers into context_t pointed by x0.
 	mov x1, sp
 	stp x1, x30, [x0], #16
@@ -47,8 +46,9 @@ context_save:
 	# Return 1.
 	mov x0, #1
 	ret
+FUNCTION_END(context_save)
 
-context_restore:
+FUNCTION_BEGIN(context_restore)
 	# Restore callee-saved registers from context_t pointed by x0.
 	ldp x1, x30, [x0], #16
 	mov sp, x1
@@ -64,3 +64,4 @@ context_restore:
 	# Return 0.
 	mov x0, #0
 	ret
+FUNCTION_END(context_restore)
