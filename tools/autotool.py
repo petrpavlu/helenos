@@ -929,9 +929,9 @@ def main():
 		
 		# Platform-specific utilities
 		if (config['BARCH'] in ('amd64', 'arm64', 'ia32', 'ppc32', 'sparc64')):
-			common['GENISOIMAGE'] = check_app_alternatives(["xorriso", "mkisofs", "genisoimage"], ["--version"], "ISO 9660 creation utility", "usually part of genisoimage")
+			common['GENISOIMAGE'] = check_app_alternatives(["mkisofs", "genisoimage", "xorriso"], ["--version"], "ISO 9660 creation utility", "usually part of genisoimage")
 			if common['GENISOIMAGE'] == 'xorriso':
-			    common['GENISOIMAGE'] += ' -as genisoimage'
+				common['GENISOIMAGE'] += ' -as genisoimage'
 		
 		probe = probe_compiler(common,
 			[
