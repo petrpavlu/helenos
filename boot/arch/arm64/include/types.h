@@ -44,6 +44,8 @@ typedef uint64_t sysarg_t;
 
 typedef uint64_t pfn_t;
 
+typedef int64_t ptrdiff_t;
+
 #endif
 
 /** @}
