@@ -37,6 +37,10 @@
 #ifndef KERN_sparc64_ARCH_H_
 #define KERN_sparc64_ARCH_H_
 
+#ifndef __ASM__
+#include <arch.h>
+#endif
+
 #include <arch/boot/boot.h>
 
 #if defined (SUN4U)
@@ -51,6 +55,8 @@
 #define NWINDOWS  8  /** Number of register window sets. */
 
 #ifndef __ASM__
+
+extern arch_ops_t *sparc64_ops;
 
 extern void sparc64_pre_main(bootinfo_t *);
 

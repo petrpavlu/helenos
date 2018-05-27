@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Jakub Jermar
+ * Copyright (c) 2016 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,60 +26,68 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup sparc64proc
+/** @addtogroup sparc64
  * @{
  */
 /** @file
  */
 
-#include <proc/thread.h>
-#include <arch/proc/thread.h>
+#include <arch.h>
+#include <arch/arch.h>
 #include <mm/slab.h>
+#include <config.h>
+#include <arch/proc/thread.h>
 #include <arch/trap/regwin.h>
-#include <align.h>
+#include <debug.h>
 
-slab_cache_t *uwb_cache = NULL;
+#define SPARC64_ARCH_OP(op)	ARCH_STRUCT_OP(sparc64_ops, op)
 
-void thr_constructor_arch(thread_t *t)
+static void sparc64_pre_mm_init(void);
+static void sparc64_post_mm_init(void);
+static void sparc64_post_cpu_init(void);
+static void sparc64_pre_smp_init(void);
+static void sparc64_post_smp_init(void);
+
+arch_ops_t sparc64_arch_ops = {
+	.pre_mm_init = sparc64_pre_mm_init,
+	.post_mm_init = sparc64_post_mm_init,
+	.post_cpu_init = sparc64_post_cpu_init,
+	.pre_smp_init = sparc64_pre_smp_init,
+	.post_smp_init = sparc64_post_smp_init,
+};
+
+arch_ops_t *arch_ops = &sparc64_arch_ops;
+
+void sparc64_pre_mm_init(void)
 {
-	/*
-	 * Allocate memory for uspace_window_buffer.
-	 */
-	t->arch.uspace_window_buffer = NULL;
+	SPARC64_ARCH_OP(pre_mm_init);
 }
 
-void thr_destructor_arch(thread_t *t)
+void sparc64_post_mm_init(void)
 {
-	if (t->arch.uspace_window_buffer) {
-		uintptr_t uw_buf = (uintptr_t) t->arch.uspace_window_buffer;
-		/*
-		 * Mind the possible alignment of the userspace window buffer
-		 * belonging to a killed thread.
-		 */
-		slab_free(uwb_cache, (uint8_t *) ALIGN_DOWN(uw_buf,
-		    UWB_ALIGNMENT));
+	SPARC64_ARCH_OP(post_mm_init);
+
+	if (config.cpu_active == 1) {
+		STATIC_ASSERT(UWB_SIZE <= UWB_ALIGNMENT);
+		/* Create slab cache for the userspace window buffers */
+		uwb_cache = slab_cache_create("uwb_cache", UWB_SIZE,
+		    UWB_ALIGNMENT, NULL, NULL, SLAB_CACHE_MAGDEFERRED);
 	}
 }
 
-void thread_create_arch(thread_t *t)
+void sparc64_post_cpu_init(void)
 {
-	if ((t->uspace) && (!t->arch.uspace_window_buffer))
-		{
-		/*
-		 * The thread needs userspace window buffer and the object
-		 * returned from the slab allocator doesn't have any.
-		 */
-		t->arch.uspace_window_buffer = slab_alloc(uwb_cache, 0);
-	} else {
-		uintptr_t uw_buf = (uintptr_t) t->arch.uspace_window_buffer;
+	SPARC64_ARCH_OP(post_cpu_init);
+}
 
-		/*
-		 * Mind the possible alignment of the userspace window buffer
-		 * belonging to a killed thread.
-		 */
-		t->arch.uspace_window_buffer = (uint8_t *) ALIGN_DOWN(uw_buf,
-		    UWB_ALIGNMENT);
-	}
+void sparc64_pre_smp_init(void)
+{
+	SPARC64_ARCH_OP(pre_smp_init);
+}
+
+void sparc64_post_smp_init(void)
+{
+	SPARC64_ARCH_OP(post_smp_init);
 }
 
 /** @}
