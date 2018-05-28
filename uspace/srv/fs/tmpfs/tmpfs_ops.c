@@ -47,7 +47,7 @@
 #include <str.h>
 #include <stdio.h>
 #include <assert.h>
-#include <sys/types.h>
+#include <stddef.h>
 #include <adt/hash_table.h>
 #include <adt/hash.h>
 #include <as.h>
@@ -426,8 +426,8 @@ static int tmpfs_fsprobe(service_id_t service_id, vfs_fs_probe_info_t *info)
 }
 
 static int
-tmpfs_mounted(service_id_t service_id, const char *opts,
-    fs_index_t *index, aoff64_t *size, unsigned *lnkcnt)
+tmpfs_mounted(service_id_t service_id, const char *opts, fs_index_t *index,
+    aoff64_t *size)
 {
 	fs_node_t *rootfn;
 	int rc;
@@ -453,7 +453,6 @@ tmpfs_mounted(service_id_t service_id, const char *opts,
 
 	*index = rootp->index;
 	*size = rootp->size;
-	*lnkcnt = rootp->lnkcnt;
 
 	return EOK;
 }

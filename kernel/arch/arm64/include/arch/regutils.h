@@ -40,7 +40,7 @@
 #if defined(KERNEL) || defined(BOOT)
 #include <typedefs.h>
 #else
-#include <sys/types.h>
+#include <stdint.h>
 #endif
 
 #define SPECIAL_REG_GEN_READ(name) \

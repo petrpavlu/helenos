@@ -36,7 +36,7 @@
 #include <ddi.h>
 #include <errno.h>
 #include <macros.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sysinfo.h>
 #include <stdio.h>
 

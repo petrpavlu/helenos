@@ -34,7 +34,7 @@
  */
 
 #include <stacktrace.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #define FRAME_OFFSET_FP_PREV  0

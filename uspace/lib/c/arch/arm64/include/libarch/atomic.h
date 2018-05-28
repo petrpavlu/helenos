@@ -40,7 +40,7 @@
 
 #include <atomicdflt.h>
 #include <stdbool.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 /** Atomic addition.
  *

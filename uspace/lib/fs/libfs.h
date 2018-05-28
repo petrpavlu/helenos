@@ -37,14 +37,13 @@
 #define LIBFS_LIBFS_H_
 
 #include <ipc/vfs.h>
-#include <stdint.h>
+#include <sys/types.h>
 #include <async.h>
 #include <loc.h>
 
 typedef struct {
 	int (* fsprobe)(service_id_t, vfs_fs_probe_info_t *);
-	int (* mounted)(service_id_t, const char *, fs_index_t *, aoff64_t *,
-	    unsigned *);
+	int (* mounted)(service_id_t, const char *, fs_index_t *, aoff64_t *);
 	int (* unmounted)(service_id_t);
 	int (* read)(service_id_t, fs_index_t, aoff64_t, size_t *);
 	int (* write)(service_id_t, fs_index_t, aoff64_t, size_t *,

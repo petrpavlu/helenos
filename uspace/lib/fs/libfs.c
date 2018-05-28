@@ -122,12 +122,10 @@ static void vfs_out_mounted(ipc_callid_t rid, ipc_call_t *req)
 
 	fs_index_t index;
 	aoff64_t size;
-	unsigned lnkcnt;
-	rc = vfs_out_ops->mounted(service_id, opts, &index, &size, &lnkcnt);
+	rc = vfs_out_ops->mounted(service_id, opts, &index, &size);
 
 	if (rc == EOK)
-		async_answer_4(rid, EOK, index, LOWER32(size), UPPER32(size),
-		    lnkcnt);
+		async_answer_3(rid, EOK, index, LOWER32(size), UPPER32(size));
 	else
 		async_answer_0(rid, rc);
 
@@ -701,14 +699,14 @@ void libfs_lookup(libfs_ops_t *ops, fs_handle_t fs_handle, ipc_callid_t rid,
 out1:
 	if (!cur) {
 		async_answer_5(rid, fs_handle, service_id, ops->index_get(par),
-		    last_next, -1, true);
+		    (ops->is_directory(par) << 16) | last_next,
+		    LOWER32(ops->size_get(par)), UPPER32(ops->size_get(par)));
 		goto out;
 	}
 	
-	aoff64_t size = ops->size_get(cur);
 	async_answer_5(rid, fs_handle, service_id, ops->index_get(cur),
-	    (ops->is_directory(cur) << 16) | last, LOWER32(size),
-	    UPPER32(size));
+	    (ops->is_directory(cur) << 16) | last, LOWER32(ops->size_get(cur)),
+	    UPPER32(ops->size_get(cur)));
 	
 out:
 	if (par)

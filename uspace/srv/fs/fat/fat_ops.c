@@ -498,22 +498,17 @@ int fat_create_node(fs_node_t **rfn, service_id_t service_id, int flags)
 			return rc;
 		/* populate the new cluster with unused dentries */
 		rc = fat_zero_cluster(bs, service_id, mcl);
-		if (rc != EOK) {
-			(void) fat_free_clusters(bs, service_id, mcl);
-			return rc;
-		}
+		if (rc != EOK)
+			goto error;
 	}
 
 	rc = fat_node_get_new(&nodep);
-	if (rc != EOK) {
-		(void) fat_free_clusters(bs, service_id, mcl);
-		return rc;
-	}
+	if (rc != EOK)
+		goto error;
 	rc = fat_idx_get_new(&idxp, service_id);
 	if (rc != EOK) {
-		(void) fat_free_clusters(bs, service_id, mcl);	
 		(void) fat_node_put(FS_NODE(nodep));
-		return rc;
+		goto error;
 	}
 	/* idxp->lock held */
 	if (flags & L_DIRECTORY) {
@@ -535,6 +530,11 @@ int fat_create_node(fs_node_t **rfn, service_id_t service_id, int flags)
 	fibril_mutex_unlock(&idxp->lock);
 	*rfn = FS_NODE(nodep);
 	return EOK;
+
+error:
+	if (flags & L_DIRECTORY)
+		(void) fat_free_clusters(bs, service_id, mcl);
+	return rc;		
 }
 
 int fat_destroy_node(fs_node_t *fn)
@@ -836,9 +836,9 @@ bool fat_is_file(fs_node_t *fn)
 	return FAT_NODE(fn)->type == FAT_FILE;
 }
 
-service_id_t fat_service_get(fs_node_t *node)
+service_id_t fat_service_get(fs_node_t *fn)
 {
-	return 0;
+	return FAT_NODE(fn)->idx->service_id;
 }
 
 int fat_size_block(service_id_t service_id, uint32_t *size)
@@ -955,7 +955,7 @@ static int fat_fsprobe(service_id_t service_id, vfs_fs_probe_info_t *info)
 
 static int
 fat_mounted(service_id_t service_id, const char *opts, fs_index_t *index,
-    aoff64_t *size, unsigned *linkcnt)
+    aoff64_t *size)
 {
 	enum cache_mode cmode = CACHE_MODE_WB;
 	fat_bs_t *bs;
@@ -1104,7 +1104,6 @@ fat_mounted(service_id_t service_id, const char *opts, fs_index_t *index,
 
 	*index = ridxp->index;
 	*size = rootp->size;
-	*linkcnt = rootp->lnkcnt;
 
 	return EOK;
 }

@@ -37,7 +37,8 @@
 #define LIBC_STR_H_
 
 #include <mem.h>
-#include <sys/types.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #define U_SPECIAL  '?'
@@ -96,7 +97,7 @@ extern char *wstr_to_astr(const wchar_t *src);
 extern void str_to_wstr(wchar_t *dest, size_t dlen, const char *src);
 extern wchar_t *str_to_awstr(const char *src);
 extern int utf16_to_str(char *dest, size_t size, const uint16_t *src);
-extern int str_to_utf16(uint16_t *dest, size_t size, const char *src);
+extern int str_to_utf16(uint16_t *dest, size_t dlen, const char *src);
 
 extern char *str_chr(const char *str, wchar_t ch);
 extern char *str_rchr(const char *str, wchar_t ch);
@@ -129,8 +130,6 @@ extern void bin_order_suffix(const uint64_t, uint64_t *, const char **, bool);
 /*
  * TODO: Get rid of this.
  */
-
-extern int stricmp(const char *, const char *);
 
 extern long int strtol(const char *, char **, int);
 extern unsigned long strtoul(const char *, char **, int);

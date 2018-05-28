@@ -39,7 +39,7 @@
 #ifdef KERNEL
 #include <typedefs.h>
 #else
-#include <sys/types.h>
+#include <stdint.h>
 #endif
 
 #define CS_ENTER_BARRIER()  asm volatile ("" ::: "memory")
