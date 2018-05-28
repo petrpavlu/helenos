@@ -122,7 +122,7 @@ check_dependecies() {
 }
 
 check_error() {
-	if [ "$1" -ne "0" ]; then
+	if [ "$1" -ne "0" ] ; then
 		echo
 		echo "Script failed: $2"
 		
@@ -163,6 +163,7 @@ show_usage() {
 	echo " riscv64    RISC-V 64b"
 	echo " sparc64    SPARC V9"
 	echo " all        build all targets"
+	echo " essential  build only targets currently needed for HelenOS development"
 	echo " parallel   same as 'all', but all in parallel"
 	echo " 2-way      same as 'all', but 2-way parallel"
 	echo
@@ -235,7 +236,7 @@ download_fetch() {
 	FILE="$2"
 	CHECKSUM="$3"
 	
-	if [ ! -f "${FILE}" ]; then
+	if [ ! -f "${FILE}" ] ; then
 		change_title "Downloading ${FILE}"
 		wget -c "${SOURCE}${FILE}"
 		check_error $? "Error downloading ${FILE}."
@@ -247,7 +248,7 @@ download_fetch() {
 source_check() {
 	FILE="$1"
 	
-	if [ ! -f "${FILE}" ]; then
+	if [ ! -f "${FILE}" ] ; then
 		echo
 		echo "File ${FILE} not found."
 		
@@ -258,7 +259,7 @@ source_check() {
 cleanup_dir() {
 	DIR="$1"
 	
-	if [ -d "${DIR}" ]; then
+	if [ -d "${DIR}" ] ; then
 		change_title "Removing ${DIR}"
 		echo " >>> Removing ${DIR}"
 		rm -fr "${DIR}"
@@ -412,9 +413,10 @@ set_target_from_platform() {
 
 build_target() {
 	PLATFORM="$1"
+	
 	# This sets the *_TARGET variables
 	set_target_from_platform "$PLATFORM"
-	if $USE_HELENOS_TARGET; then
+	if $USE_HELENOS_TARGET ; then
 		TARGET="$HELENOS_TARGET"
 	else
 		TARGET="$LINUX_TARGET"
@@ -433,7 +435,7 @@ build_target() {
 		CROSS_HELENOS_PREFIX="/usr/local/cross-helenos"
 	fi
 	
-	if $USE_HELENOS_TARGET; then
+	if $USE_HELENOS_TARGET ; then
 		PREFIX="${CROSS_HELENOS_PREFIX}/${PLATFORM}"
 	else
 		PREFIX="${CROSS_PREFIX}/${PLATFORM}"
@@ -462,13 +464,13 @@ build_target() {
 	unpack_tarball "${BASEDIR}/${GDB}" "GDB"
 	
 	echo ">>> Applying patches"
-	for p in $BINUTILS_PATCHES; do
+	for p in $BINUTILS_PATCHES ; do
 		patch_sources "${SRCDIR}/${p}" 0 "binutils"
 	done
-	for p in $GCC_PATCHES; do
+	for p in $GCC_PATCHES ; do
 		patch_sources "${SRCDIR}/${p}" 0 "GCC"
 	done
-	for p in $GDB_PATCHES; do
+	for p in $GDB_PATCHES ; do
 		patch_sources "${SRCDIR}/${p}" 0 "GDB"
 	done
 	
@@ -488,7 +490,7 @@ build_target() {
 	check_error $? "Error compiling binutils."
 	
 	change_title "binutils: install (${PLATFORM})"
-	if $REAL_INSTALL; then
+	if $REAL_INSTALL ; then
 		make install
 	else
 		make install "DESTDIR=${INSTALL_DIR}"
@@ -515,7 +517,7 @@ build_target() {
 	check_error $? "Error compiling GCC."
 	
 	change_title "GCC: install (${PLATFORM})"
-	if $REAL_INSTALL; then
+	if $REAL_INSTALL ; then
 		PATH="${PATH}:${PREFIX}/bin" make install-gcc
 	else
 		PATH="${PATH}:${INSTALL_DIR}/${PREFIX}/bin" make install-gcc "DESTDIR=${INSTALL_DIR}"
@@ -560,7 +562,7 @@ build_target() {
 	echo ">>> Cross-compiler for ${TARGET} installed."
 }
 
-while [ "$#" -gt 1 ]; do
+while [ "$#" -gt 1 ] ; do
 	case "$1" in
 		--no-install)
 			REAL_INSTALL=false
@@ -576,7 +578,7 @@ while [ "$#" -gt 1 ]; do
 	esac
 done
 
-if [ "$#" -lt "1" ]; then
+if [ "$#" -lt "1" ] ; then
 	show_usage
 fi
 
@@ -599,6 +601,17 @@ case "$1" in
 		build_target "ppc32"
 		build_target "ppc64"
 		build_target "riscv64"
+		build_target "sparc64"
+		;;
+	"essential")
+		prepare
+		build_target "amd64"
+		build_target "arm32"
+		build_target "ia32"
+		build_target "ia64"
+		build_target "mips32"
+		build_target "mips32eb"
+		build_target "ppc32"
 		build_target "sparc64"
 		;;
 	"parallel")
