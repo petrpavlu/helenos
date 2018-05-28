@@ -30,15 +30,22 @@
  * @{
  */
 /**
- * @file  libext4_directory_index.c
+ * @file  directory_index.c
  * @brief Ext4 directory index operations.
  */
 
 #include <byteorder.h>
 #include <errno.h>
-#include <malloc.h>
+#include <mem.h>
 #include <sort.h>
-#include "libext4.h"
+#include <stdlib.h>
+#include <str.h>
+#include "ext4/directory.h"
+#include "ext4/directory_index.h"
+#include "ext4/filesystem.h"
+#include "ext4/hash.h"
+#include "ext4/inode.h"
+#include "ext4/superblock.h"
 
 /** Type entry to pass to sorting algorithm.
  *

@@ -41,6 +41,7 @@
 #include <loc.h>
 #include <stdlib.h>
 #include <str.h>
+#include <vfs/vfs.h>
 
 #include "empty.h"
 #include "mkfs.h"
@@ -50,6 +51,20 @@
 static int vol_part_add_locked(service_id_t);
 static LIST_INITIALIZE(vol_parts); /* of vol_part_t */
 static FIBRIL_MUTEX_INITIALIZE(vol_parts_lock);
+
+struct fsname_type {
+	const char *name;
+	vol_fstype_t fstype;
+};
+
+static struct fsname_type fstab[] = {
+	{ "ext4fs", fs_ext4 },
+	{ "cdfs", fs_cdfs },
+	{ "exfat", fs_exfat },
+	{ "fat", fs_fat },
+	{ "mfs", fs_minix },
+	{ NULL, 0 }
+};
 
 /** Check for new partitions */
 static int vol_part_check_new(void)
@@ -131,6 +146,8 @@ static int vol_part_add_locked(service_id_t sid)
 {
 	vol_part_t *part;
 	bool empty;
+	vfs_fs_probe_info_t info;
+	struct fsname_type *fst;
 	int rc;
 
 	assert(fibril_mutex_is_locked(&vol_parts_lock));
@@ -153,15 +170,34 @@ static int vol_part_add_locked(service_id_t sid)
 		goto error;
 	}
 
-	log_msg(LOG_DEFAULT, LVL_DEBUG, "Probe partition %s", part->svc_name);
-	rc = volsrv_part_is_empty(sid, &empty);
-	if (rc != EOK) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed determining if "
-		    "partition is empty.");
-		goto error;
+	log_msg(LOG_DEFAULT, LVL_NOTE, "Probe partition %s", part->svc_name);
+
+	fst = &fstab[0];
+	while (fst->name != NULL) {
+		rc = vfs_fsprobe(fst->name, sid, &info);
+		if (rc == EOK)
+			break;
+		++fst;
 	}
 
-	part->pcnt = empty ? vpc_empty : vpc_unknown;
+	if (fst->name != NULL) {
+		log_msg(LOG_DEFAULT, LVL_NOTE, "Found %s", fst->name);
+		part->pcnt = vpc_fs;
+		part->fstype = fst->fstype;
+	} else {
+		log_msg(LOG_DEFAULT, LVL_NOTE, "Partition does not contain "
+		    "a recognized file system.");
+
+		rc = volsrv_part_is_empty(sid, &empty);
+		if (rc != EOK) {
+			log_msg(LOG_DEFAULT, LVL_ERROR, "Failed determining if "
+			    "partition is empty.");
+			goto error;
+		}
+
+		part->pcnt = empty ? vpc_empty : vpc_unknown;
+	}
+
 	list_append(&part->lparts, &vol_parts);
 
 	log_msg(LOG_DEFAULT, LVL_NOTE, "Added partition %zu", part->svc_id);

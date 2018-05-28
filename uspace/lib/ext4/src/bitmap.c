@@ -30,14 +30,14 @@
  * @{
  */
 /**
- * @file  libext4_bitmap.c
+ * @file  bitmap.c
  * @brief Ext4 bitmap operations.
  */
 
 #include <errno.h>
 #include <block.h>
 #include <sys/types.h>
-#include "libext4.h"
+#include "ext4/bitmap.h"
 
 /** Set bit in bitmap to 0 (free).
  *

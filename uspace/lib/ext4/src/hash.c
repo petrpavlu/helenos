@@ -29,21 +29,20 @@
 /** @addtogroup libext4
  * @{
  */
+/**
+ * @file  hash.c
+ * @brief Hashing algorithms for ext4 HTree.
+ */
 
-#ifndef LIBEXT4_LIBEXT4_BALLOC_H_
-#define LIBEXT4_LIBEXT4_BALLOC_H_
+#include <errno.h>
+#include "ext4/hash.h"
 
-#include <sys/types.h>
-#include "libext4_types.h"
-
-extern int ext4_balloc_free_block(ext4_inode_ref_t *, uint32_t);
-extern int ext4_balloc_free_blocks(ext4_inode_ref_t *, uint32_t, uint32_t);
-extern uint32_t ext4_balloc_get_first_data_block_in_group(ext4_superblock_t *,
-    ext4_block_group_ref_t *);
-extern int ext4_balloc_alloc_block(ext4_inode_ref_t *, uint32_t *);
-extern int ext4_balloc_try_alloc_block(ext4_inode_ref_t *, uint32_t, bool *);
-
-#endif
+int ext4_hash_string(ext4_hash_info_t *hinfo, int len, const char *name)
+{
+	// TODO
+	hinfo->hash = 0;
+	return ENOTSUP;
+}
 
 /**
  * @}

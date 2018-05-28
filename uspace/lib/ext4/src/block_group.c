@@ -31,12 +31,13 @@
  * @{
  */
 /**
- * @file  libext4_block_group.c
+ * @file  block_group.c
  * @brief Ext4 block group structure operations.
  */
 
 #include <byteorder.h>
-#include "libext4.h"
+#include "ext4/block_group.h"
+#include "ext4/superblock.h"
 
 /** Get address of block with data block bitmap.
  *

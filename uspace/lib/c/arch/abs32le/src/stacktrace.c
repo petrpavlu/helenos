@@ -30,8 +30,8 @@
  */
 
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stacktrace.h>
 
 bool stacktrace_fp_valid(stacktrace_t *st, uintptr_t fp)

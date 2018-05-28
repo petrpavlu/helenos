@@ -30,13 +30,19 @@
  * @{
  */
 /**
- * @file  libext4_balloc.c
+ * @file  balloc.c
  * @brief Physical block allocator.
  */
 
 #include <errno.h>
 #include <sys/types.h>
-#include "libext4.h"
+#include "ext4/balloc.h"
+#include "ext4/bitmap.h"
+#include "ext4/block_group.h"
+#include "ext4/filesystem.h"
+#include "ext4/inode.h"
+#include "ext4/superblock.h"
+#include "ext4/types.h"
 
 /** Free block.
  *

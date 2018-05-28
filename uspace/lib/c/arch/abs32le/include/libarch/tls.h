@@ -38,7 +38,7 @@
 #define CONFIG_TLS_VARIANT_2
 
 #include <libc.h>
-#include <unistd.h>
+#include <stddef.h>
 
 typedef struct {
 	void *self;

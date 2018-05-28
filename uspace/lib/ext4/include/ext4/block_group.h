@@ -31,12 +31,12 @@
  * @{
  */
 
-#ifndef LIBEXT4_LIBEXT4_BLOCK_GROUP_H_
-#define LIBEXT4_LIBEXT4_BLOCK_GROUP_H_
+#ifndef LIBEXT4_BLOCK_GROUP_H_
+#define LIBEXT4_BLOCK_GROUP_H_
 
 #include <block.h>
 #include <sys/types.h>
-#include "libext4_types.h"
+#include "types.h"
 
 extern uint64_t ext4_block_group_get_block_bitmap(ext4_block_group_t *,
     ext4_superblock_t *);

@@ -26,21 +26,17 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup fs
+/** @addtogroup libext4
  * @{
  */
 
-#ifndef EXT4FS_EXT4FS_H_
-#define EXT4FS_EXT4FS_H_
+#ifndef LIBEXT4_IALLOC_H_
+#define LIBEXT4_IALLOC_H_
 
-#include <libfs.h>
+#include "ext4/types.h"
 
-extern vfs_out_ops_t ext4fs_ops;
-extern libfs_ops_t ext4fs_libfs_ops;
-
-extern int ext4fs_global_init(void);
-extern int ext4fs_global_fini(void);
-
+extern int ext4_ialloc_free_inode(ext4_filesystem_t *, uint32_t, bool);
+extern int ext4_ialloc_alloc_inode(ext4_filesystem_t *, uint32_t *, bool);
 
 #endif
 

@@ -30,19 +30,13 @@
  * @{
  */
 
-#ifndef LIBEXT4_LIBEXT4_BITMAP_H_
-#define LIBEXT4_LIBEXT4_BITMAP_H_
+#ifndef LIBEXT4_HASH_H_
+#define LIBEXT4_HASH_H_
 
 #include <sys/types.h>
+#include "ext4/types.h"
 
-extern void ext4_bitmap_free_bit(uint8_t *, uint32_t);
-extern void ext4_bitmap_free_bits(uint8_t *, uint32_t, uint32_t);
-extern void ext4_bitmap_set_bit(uint8_t *, uint32_t);
-extern bool ext4_bitmap_is_free_bit(uint8_t *, uint32_t);
-extern int ext4_bitmap_find_free_byte_and_set_bit(uint8_t *, uint32_t,
-    uint32_t *, uint32_t);
-extern int ext4_bitmap_find_free_bit_and_set(uint8_t *, uint32_t, uint32_t *,
-    uint32_t);
+extern int ext4_hash_string(ext4_hash_info_t *, int, const char *);
 
 #endif
 

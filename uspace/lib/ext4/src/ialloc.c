@@ -30,13 +30,17 @@
  * @{
  */
 /**
- * @file  libext4_ialloc.c
+ * @file  ialloc.c
  * @brief I-node (de)allocation operations.
  */
 
 #include <errno.h>
-#include <time.h>
-#include "libext4.h"
+#include <stdbool.h>
+#include "ext4/bitmap.h"
+#include "ext4/block_group.h"
+#include "ext4/filesystem.h"
+#include "ext4/ialloc.h"
+#include "ext4/superblock.h"
 
 
 /** Convert i-node number to relative index in block group.

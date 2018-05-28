@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Martin Decky
+ * Copyright (c) 2012 Frantisek Princ
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup libext4
  * @{
  */
-/** @file
- */
 
-#ifndef LIBC_UNISTD_H_
-#define LIBC_UNISTD_H_
+#ifndef LIBEXT4_OPS_H_
+#define LIBEXT4_OPS_H_
 
-#include <sys/types.h>
-#include <time.h>
-#include <libarch/config.h>
+#include <libfs.h>
+#include "ext4/fstypes.h"
 
-#ifndef NULL
-	#define NULL  ((void *) 0)
-#endif
+extern vfs_out_ops_t ext4_ops;
+extern libfs_ops_t ext4_libfs_ops;
 
-#define getpagesize()  (PAGE_SIZE)
+extern int ext4_global_init(void);
+extern int ext4_global_fini(void);
 
-extern int usleep(useconds_t);
-extern unsigned int sleep(unsigned int);
+extern int ext4_node_get_core(fs_node_t **, ext4_instance_t *, fs_index_t);
+extern int ext4_node_put(fs_node_t *);
+
 
 #endif
 
-/** @}
+/**
+ * @}
  */

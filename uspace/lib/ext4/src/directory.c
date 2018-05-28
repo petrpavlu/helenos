@@ -31,14 +31,20 @@
  * @{
  */
 /**
- * @file  libext4_directory.c
+ * @file  directory.c
  * @brief Ext4 directory structure operations.
  */
 
 #include <byteorder.h>
 #include <errno.h>
 #include <malloc.h>
-#include "libext4.h"
+#include <mem.h>
+#include <str.h>
+#include "ext4/directory.h"
+#include "ext4/directory_index.h"
+#include "ext4/filesystem.h"
+#include "ext4/inode.h"
+#include "ext4/superblock.h"
 
 /** Get i-node number from directory entry.
  *

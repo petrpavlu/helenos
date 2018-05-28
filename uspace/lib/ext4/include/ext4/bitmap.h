@@ -30,26 +30,19 @@
  * @{
  */
 
-#ifndef LIBEXT4_LIBEXT4_H_
-#define LIBEXT4_LIBEXT4_H_
+#ifndef LIBEXT4_BITMAP_H_
+#define LIBEXT4_BITMAP_H_
 
-#include "libext4_balloc.h"
-#include "libext4_bitmap.h"
-#include "libext4_block_group.h"
-#include "libext4_directory.h"
-#include "libext4_directory_index.h"
-#include "libext4_extent.h"
-#include "libext4_filesystem.h"
-#include "libext4_hash.h"
-#include "libext4_ialloc.h"
-#include "libext4_inode.h"
-#include "libext4_superblock.h"
-#include "libext4_types.h"
+#include <sys/types.h>
 
-#include <stdio.h>
-#define EXT4FS_DBG(format, ...) \
-	printf("ext4fs: %s: " format "\n", \
-	    __FUNCTION__, ##__VA_ARGS__) \
+extern void ext4_bitmap_free_bit(uint8_t *, uint32_t);
+extern void ext4_bitmap_free_bits(uint8_t *, uint32_t, uint32_t);
+extern void ext4_bitmap_set_bit(uint8_t *, uint32_t);
+extern bool ext4_bitmap_is_free_bit(uint8_t *, uint32_t);
+extern int ext4_bitmap_find_free_byte_and_set_bit(uint8_t *, uint32_t,
+    uint32_t *, uint32_t);
+extern int ext4_bitmap_find_free_bit_and_set(uint8_t *, uint32_t, uint32_t *,
+    uint32_t);
 
 #endif
 

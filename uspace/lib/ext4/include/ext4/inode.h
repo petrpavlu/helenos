@@ -31,12 +31,12 @@
  * @{
  */
 
-#ifndef LIBEXT4_LIBEXT4_INODE_H_
-#define LIBEXT4_LIBEXT4_INODE_H_
+#ifndef LIBEXT4_INODE_H_
+#define LIBEXT4_INODE_H_
 
 #include <block.h>
 #include <sys/types.h>
-#include "libext4_types.h"
+#include "ext4/types.h"
 
 extern uint32_t ext4_inode_get_mode(ext4_superblock_t *, ext4_inode_t *);
 extern void ext4_inode_set_mode(ext4_superblock_t *, ext4_inode_t *, uint32_t);
