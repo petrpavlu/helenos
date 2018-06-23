@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Sergey Bondari
+ * Copyright (c) 2006 Josef Cejka
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,15 +32,18 @@
 /** @file
  */
 
-#ifndef KERN_SORT_H_
-#define KERN_SORT_H_
+#ifndef KERN_STDDEF_H_
+#define KERN_STDDEF_H_
 
-#include <typedefs.h>
+#include <arch/types.h>
 
-typedef int (* sort_cmp_t)(void *, void *, void *);
+typedef native_t ptrdiff_t;
 
-extern bool gsort(void *, size_t, size_t, sort_cmp_t, void *);
-extern bool qsort(void *, size_t, size_t, sort_cmp_t, void *);
+#ifndef NULL
+	#define NULL  ((void *) 0)
+#endif
+
+#define offsetof(type,member) ((size_t) &(((type *) 0)->member))
 
 #endif
 

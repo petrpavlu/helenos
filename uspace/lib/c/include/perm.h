@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Sergey Bondari
+ * Copyright (c) 2006 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,16 +32,13 @@
 /** @file
  */
 
-#ifndef LIBC_SORT_H_
-#define LIBC_SORT_H_
+#ifndef LIB_PERM_H_
+#define LIB_PERM_H_
 
-#include <stddef.h>
-#include <stdbool.h>
+#include <task.h>
 
-typedef int (* sort_cmp_t)(void *, void *, void *);
-
-extern bool gsort(void *, size_t, size_t, sort_cmp_t, void *);
-extern bool qsort(void *, size_t, size_t, sort_cmp_t, void *);
+extern int perm_grant(task_id_t, unsigned int);
+extern int perm_revoke(task_id_t, unsigned int);
 
 #endif
 

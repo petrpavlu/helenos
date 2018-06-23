@@ -29,8 +29,6 @@
 /** @file
  */
 
-#include "../ctl/serial.h"
-#include "pl011.h"
 #include <align.h>
 #include <as.h>
 #include <ddi.h>
@@ -39,6 +37,8 @@
 #include <stdint.h>
 #include <sysinfo.h>
 #include <stdio.h>
+#include "../ctl/serial.h"
+#include "pl011.h"
 
 /** Simplified PrimeCell UART (PL011) register map. */
 typedef struct {

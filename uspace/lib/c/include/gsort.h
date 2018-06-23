@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Jakub Jermar
+ * Copyright (c) 2005 Sergey Bondari
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,67 +26,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup generic
+/** @addtogroup libc
  * @{
  */
 /** @file
  */
 
-/**
- * @file
- * @brief Capabilities definitions.
- *
- * Capabilities represent virtual rights that entitle their
- * holder to perform certain security sensitive tasks.
- *
- * Each task can have arbitrary combination of the capabilities
- * defined in this file. Therefore, they are required to be powers
- * of two.
- */
+#ifndef LIBC_SORT_H_
+#define LIBC_SORT_H_
 
-#ifndef __CAP_H__
-#define __CAP_H__
+#include <stddef.h>
+#include <stdbool.h>
 
-#include <typedefs.h>
+typedef int (* sort_cmp_t)(void *, void *, void *);
 
-/**
- * CAP_CAP allows its holder to grant/revoke arbitrary
- * privilege to/from other tasks.
- */
-#define CAP_CAP  (1 << 0)
-
-/**
- * CAP_MEM_MANAGER allows its holder to map physical memory
- * to other tasks.
- */
-#define CAP_MEM_MANAGER  (1 << 1)
-
-/**
- * CAP_IO_MANAGER allows its holder to access I/O space
- * to other tasks.
- */
-#define CAP_IO_MANAGER  (1 << 2)
-
-/**
- * CAP_IRQ_REG entitles its holder to register IRQ handlers.
- */
-#define CAP_IRQ_REG  (1 << 3)
-
-typedef uint32_t cap_t;
-
-#ifdef __32_BITS__
-
-extern sysarg_t sys_cap_grant(sysarg64_t *, cap_t);
-extern sysarg_t sys_cap_revoke(sysarg64_t *, cap_t);
-
-#endif  /* __32_BITS__ */
-
-#ifdef __64_BITS__
-
-extern sysarg_t sys_cap_grant(sysarg_t, cap_t);
-extern sysarg_t sys_cap_revoke(sysarg_t, cap_t);
-
-#endif  /* __64_BITS__ */
+extern bool gsort(void *, size_t, size_t, sort_cmp_t, void *);
 
 #endif
 

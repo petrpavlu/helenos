@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Jakub Jermar
+ * Copyright (c) 2006 Martin Decky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup generic
  * @{
  */
-/**
- * @file
- * @brief	This file contains rwlock API and provides its fake
- *		implementation based on futexes.
+/** @file
  */
 
-#ifndef LIBC_RWLOCK_H_
-#define LIBC_RWLOCK_H_
+#ifndef KERN_BOOL_H_
+#define KERN_BOOL_H_
 
-#include <atomic.h>
-#include <futex.h>
+#include <abi/bool.h>
 
-typedef atomic_t rwlock_t;
+#define false  0
+#define true   1
 
-#define RWLOCK_INITIALIZE(rwlock)	\
-    rwlock_t rwlock = FUTEX_INITIALIZER
-
-#define rwlock_initialize(rwlock)	futex_initialize((rwlock), 1)
-#define rwlock_read_lock(rwlock)	futex_lock((rwlock))
-#define rwlock_write_lock(rwlock)	futex_lock((rwlock))
-#define rwlock_read_unlock(rwlock)	futex_unlock((rwlock))
-#define rwlock_write_unlock(rwlock)	futex_unlock((rwlock))
+#define __bool_true_false_are_defined 1
 
 #endif
 

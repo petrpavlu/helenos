@@ -44,8 +44,7 @@
 #include <config.h>
 #include <log.h>
 #include <mm/slab.h>
-#include <memstr.h>
-#include <sort.h>
+#include <gsort.h>
 
 struct acpi_madt *acpi_madt = NULL;
 

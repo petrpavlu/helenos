@@ -37,6 +37,7 @@
 
 #ifndef __ASM__
 
+#include <stdbool.h>
 #include <typedefs.h>
 
 #define KM_ARM64_IDENTITY_START  UINT64_C(0xffffffff80000000)

@@ -239,9 +239,9 @@ GENERIC_SOURCES = \
 	generic/src/mm/backend_user.c \
 	generic/src/mm/slab.c \
 	generic/src/lib/func.c \
-	generic/src/lib/memstr.c \
+	generic/src/lib/mem.c \
 	generic/src/lib/memfnc.c \
-	generic/src/lib/sort.c \
+	generic/src/lib/gsort.c \
 	generic/src/lib/str.c \
 	generic/src/lib/elf.c \
 	generic/src/lib/ra.c \
@@ -285,7 +285,7 @@ GENERIC_SOURCES = \
 	generic/src/ipc/ipcrsc.c \
 	generic/src/ipc/irq.c \
 	generic/src/ipc/event.c \
-	generic/src/security/cap.c \
+	generic/src/security/perm.c \
 	generic/src/sysinfo/sysinfo.c \
 	generic/src/sysinfo/stats.c
 

@@ -26,58 +26,67 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup generic
  * @{
  */
+/** @file
+ */
+
 /**
- * @file  cap.c
- * @brief Functions to grant/revoke capabilities to/from a task.
+ * @file
+ * @brief Task permissions definitions.
+ *
+ * Permissions represent virtual rights that entitle their
+ * holder to perform certain security sensitive tasks.
+ *
+ * Each task can have arbitrary combination of the permissions 
+ * defined in this file. Therefore, they are required to be powers
+ * of two.
  */
 
-#include <cap.h>
-#include <task.h>
-#include <libc.h>
-#include <libarch/types.h>
+#ifndef __PERM_H__
+#define __PERM_H__
 
-/** Grant capabilities to a task.
- *
- * @param id   Destination task ID.
- * @param caps Capabilities to grant.
- *
- * @return Zero on success or a value from @ref errno.h on failure.
- *
+#include <typedefs.h>
+
+/**
+ * PERM_PERM allows its holder to grant/revoke arbitrary permission to/from
+ * other tasks.
  */
-int cap_grant(task_id_t id, unsigned int caps)
-{
+#define PERM_PERM        (1 << 0)
+
+/**
+ * PERM_MEM_MANAGER allows its holder to map physical memory to other tasks.
+ */
+#define PERM_MEM_MANAGER (1 << 1)
+
+/**
+ * PERM_IO_MANAGER allows its holder to access I/O space to other tasks.
+ */
+#define PERM_IO_MANAGER  (1 << 2)
+
+/**
+ * PERM_IRQ_REG entitles its holder to register IRQ handlers.
+ */
+#define PERM_IRQ_REG     (1 << 3)
+
+typedef uint32_t perm_t;
+
 #ifdef __32_BITS__
-	sysarg64_t arg = (sysarg64_t) id;
-	return __SYSCALL2(SYS_CAP_GRANT, (sysarg_t) &arg, (sysarg_t) caps);
-#endif
-	
-#ifdef __64_BITS__
-	return __SYSCALL2(SYS_CAP_GRANT, (sysarg_t) id, (sysarg_t) caps);
-#endif
-}
 
-/** Revoke capabilities from a task.
- *
- * @param id   Destination task ID.
- * @param caps Capabilities to revoke.
- *
- * @return Zero on success or a value from @ref errno.h on failure.
- *
- */
-int cap_revoke(task_id_t id, unsigned int caps)
-{
-#ifdef __32_BITS__
-	sysarg64_t arg = (sysarg64_t) id;
-	return __SYSCALL2(SYS_CAP_REVOKE, (sysarg_t) &arg, (sysarg_t) caps);
-#endif
-	
+extern sysarg_t sys_perm_grant(sysarg64_t *, perm_t);
+extern sysarg_t sys_perm_revoke(sysarg64_t *, perm_t);
+
+#endif  /* __32_BITS__ */
+
 #ifdef __64_BITS__
-	return __SYSCALL2(SYS_CAP_REVOKE, (sysarg_t) id, (sysarg_t) caps);
+
+extern sysarg_t sys_perm_grant(sysarg_t, perm_t);
+extern sysarg_t sys_perm_revoke(sysarg_t, perm_t);
+
+#endif  /* __64_BITS__ */
+
 #endif
-}
 
 /** @}
  */

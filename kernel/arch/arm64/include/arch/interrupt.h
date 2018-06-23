@@ -36,6 +36,7 @@
 #ifndef KERN_arm64_INTERRUPT_H_
 #define KERN_arm64_INTERRUPT_H_
 
+#include <stdbool.h>
 #include <arch/istate.h>
 
 /** Size of exception table. */

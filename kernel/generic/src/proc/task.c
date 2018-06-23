@@ -55,7 +55,6 @@
 #include <errno.h>
 #include <func.h>
 #include <str.h>
-#include <memstr.h>
 #include <syscall/copy.h>
 #include <macros.h>
 
@@ -202,7 +201,7 @@ task_t *task_create(as_t *as, const char *name)
 	str_cpy(task->name, TASK_NAME_BUFLEN, name);
 	
 	task->container = CONTAINER;
-	task->capabilities = 0;
+	task->perms = 0;
 	task->ucycles = 0;
 	task->kcycles = 0;
 

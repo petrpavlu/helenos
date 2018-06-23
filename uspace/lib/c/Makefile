@@ -62,7 +62,7 @@ GENERIC_SOURCES = \
 	generic/as.c \
 	generic/bd.c \
 	generic/bd_srv.c \
-	generic/cap.c \
+	generic/perm.c \
 	generic/clipboard.c \
 	generic/config.c \
 	generic/corecfg.c \
@@ -80,6 +80,7 @@ GENERIC_SOURCES = \
 	generic/elf/elf_mod.c \
 	generic/event.c \
 	generic/errno.c \
+	generic/gsort.c \
 	generic/loc.c \
 	generic/mem.c \
 	generic/str.c \
@@ -145,6 +146,7 @@ GENERIC_SOURCES = \
 	generic/adt/odict.c \
 	generic/adt/prodcons.c \
 	generic/time.c \
+	generic/stdio.c \
 	generic/stdlib.c \
 	generic/udebug.c \
 	generic/vfs/canonify.c \
@@ -156,10 +158,10 @@ GENERIC_SOURCES = \
 	generic/stack.c \
 	generic/stacktrace.c \
 	generic/arg_parse.c \
-	generic/sort.c \
 	generic/stats.c \
 	generic/assert.c \
 	generic/pio_trace.c \
+	generic/qsort.c \
 	generic/uuid.c \
 	generic/vbd.c \
 	generic/vol.c
@@ -179,6 +181,7 @@ SOURCES = \
 TEST_SOURCES = \
 	test/main.c \
 	test/odict.c \
+	test/qsort.c \
 	test/sprintf.c \
 	test/str.c
 
