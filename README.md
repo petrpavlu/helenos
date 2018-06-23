@@ -1,12 +1,19 @@
+# HelenOS-AArch64
+
 HelenOS-AArch64 is a project that adds support for the 64-bit ARM architecture
 (AArch64) to [HelenOS][HelenOS].
 
-To build and run this port, follow [the official HelenOS build
-instructions][CompilingFromSource] with these deviations:
+The port was primarily created for learning purposes by its author. The system
+is able to boot under [QEMU][QEMU] and allows to execute user commands entered
+on the console, but otherwise provides limited functionality and has not been
+extensively tested.
+
+To build and run this port, follow [the official build instructions for
+HelenOS][CompilingFromSource] with these deviations:
 
 1. Get the sources
 
-        $ git clone git@bitbucket.org:setupji/helenos-aarch64.git
+        $ git clone https://github.com/setupji/helenos.git
 
 2. Build a supported cross-compiler
 
@@ -24,8 +31,8 @@ instructions][CompilingFromSource] with these deviations:
 
         $ ./tools/ew.py
 
-Please send bug reports and any questions about the project to
-<setup@dagobah.cz>.
+Bug reports and any questions about the port can be sent to <setup@dagobah.cz>.
 
 [HelenOS]: http://www.helenos.org/
+[QEMU]: https://www.qemu.org/
 [CompilingFromSource]: http://www.helenos.org/wiki/UsersGuide/CompilingFromSource
