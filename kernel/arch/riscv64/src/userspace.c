@@ -33,7 +33,6 @@
  */
 
 #include <abi/proc/uarg.h>
-#include <stdbool.h>
 #include <userspace.h>
 
 void userspace(uspace_arg_t *kernel_uarg)

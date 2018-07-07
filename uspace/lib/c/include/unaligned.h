@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Jiri Svoboda
+ * Copyright (c) 2017 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,21 @@
 /** @addtogroup libc
  * @{
  */
-/** @file Formatting macros for types from sys/types.h and some other
- * system types.
+/** @file
  */
 
-#ifndef LIBC_SYS_TYPEFMT_H_
-#define LIBC_SYS_TYPEFMT_H_
+#ifndef LIBC_UNALIGNED_H_
+#define LIBC_UNALIGNED_H_
 
-#include <inttypes.h>
+#include <stdint.h>
 
-/* off64_t, aoff64_t */
-#define PRIdOFF64 PRId64
-#define PRIuOFF64 PRIu64
-#define PRIxOFF64 PRIx64
-#define PRIXOFF64 PRIX64
+typedef int16_t unaligned_int16_t __attribute__ ((aligned(1)));
+typedef int32_t unaligned_int32_t __attribute__ ((aligned(1)));
+typedef int64_t unaligned_int64_t __attribute__ ((aligned(1)));
+
+typedef uint16_t unaligned_uint16_t __attribute__ ((aligned(1)));
+typedef uint32_t unaligned_uint32_t __attribute__ ((aligned(1)));
+typedef uint64_t unaligned_uint64_t __attribute__ ((aligned(1)));
 
 #endif
 

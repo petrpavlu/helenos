@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Josef Cejka
+ * Copyright (c) 2006 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,32 +26,17 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup libcamd64
  * @{
  */
 /** @file
  */
 
-#ifndef LIBC_SYS_TYPES_H_
-#define LIBC_SYS_TYPES_H_
+#ifndef LIBC_riscv64_CONFIG_H_
+#define LIBC_riscv64_CONFIG_H_
 
-#include <libarch/types.h>
-
-/** Relative offset */
-typedef int64_t off64_t;
-
-/** Absolute offset */
-typedef uint64_t aoff64_t;
-
-typedef uint32_t fourcc_t;
-
-typedef int16_t unaligned_int16_t __attribute__ ((aligned(1)));
-typedef int32_t unaligned_int32_t __attribute__ ((aligned(1)));
-typedef int64_t unaligned_int64_t __attribute__ ((aligned(1)));
-
-typedef uint16_t unaligned_uint16_t __attribute__ ((aligned(1)));
-typedef uint32_t unaligned_uint32_t __attribute__ ((aligned(1)));
-typedef uint64_t unaligned_uint64_t __attribute__ ((aligned(1)));
+#define PAGE_WIDTH  12
+#define PAGE_SIZE   (1 << PAGE_WIDTH)
 
 #endif
 

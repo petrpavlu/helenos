@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Jiri Svoboda
+ * Copyright (c) 2017 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,44 +32,12 @@
 /** @file
  */
 
-#ifndef LIBC_BD_SRV_H_
-#define LIBC_BD_SRV_H_
+#ifndef LIBC_FOURCC_H_
+#define LIBC_FOURCC_H_
 
-#include <adt/list.h>
-#include <async.h>
-#include <fibril_synch.h>
-#include <stdbool.h>
-#include <offset.h>
+#include <stdint.h>
 
-typedef struct bd_ops bd_ops_t;
-
-/** Service setup (per sevice) */
-typedef struct {
-	bd_ops_t *ops;
-	void *sarg;
-} bd_srvs_t;
-
-/** Server structure (per client session) */
-typedef struct {
-	bd_srvs_t *srvs;
-	async_sess_t *client_sess;
-	void *carg;
-} bd_srv_t;
-
-struct bd_ops {
-	int (*open)(bd_srvs_t *, bd_srv_t *);
-	int (*close)(bd_srv_t *);
-	int (*read_blocks)(bd_srv_t *, aoff64_t, size_t, void *, size_t);
-	int (*read_toc)(bd_srv_t *, uint8_t, void *, size_t);
-	int (*sync_cache)(bd_srv_t *, aoff64_t, size_t);
-	int (*write_blocks)(bd_srv_t *, aoff64_t, size_t, const void *, size_t);
-	int (*get_block_size)(bd_srv_t *, size_t *);
-	int (*get_num_blocks)(bd_srv_t *, aoff64_t *);
-};
-
-extern void bd_srvs_init(bd_srvs_t *);
-
-extern int bd_conn(ipc_callid_t, ipc_call_t *, bd_srvs_t *);
+typedef uint32_t fourcc_t;
 
 #endif
 
