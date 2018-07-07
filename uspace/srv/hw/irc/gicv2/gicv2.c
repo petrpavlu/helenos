@@ -284,7 +284,7 @@ static int gicv2_init(void)
 	async_set_fallback_port_handler(icpic_connection, NULL);
 
 	/* Register itself as an IRC service. */
-	rc = service_register(SERVICE_IRC);
+	rc = ENOENT; /*service_register(SERVICE_IRC); FIXME */
 	if (rc != EOK) {
 		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed registering itself as "
 		    "an IRC service.");

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 Martin Decky
+# Copyright (c) 2014 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,13 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-USPACE_PREFIX = ../../../..
-BINARY = apic
+USPACE_PREFIX = ../../..
+LIBS = $(LIBDRV_PREFIX)/libdrv.a
+EXTRA_CFLAGS += -I$(LIBDRV_PREFIX)/include
+BINARY = icp-ic
 
 SOURCES = \
-	apic.c
+	icp-ic.c \
+	main.c
 
 include $(USPACE_PREFIX)/Makefile.common

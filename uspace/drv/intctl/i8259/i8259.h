@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Jakub Jermar
+ * Copyright (c) 2017 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libcipc
+/** @addtogroup genarch
  * @{
  */
-/**
- * @file  services.h
- * @brief List of all known services and their codes.
+/** @file
  */
 
-#ifndef LIBC_SERVICES_H_
-#define LIBC_SERVICES_H_
+#ifndef I8259_H_
+#define I8259_H_
 
-#include <abi/fourcc.h>
+#include <ddf/driver.h>
+#include <ddi.h>
+#include <stdint.h>
 
-typedef enum {
-	SERVICE_NONE       = 0,
-	SERVICE_LOADER     = FOURCC('l', 'o', 'a', 'd'),
-	SERVICE_VFS        = FOURCC('v', 'f', 's', ' '),
-	SERVICE_LOC        = FOURCC('l', 'o', 'c', ' '),
-	SERVICE_LOGGER     = FOURCC('l', 'o', 'g', 'g'),
-	SERVICE_DEVMAN     = FOURCC('d', 'e', 'v', 'n'),
-} service_t;
+typedef struct {
+	uintptr_t base0;
+	uintptr_t base1;
+} i8259_res_t;
 
-#define SERVICE_NAME_CLIPBOARD "clipboard"
-#define SERVICE_NAME_CORECFG  "corecfg"
-#define SERVICE_NAME_DHCP     "net/dhcp"
-#define SERVICE_NAME_DNSR     "net/dnsr"
-#define SERVICE_NAME_INET     "net/inet"
-#define SERVICE_NAME_NETCONF  "net/netconf"
-#define SERVICE_NAME_UDP      "net/udp"
-#define SERVICE_NAME_TCP      "net/tcp"
-#define SERVICE_NAME_VBD      "vbd"
-#define SERVICE_NAME_VOLSRV   "volsrv"
+/** IntegratorCP Interrupt Controller */
+typedef struct {
+	ioport8_t *regs0;
+	ioport8_t *regs1;
+	ddf_dev_t *dev;
+} i8259_t;
+
+extern int i8259_add(i8259_t *, i8259_res_t *);
+extern int i8259_remove(i8259_t *);
+extern int i8259_gone(i8259_t *);
 
 #endif
 

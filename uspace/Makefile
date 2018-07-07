@@ -134,9 +134,6 @@ DIRS = \
 	srv/hid/output \
 	srv/hid/remcons \
 	srv/hw/char/s3c24xx_uart \
-	srv/hw/irc/apic \
-	srv/hw/irc/i8259 \
-	srv/hw/irc/icp-ic \
 	srv/hw/irc/obio \
 	srv/hid/rfb \
 	drv/audio/hdaudio \
@@ -171,6 +168,9 @@ DIRS = \
 	drv/test/test3 \
 	drv/fb/amdm37x_dispc \
 	drv/fb/kfb \
+	drv/intctl/apic \
+	drv/intctl/i8259 \
+	drv/intctl/icp-ic \
 	drv/nic/ne2k \
 	drv/nic/e1k \
 	drv/nic/rtl8139 \
