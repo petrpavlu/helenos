@@ -42,7 +42,6 @@
 #include <types/label.h>
 #include <types/vol.h>
 #include <vbd.h>
-#include <vol.h>
 
 /** Capacity unit */
 typedef enum {
@@ -186,6 +185,8 @@ typedef struct fdisk_part {
 	aoff64_t nblocks;
 	/** Service ID */
 	service_id_t svc_id;
+	/** Volume label */
+	char *label;
 } fdisk_part_t;
 
 /** Specification of new partition */
@@ -196,6 +197,8 @@ typedef struct {
 	label_pkind_t pkind;
 	/** File system type */
 	vol_fstype_t fstype;
+	/** Volume label */
+	char *label;
 } fdisk_part_spec_t;
 
 /** Partition info */
@@ -208,6 +211,8 @@ typedef struct {
 	vol_part_cnt_t pcnt;
 	/** File system type */
 	vol_fstype_t fstype;
+	/** Volume label */
+	char *label;
 } fdisk_part_info_t;
 
 /** Free range iterator */
