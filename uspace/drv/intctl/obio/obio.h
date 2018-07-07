@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2004 Jakub Jermar
+ * Copyright (c) 2017 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup sync
+/** @addtogroup genarch
  * @{
  */
 /** @file
  */
 
-#ifndef KERN_MUTEX_H_
-#define KERN_MUTEX_H_
+#ifndef OBIO_H_
+#define OBIO_H_
 
-#include <stdbool.h>
+#include <ddf/driver.h>
+#include <ddi.h>
+#include <loc.h>
 #include <stdint.h>
-#include <synch/semaphore.h>
-#include <abi/synch.h>
-
-typedef enum {
-	MUTEX_PASSIVE,
-	MUTEX_RECURSIVE,
-	MUTEX_ACTIVE
-} mutex_type_t;
-
-struct thread;
 
 typedef struct {
-	mutex_type_t type;
-	semaphore_t sem;
-	struct thread *owner;
-	unsigned nesting;
-} mutex_t;
+	uintptr_t base;
+} obio_res_t;
 
-#define mutex_lock(mtx) \
-	_mutex_lock_timeout((mtx), SYNCH_NO_TIMEOUT, SYNCH_FLAGS_NONE)
+/** OBIO */
+typedef struct {
+	volatile uint64_t *regs;
+	uintptr_t phys_base;
+	ddf_dev_t *dev;
+} obio_t;
 
-#define mutex_trylock(mtx) \
-	_mutex_lock_timeout((mtx), SYNCH_NO_TIMEOUT, SYNCH_FLAGS_NON_BLOCKING)
-
-#define mutex_lock_timeout(mtx, usec) \
-	_mutex_lock_timeout((mtx), (usec), SYNCH_FLAGS_NON_BLOCKING)
-
-extern void mutex_initialize(mutex_t *, mutex_type_t);
-extern bool mutex_locked(mutex_t *);
-extern int _mutex_lock_timeout(mutex_t *, uint32_t, unsigned int);
-extern void mutex_unlock(mutex_t *);
+extern int obio_add(obio_t *, obio_res_t *);
+extern int obio_remove(obio_t *);
+extern int obio_gone(obio_t *);
 
 #endif
 

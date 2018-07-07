@@ -88,7 +88,7 @@ def main():
 	
 	archive = zipfile.ZipFile("%s.zip" % dest, "w", zipfile.ZIP_STORED)
 	
-	for i, src in enumerate(sorted(sys.argv[5:])):
+	for i, src in enumerate(sys.argv[5:]):
 		basename = os.path.basename(src)
 		plainname = os.path.splitext(basename)[0]
 		symbol = basename.replace(".", "_")
