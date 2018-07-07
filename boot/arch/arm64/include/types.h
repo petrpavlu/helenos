@@ -36,15 +36,7 @@
 #ifndef BOOT_arm64_TYPES_H
 #define BOOT_arm64_TYPES_H
 
-#include <arch/common.h>
-
-typedef uint64_t size_t;
-typedef uint64_t uintptr_t;
-typedef uint64_t sysarg_t;
-
-typedef uint64_t pfn_t;
-
-typedef int64_t ptrdiff_t;
+#include <_bits/all.h>
 
 #endif
 
