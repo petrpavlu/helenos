@@ -37,7 +37,7 @@
 
 #include <arch/asm.h>
 #include <genarch/drivers/gicv2/gicv2.h>
-#include <debug.h>
+#include <assert.h>
 
 /** Initialize GICv2 interrupt controller.
  *
@@ -87,9 +87,9 @@ void gicv2_inum_get(gicv2_t *irqc, unsigned *inum, unsigned *cpuid)
 /** Signal end of interrupt to the controller. */
 void gicv2_end(gicv2_t *irqc, unsigned inum, unsigned cpuid)
 {
-	ASSERT((inum & ~((unsigned) GICV2C_IAR_INTERRUPT_ID_MASK >>
+	assert((inum & ~((unsigned) GICV2C_IAR_INTERRUPT_ID_MASK >>
 	    GICV2C_IAR_INTERRUPT_ID_SHIFT)) == 0);
-	ASSERT((cpuid & ~((unsigned) GICV2C_IAR_CPUID_MASK >>
+	assert((cpuid & ~((unsigned) GICV2C_IAR_CPUID_MASK >>
 	    GICV2C_IAR_CPUID_SHIFT)) == 0);
 
 	uint32_t eoir = (inum << GICV2C_IAR_INTERRUPT_ID_SHIFT) |
@@ -100,7 +100,7 @@ void gicv2_end(gicv2_t *irqc, unsigned inum, unsigned cpuid)
 /** Enable specific interrupt. */
 void gicv2_enable(gicv2_t *irqc, unsigned inum)
 {
-	ASSERT(inum < irqc->inum_total);
+	assert(inum < irqc->inum_total);
 
 	pio_write_32(&irqc->distr->isenabler[inum / 32], 1 << (inum % 32));
 }
@@ -108,7 +108,7 @@ void gicv2_enable(gicv2_t *irqc, unsigned inum)
 /** Disable specific interrupt. */
 void gicv2_disable(gicv2_t *irqc, unsigned inum)
 {
-	ASSERT(inum < irqc->inum_total);
+	assert(inum < irqc->inum_total);
 
 	pio_write_32(&irqc->distr->icenabler[inum / 32], 1 << (inum % 32));
 }
