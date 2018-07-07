@@ -74,4 +74,4 @@ SOURCES = \
 	generic/src/version.c \
 	generic/src/vprintf.c
 
-PRE_DEPEND = $(COMPS).s $(COMPS).h $(COMPS)_desc.c
+PRE_DEPEND = $(COMPS).s $(COMPS).h $(COMPS)_desc.c $(COMPONENTS_DEFLATE)
