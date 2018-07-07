@@ -58,7 +58,10 @@ static async_sess_t *dev_sess;
 
 /** List of devices to try connecting to. */
 static const char *in_devs[] = {
-	"char/s3c24xx_uart"
+	/** S3C24xx UART - Openmoko debug console */
+	"char/s3c24xx_uart",
+	/** Ski console */
+	"devices/\\hw\\console\\a"
 };
 
 static const unsigned int num_devs = sizeof(in_devs) / sizeof(in_devs[0]);

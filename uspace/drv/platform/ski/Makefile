@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Martin Decky
+# Copyright (c) 2017 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,12 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-ifeq ($(CONFIG_FPU),y)
-	FLOATS=hard
-else
-	FLOATS=soft
-endif
+USPACE_PREFIX = ../../..
+LIBS = drv
+EXTRA_CFLAGS += -I$(LIBDRV_PREFIX)/include
+BINARY = ski
 
-COMMON_CFLAGS += -mcpu=powerpc -m$(FLOATS)-float -m32
-AFLAGS += -a32
-LFLAGS += --gc-sections
+SOURCES = \
+	ski.c
 
-ENDIANESS = BE
-
-BFD_NAME = elf32-powerpc
-BFD_ARCH = powerpc:common
+include $(USPACE_PREFIX)/Makefile.common

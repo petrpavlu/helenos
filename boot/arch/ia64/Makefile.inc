@@ -65,6 +65,7 @@ SOURCES += \
 	arch/$(BARCH)/src/ski.c
 endif
 
+ifeq ($(MACHINE),i460GX)
 RD_DRVS_ESSENTIAL += \
 	platform/pc \
 	bus/pci/pciintel \
@@ -87,5 +88,12 @@ RD_DRVS_NON_ESSENTIAL += \
 
 RD_DRV_CFG += \
 	bus/isa
+endif
+
+ifeq ($(MACHINE),ski)
+RD_DRVS_ESSENTIAL += \
+	char/ski-con \
+	platform/ski
+endif
 
 PRE_DEPEND = $(COMPS).s $(COMPS).h $(COMPS)_desc.c $(COMPONENTS_DEFLATE)

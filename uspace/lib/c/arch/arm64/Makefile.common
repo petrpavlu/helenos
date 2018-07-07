@@ -28,10 +28,6 @@
 
 GCC_CFLAGS += -fno-omit-frame-pointer
 
-# Add libsoftfloat to BASE_LIBS to support 128-bit floating-point operations
-# which are not implemented by hardware.
-BASE_LIBS += $(LIBSOFTFLOAT_PREFIX)/libsoftfloat.a
-
 ENDIANESS = LE
 
 BFD_NAME = elf64-littleaarch64
