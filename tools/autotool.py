@@ -233,7 +233,7 @@ def get_target(config):
 	
 	if (config['PLATFORM'] == "amd64"):
 		platform = config['PLATFORM']
-		gnu_target = "amd64-linux-gnu"
+		gnu_target = "amd64-unknown-elf"
 		helenos_target = "amd64-helenos"
 	
 	if (config['PLATFORM'] == "arm32"):
@@ -242,9 +242,8 @@ def get_target(config):
 		helenos_target = "arm-helenos-gnueabi"
 	
 	if (config['PLATFORM'] == "arm64"):
-		target = config['PLATFORM']
+		platform = config['PLATFORM']
 		gnu_target = "aarch64-linux-gnu"
-		clang_target = "aarch64-unknown-none"
 		helenos_target = "aarch64-helenos"
 
 	if (config['PLATFORM'] == "ia32"):
@@ -896,14 +895,6 @@ def main():
 			
 			check_common(common, "GCC")
 			common['CC'] = common['GCC']
-			common['CC_AUTOGEN'] = common['CC']
-		
-		if (config['COMPILER'] == "icc"):
-			check_app([common['CC'], "-V"], "Intel C++ Compiler", "support is experimental")
-			check_gcc(None, "", common, PACKAGE_GCC)
-			check_binutils(None, binutils_prefix, common, PACKAGE_BINUTILS)
-			
-			common['CC'] = "icc"
 			common['CC_AUTOGEN'] = common['CC']
 		
 		if (config['COMPILER'] == "clang"):
