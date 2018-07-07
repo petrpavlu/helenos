@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Jiri Svoboda
+ * Copyright (c) 2015 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,18 +29,16 @@
 /** @addtogroup tcp
  * @{
  */
-/** @file Connection incoming segments queue
+/** @file TCP inet interfacing
  */
 
-#ifndef IQUEUE_H
-#define IQUEUE_H
+#ifndef TCP_INET_H
+#define TCP_INET_H
 
 #include "tcp_type.h"
 
-extern void tcp_iqueue_init(tcp_iqueue_t *, tcp_conn_t *);
-extern void tcp_iqueue_insert_seg(tcp_iqueue_t *, tcp_segment_t *);
-extern void tcp_iqueue_remove_seg(tcp_iqueue_t *, tcp_segment_t *);
-extern int tcp_iqueue_get_ready_seg(tcp_iqueue_t *, tcp_segment_t **);
+extern int tcp_inet_init(void);
+extern void tcp_transmit_pdu(tcp_pdu_t *);
 
 #endif
 

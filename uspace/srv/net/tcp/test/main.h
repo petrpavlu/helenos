@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Jiri Svoboda
+ * Copyright (c) 2017 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,16 +29,15 @@
 /** @addtogroup tcp
  * @{
  */
-/** @file TCP (Transmission Control Protocol) network module
+/** @file
  */
 
-#ifndef TCP_H
-#define TCP_H
+#ifndef TEST_MAIN_H
+#define TEST_MAIN_H
 
-#include <async.h>
-#include "tcp_type.h"
+#include "../tcp_type.h"
 
-extern void tcp_transmit_pdu(tcp_pdu_t *);
+extern void test_seg_same(tcp_segment_t *, tcp_segment_t *);
 
 #endif
 

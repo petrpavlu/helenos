@@ -26,86 +26,104 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
+#include <adt/prodcons.h>
 #include <inet/endpoint.h>
-#include <mem.h>
+#include <io/log.h>
 #include <pcut/pcut.h>
-#include <stdlib.h>
 
-#include "main.h"
-#include "../pdu.h"
+#include "../rqueue.h"
 #include "../segment.h"
 
 PCUT_INIT
 
-PCUT_TEST_SUITE(pdu);
+PCUT_TEST_SUITE(rqueue);
 
-/** Test encode/decode round trip for control PDU */
-PCUT_TEST(encdec_syn)
+enum {
+	test_seg_max = 10
+};
+
+static void test_seg_received(inet_ep2_t *, tcp_segment_t *);
+
+static tcp_rqueue_cb_t rcb = {
+	.seg_received = test_seg_received
+};
+
+static int seg_cnt;
+static tcp_segment_t *recv_seg[test_seg_max];
+
+static void test_seg_received(inet_ep2_t *epp, tcp_segment_t *seg)
 {
-	tcp_segment_t *seg, *dseg;
-	tcp_pdu_t *pdu;
-	inet_ep2_t epp, depp;
+	recv_seg[seg_cnt++] = seg;
+}
+
+PCUT_TEST_BEFORE
+{
 	int rc;
 
-	inet_ep2_init(&epp);
-	inet_addr(&epp.local.addr, 1, 2, 3, 4);
-	inet_addr(&epp.remote.addr, 5, 6, 7, 8);
+	/* We will be calling functions that perform logging */
+	rc = log_init("test-tcp");
+	PCUT_ASSERT_INT_EQUALS(EOK, rc);
+}
+
+/** Test empty queue */
+PCUT_TEST(init_fini)
+{
+	tcp_rqueue_init(&rcb);
+	tcp_rqueue_fibril_start();
+	tcp_rqueue_fini();
+}
+
+/** Test one segment */
+PCUT_TEST(one_segment)
+{
+	tcp_segment_t *seg;
+	inet_ep2_t epp;
+
+	tcp_rqueue_init(&rcb);
+	seg_cnt = 0;
 
 	seg = tcp_segment_make_ctrl(CTL_SYN);
 	PCUT_ASSERT_NOT_NULL(seg);
-
-	seg->seq = 20;
-	seg->ack = 19;
-	seg->wnd = 18;
-	seg->up = 17;
-
-	rc = tcp_pdu_encode(&epp, seg, &pdu);
-	PCUT_ASSERT_INT_EQUALS(EOK, rc);
-	rc = tcp_pdu_decode(pdu, &depp, &dseg);
-	PCUT_ASSERT_INT_EQUALS(EOK, rc);
-
-	test_seg_same(seg, dseg);
-	tcp_segment_delete(seg);
-}
-
-/** Test encode/decode round trip for data PDU */
-PCUT_TEST(encdec_data)
-{
-	tcp_segment_t *seg, *dseg;
-	tcp_pdu_t *pdu;
-	inet_ep2_t epp, depp;
-	uint8_t *data;
-	size_t i, dsize;
-	int rc;
-
 	inet_ep2_init(&epp);
-	inet_addr(&epp.local.addr, 1, 2, 3, 4);
-	inet_addr(&epp.remote.addr, 5, 6, 7, 8);
 
-	dsize = 15;
-	data = malloc(dsize);
-	PCUT_ASSERT_NOT_NULL(data);
+	tcp_rqueue_insert_seg(&epp, seg);
+	tcp_rqueue_fibril_start();
+	tcp_rqueue_fini();
 
-	for (i = 0; i < dsize; i++)
-		data[i] = (uint8_t) i;
+	PCUT_ASSERT_INT_EQUALS(1, seg_cnt);
+	PCUT_ASSERT_EQUALS(seg, recv_seg[0]);
 
-	seg = tcp_segment_make_data(CTL_SYN, data, dsize);
-	PCUT_ASSERT_NOT_NULL(seg);
-
-	seg->seq = 20;
-	seg->ack = 19;
-	seg->wnd = 18;
-	seg->up = 17;
-
-	rc = tcp_pdu_encode(&epp, seg, &pdu);
-	PCUT_ASSERT_INT_EQUALS(EOK, rc);
-	rc = tcp_pdu_decode(pdu, &depp, &dseg);
-	PCUT_ASSERT_INT_EQUALS(EOK, rc);
-
-	test_seg_same(seg, dseg);
 	tcp_segment_delete(seg);
-	free(data);
 }
 
-PCUT_EXPORT(pdu);
+/** Test multiple segments */
+PCUT_TEST(multiple_segments)
+{
+	tcp_segment_t *seg[test_seg_max];
+	inet_ep2_t epp;
+	int i;
+
+	tcp_rqueue_init(&rcb);
+	seg_cnt = 0;
+
+    	inet_ep2_init(&epp);
+
+	tcp_rqueue_fibril_start();
+
+	for (i = 0; i < test_seg_max; i++) {
+		seg[i] = tcp_segment_make_ctrl(CTL_ACK);
+		PCUT_ASSERT_NOT_NULL(seg[i]);
+		tcp_rqueue_insert_seg(&epp, seg[i]);
+	}
+
+	tcp_rqueue_fini();
+
+	PCUT_ASSERT_INT_EQUALS(test_seg_max, seg_cnt);
+	for (i = 0; i < test_seg_max; i++) {
+		PCUT_ASSERT_EQUALS(seg[i], recv_seg[i]);
+		tcp_segment_delete(seg[i]);
+	}
+
+}
+
+PCUT_EXPORT(rqueue);
