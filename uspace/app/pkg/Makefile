@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 Jiri Svoboda
+# Copyright (c) 2017 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,10 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-USPACE_PREFIX = ../../..
-
-LIBS = \
-	$(LIBNETTL_PREFIX)/libnettl.a
-
-EXTRA_CFLAGS += \
-	-I$(LIBNETTL_PREFIX)/include
-
-BINARY = tcp
+USPACE_PREFIX = ../..
+BINARY = pkg
 
 SOURCES = \
-	conn.c \
-	iqueue.c \
-	ncsim.c \
-	pdu.c \
-	rqueue.c \
-	segment.c \
-	service.c \
-	seq_no.c \
-	tcp.c \
-	test.c \
-	tqueue.c \
-	ucall.c
-
-TEST_SOURCES = \
-	pdu.c \
-	segment.c \
-	seq_no.c \
-	test/main.c \
-	test/pdu.c
+	pkg.c
 
 include $(USPACE_PREFIX)/Makefile.common

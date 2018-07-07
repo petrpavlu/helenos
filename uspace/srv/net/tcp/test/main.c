@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Jiri Svobda
+ * Copyright (c) 2017 Jiri Svobda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libcipc
- * @{
- */
-/** @file
- */
+#include <pcut/pcut.h>
 
-#ifndef LIBC_IPC_UDP_H_
-#define LIBC_IPC_UDP_H_
+PCUT_INIT
 
-#include <ipc/common.h>
+PCUT_IMPORT(pdu);
 
-typedef enum {
-	UDP_CALLBACK_CREATE = IPC_FIRST_USER_METHOD,
-	UDP_ASSOC_CREATE,
-	UDP_ASSOC_DESTROY,
-	UDP_ASSOC_SET_NOLOCAL,
-	UDP_ASSOC_SEND_MSG,
-	UDP_RMSG_INFO,
-	UDP_RMSG_READ,
-	UDP_RMSG_DISCARD
-} udp_request_t;
-
-typedef enum {
-	UDP_EV_DATA = IPC_FIRST_USER_METHOD
-} udp_event_t;
-
-#endif
-
-/** @}
- */
+PCUT_MAIN()
