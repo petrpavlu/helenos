@@ -390,7 +390,7 @@ static int ns8250_dev_initialize(ns8250_t *ns)
 	memset(&hw_resources, 0, sizeof(hw_resource_list_t));
 	
 	/* Connect to the parent's driver. */
-	parent_sess = ddf_dev_parent_sess_create(ns->dev);
+	parent_sess = ddf_dev_parent_sess_get(ns->dev);
 	if (parent_sess == NULL) {
 		ddf_msg(LVL_ERROR, "Failed to connect to parent driver of "
 		    "device %s.", ddf_dev_get_name(ns->dev));
@@ -779,7 +779,7 @@ static inline void ns8250_interrupt_handler(ipc_callid_t iid, ipc_call_t *icall,
 	}
 	
 	ns8250_read_from_device(ns);
-	irc_disable_interrupt(ns->irq);
+	irc_clear_interrupt(ns->irq);
 }
 
 /** Register the interrupt handler for the device.

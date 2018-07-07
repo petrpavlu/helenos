@@ -381,7 +381,7 @@ static int sttykbd_add(ddf_dev_t *dev)
 	}
 
 	/* Connect to the parent. */
-	parent_sess = ddf_dev_parent_sess_create(dev);
+	parent_sess = ddf_dev_parent_sess_get(dev);
 	if (parent_sess == NULL) {
 		ddf_msg(LVL_ERROR, "Failed connecting parent driver of device "
 		    "'%s'.", name);

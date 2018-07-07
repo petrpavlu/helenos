@@ -298,7 +298,7 @@ static int pl011_init(pl011_t *pl011)
 	pl011->buf_rp = pl011->buf_wp = 0;
 
 	/* Get the information about the device. */
-	pl011->parent_sess = ddf_dev_parent_sess_create(pl011->dev);
+	pl011->parent_sess = ddf_dev_parent_sess_get(pl011->dev);
 	if (pl011->parent_sess == NULL) {
 		ddf_msg(LVL_ERROR, "Failed connecting parent driver of device "
 		    "'%s'.", name);
