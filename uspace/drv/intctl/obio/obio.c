@@ -41,8 +41,6 @@
  * be found at the same addresses.
  */
 
-#include <align.h>
-#include <as.h>
 #include <async.h>
 #include <ddf/driver.h>
 #include <ddf/log.h>
@@ -117,17 +115,10 @@ static void obio_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
 int obio_add(obio_t *obio, obio_res_t *res)
 {
 	ddf_fun_t *fun_a = NULL;
-	int flags;
-	int retval;
 	int rc;
 
-	flags = AS_AREA_READ | AS_AREA_WRITE;
-	obio->regs = (ioport64_t *)AS_AREA_ANY;
-	retval = physmem_map(res->base,
-	    ALIGN_UP(OBIO_SIZE, PAGE_SIZE) >> PAGE_WIDTH, flags,
-	    (void *) &obio->regs);
-
-	if (retval < 0) {
+	rc = pio_enable((void *)res->base, OBIO_SIZE, (void **) &obio->regs);
+	if (rc != EOK) {
 		ddf_msg(LVL_ERROR, "Error mapping OBIO registers");
 		rc = EIO;
 		goto error;
