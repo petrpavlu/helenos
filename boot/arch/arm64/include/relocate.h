@@ -30,41 +30,36 @@
  * @{
  */
 /** @file
- * @brief Relocate support for components.
+ * @brief Relocate support for mkarray entries.
  */
 
 #ifndef BOOT_arm64_RELOCATE_H
 #define BOOT_arm64_RELOCATE_H
 
-#define RELOC_COMPONENT(index, name, symbol) \
+#define RELOC_MKARRAY_ENTRY(label, index, name, symbol) \
 do { \
 	asm volatile ( \
-		".global " #symbol "_start\n" \
-		".global " #symbol "_end\n" \
-		"adr x0, components + %[off]\n" \
+		".global " #symbol "\n" \
+		"adr x0, " #label "s + %[off]\n" \
 		"adr x1, 1f\n" \
-		"adrp x2, " #symbol "_start\n" \
-		"add x2, x2, #:lo12:" #symbol "_start\n" \
+		"adrp x2, " #symbol "\n" \
+		"add x2, x2, #:lo12:" #symbol "\n" \
 		"stp x1, x2, [x0], #16\n" \
-		"adrp x1, " #symbol "_end\n" \
-		"add x1, x1, #:lo12:" #symbol "_end\n" \
-		"sub x1, x1, x2\n" \
-		"str x1, [x0]\n" \
 		"b 2f\n" \
 		"1:\n" \
 		".asciz " #name "\n" \
 		".align 2\n" \
 		"2:\n" \
-		: : [off] "i" (index * sizeof(component_t)) : "x0", "x1", "x2" \
+		: : [off] "i" (index * sizeof(label##_t)) : "x0", "x1", "x2" \
 	); \
 } while (0)
 
-#define RETURN_COMPONENTS() \
+#define RETURN_MKARRAY_ENTRIES(label) \
 do { \
-	component_t *res; \
+	label##_t *res; \
 	asm volatile ( \
-		".global components\n" \
-		"adr %[res], components\n" \
+		".global " #label "s\n" \
+		"adr %[res], " #label "s\n" \
 		: [res] "=r" (res) \
 	); \
 	return res; \

@@ -29,7 +29,7 @@
 BOOT_OUTPUT = image.boot
 POST_OUTPUT = $(ROOT_PATH)/image.iso
 POSTBUILD = Makefile.grub
-IS_PIC_LOADER = yes
+COMPS_MKARRAY_FLAGS = --pic
 GRUB_LOADER = chainloader
 
 BFD_NAME = elf64-littleaarch64
@@ -63,7 +63,8 @@ endif
 SOURCES = \
 	arch/$(BARCH)/src/asm.S \
 	arch/$(BARCH)/src/main.c \
-	$(COMPS_C) \
+	$(COMPS).s \
+	$(COMPS)_desc.c \
 	genarch/src/efi.c \
 	generic/src/inflate.c \
 	generic/src/memstr.c \
@@ -72,3 +73,5 @@ SOURCES = \
 	generic/src/str.c \
 	generic/src/version.c \
 	generic/src/vprintf.c
+
+PRE_DEPEND = $(COMPS).s $(COMPS).h $(COMPS)_desc.c

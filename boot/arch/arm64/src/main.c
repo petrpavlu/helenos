@@ -35,7 +35,6 @@
 
 #include <stddef.h>
 #include <align.h>
-#include <arch/_components.h>
 #include <arch/arch.h>
 #include <arch/asm.h>
 #include <arch/boot.h>
@@ -49,6 +48,7 @@
 #include <putchar.h>
 #include <str.h>
 #include <version.h>
+#include "../../components.h"
 
 static efi_system_table_t *efi_system_table;
 
@@ -170,7 +170,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	component_t *components = get_components();
 	for (size_t i = 0; i < COMPONENTS; i++) {
 		printf(" %p|%p: %s image (%zu/%zu bytes)\n",
-		    components[i].start, components[i].start,
+		    components[i].addr, components[i].addr,
 		    components[i].name, components[i].inflated,
 		    components[i].size);
 	}
@@ -305,7 +305,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	for (size_t i = COMPONENTS; i > 0; i--) {
 		printf("%s ", components[i - 1].name);
 
-		int err = inflate(components[i - 1].start,
+		int err = inflate(components[i - 1].addr,
 		    components[i - 1].size, dest[i - 1],
 		    components[i - 1].inflated);
 		if (err != EOK) {
