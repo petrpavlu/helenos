@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2006 Martin Decky
- * Copyright (c) 2006 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +26,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOT_sparc64_ASM_H_
-#define BOOT_sparc64_ASM_H_
+/** @file
+ */
 
-#include <stdint.h>
+#ifndef BOOT_STDBOOL_H_
+#define BOOT_STDBOOL_H_
 
-extern void jump_to_kernel(uintptr_t physmem_start, bootinfo_t *bootinfo,
-    uint8_t subarch, void *entry) __attribute__((noreturn));
+#define false  0
+#define true   1
+
+#define bool _Bool
 
 #endif
+
+/** @}
+ */

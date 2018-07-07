@@ -33,7 +33,7 @@
  * @brief Bootstrap.
  */
 
-#include <typedefs.h>
+#include <stddef.h>
 #include <align.h>
 #include <arch/_components.h>
 #include <arch/arch.h>

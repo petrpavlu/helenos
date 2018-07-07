@@ -29,19 +29,13 @@
 /** @file
  */
 
-#ifndef BOOT_TYPEDEFS_H_
-#define BOOT_TYPEDEFS_H_
+#ifndef BOOT_STDDEF_H_
+#define BOOT_STDDEF_H_
 
-#include <stdint.h>
 #include <arch/common.h>
 #include <arch/types.h>
 
 #define NULL  ((void *) 0)
-
-#define false  0
-#define true   1
-
-typedef uint8_t bool;
 
 #endif
 

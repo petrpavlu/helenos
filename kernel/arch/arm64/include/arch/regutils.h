@@ -38,7 +38,7 @@
 
 #ifndef __ASM__
 #if defined(KERNEL) || defined(BOOT)
-#include <typedefs.h>
+#include <stddef.h>
 #else
 #include <stdint.h>
 #endif

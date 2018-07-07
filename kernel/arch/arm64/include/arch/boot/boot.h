@@ -38,7 +38,7 @@
 #define BOOT_OFFSET  0x80000
 
 #ifndef __ASM__
-#include <typedefs.h>
+#include <stddef.h>
 
 #define BOOTINFO_TASK_NAME_BUFLEN  32
 #define TASKMAP_MAX_RECORDS        32
