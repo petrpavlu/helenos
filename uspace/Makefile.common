@@ -53,7 +53,7 @@
 #                      (e.g. uses thread-local variables)
 #
 # Optionally, for a libary:
-#   SLIBRARY           Name with full version, e.g. libfoo.so.0.0 
+#   SLIBRARY           Name with full version, e.g. libfoo.so.0.0
 #   LSONAME            Soname / name with short version, e.g. libfoo.so.0
 #
 # (x) required variables
@@ -93,7 +93,7 @@ ifeq ($(CONFIG_BUILD_SHARED_LIBS),y)
 		LARCHIVE = $(LIBRARY).la
 		LOUTPUT = $(SLIBRARY)
 		EXTRA_OUTPUT += $(LOUTPUT).disasm $(LIBRARY).so $(LSONAME)
-		EXTRA_CLEAN += $(LOUTPUT).map $(LOUTPUT).ldisasm \
+		EXTRA_CLEAN += $(LOUTPUT).map $(LOUTPUT).disasm \
 		    $(LIBC_PREFIX)/shared/arch/$(UARCH)/_lib.ld \
 		    $(LIBRARY).so $(LSONAME)
 	endif
@@ -219,7 +219,7 @@ endif
 	TEST_OUTPUT_LIBS += $(TEST_LIBS)
 endif
 
-.PHONY: all clean depend
+.PHONY: all all-test clean depend
 
 all: $(VERSION_DEF) $(COMMON_MAKEFILE) $(CONFIG_MAKEFILE) $(CONFIG_HEADER) $(LIBS) $(OUTPUT) $(LOUTPUT) $(EXTRA_OUTPUT)
 
@@ -279,6 +279,10 @@ else
 	CFLAGS += $(COMMON_CFLAGS) $(GCC_CFLAGS)
 endif
 
+ifeq ($(CONFIG_STRIP_BINARIES),y)
+	LFLAGS += --strip-all
+endif
+
 LIB_CFLAGS = $(CFLAGS) -fPIC
 LIB_LFLAGS = $(LFLAGS) -shared -soname $(LSONAME) --whole-archive
 
@@ -292,29 +296,19 @@ DEPENDS := $(addsuffix .d,$(basename $(SOURCES))) $(addsuffix .test.d,$(basename
 
 -include $(DEPENDS)
 
-ifneq ($(BINARY),)
-$(BINARY).disasm: $(BINARY)
+%.disasm: %
 ifeq ($(CONFIG_LINE_DEBUG),y)
 	$(OBJDUMP) -d -S $< > $@
 else
 	$(OBJDUMP) -d $< > $@
 endif
 
+ifneq ($(BINARY),)
 $(BINARY): $(LINKER_SCRIPT) $(OBJECTS) $(LIBS) $(BASE_LIBS)
 	$(LD) -n $(LFLAGS) -T $(LINKER_SCRIPT) -M -Map $(BINARY).map -o $(BINARY) $(OBJECTS) $(LIBS) $(BASE_LIBS)
-ifeq ($(CONFIG_STRIP_BINARIES),y)
-	$(STRIP) $(BINARY)
-endif
 endif
 
 ifneq ($(SLIBRARY),)
-$(LOUTPUT).disasm: $(LOUTPUT)
-ifeq ($(CONFIG_LINE_DEBUG),y)
-	$(OBJDUMP) -d -S $< > $@
-else
-	$(OBJDUMP) -d $< > $@
-endif
-
 $(LOUTPUT): $(LARCHIVE) $(LIBC_PREFIX)/arch/$(UARCH)/_link-shlib.ld
 	$(LD) -T $(LIBC_PREFIX)/arch/$(UARCH)/_link-shlib.ld $(LIB_LFLAGS) $(LARCHIVE) -o $@ -Map $(LOUTPUT).map
 
@@ -338,15 +332,6 @@ endif
 ifneq ($(TEST_OUTPUT),)
 $(TEST_OUTPUT): $(LINKER_SCRIPT) $(TEST_OBJECTS) $(TEST_OUTPUT_LIBS)
 	$(LD) -n $(LFLAGS) -T $(LINKER_SCRIPT) -M -Map $(TEST_OUTPUT).map -o $@ $(TEST_OBJECTS) $(TEST_OUTPUT_LIBS) $(LIBS) $(BASE_LIBS)
-ifeq ($(CONFIG_STRIP_BINARIES),y)
-	$(STRIP) $(TEST_OUTPUT)
-endif
-$(TEST_BINARY).disasm: $(TEST_BINARY)
-ifeq ($(CONFIG_LINE_DEBUG),y)
-	$(OBJDUMP) -d -S $< > $@
-else
-	$(OBJDUMP) -d $< > $@
-endif
 endif
 
 %.o: %.S | depend
