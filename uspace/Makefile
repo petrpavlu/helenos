@@ -229,6 +229,7 @@ LIBS = \
 	lib/draw \
 	lib/label \
 	lib/math \
+	lib/minix \
 	lib/nettl \
 	lib/nic \
 	lib/ext4 \
@@ -263,6 +264,7 @@ clean: $(CLEANS)
 	find lib app drv srv -name '*.o' -follow -exec rm \{\} \;
 	find lib app drv srv -name '*.lo' -follow -exec rm \{\} \;
 	find lib app drv srv -name '*.d' -follow -exec rm \{\} \;
+	find lib app drv srv -name 'tag' -follow -exec rm \{\} \;
 
 $(CLEANS):
 	-$(MAKE) -r -C $(basename $@) clean
