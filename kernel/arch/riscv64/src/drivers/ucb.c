@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Martin Decky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,68 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
- * @{
- */
-/** @file
- */
-
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
-
+#include <arch/drivers/ucb.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <console/chardev.h>
+#include <str.h>
+#include <mm/slab.h>
 
-#define ASID_MAX_ARCH  4096
+#define HTIF_DEVICE_CONSOLE  1
 
-typedef uint32_t asid_t;
+#define HTIF_CONSOLE_PUTC  1
 
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
+static volatile uint64_t *tohost;
+static volatile uint64_t *fromhost;
 
-#endif
+static outdev_operations_t htifdev_ops = {
+	.write = htif_putchar,
+	.redraw = NULL,
+	.scroll_up = NULL,
+	.scroll_down = NULL
+};
 
-/** @}
- */
+static void poll_fromhost()
+{
+	uint64_t val = *fromhost;
+	if (!val)
+		return;
+	
+	*fromhost = 0;
+}
+
+void htif_init(volatile uint64_t *tohost_addr, volatile uint64_t *fromhost_addr)
+{
+	tohost = tohost_addr;
+	fromhost = fromhost_addr;
+}
+
+outdev_t *htifout_init(void)
+{
+	outdev_t *htifdev = malloc(sizeof(outdev_t), FRAME_ATOMIC);
+	if (!htifdev)
+		return NULL;
+	
+	outdev_initialize("htifdev", htifdev, &htifdev_ops);
+	return htifdev;
+}
+
+static void htif_cmd(uint8_t device, uint8_t cmd, uint64_t payload)
+{
+	uint64_t val = (((uint64_t) device) << 56) |
+	    (((uint64_t) cmd) << 48) |
+	    (payload & UINT64_C(0xffffffffffff));
+	
+	while (*tohost)
+		poll_fromhost();
+	
+	*tohost = val;
+}
+
+void htif_putchar(outdev_t *dev, const wchar_t ch)
+{
+	if (ascii_check(ch))
+		htif_cmd(HTIF_DEVICE_CONSOLE, HTIF_CONSOLE_PUTC, ch);
+	else
+		htif_cmd(HTIF_DEVICE_CONSOLE, HTIF_CONSOLE_PUTC, U_SPECIAL);
+}

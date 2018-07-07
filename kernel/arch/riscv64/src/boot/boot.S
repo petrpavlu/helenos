@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Martin Decky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,33 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
- * @{
- */
-/** @file
- */
+#include <abi/asmtool.h>
+#include <arch/boot/boot.h>
+#include <arch/cpu.h>
 
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
+.section K_TEXT_START, "ax"
 
-#include <stdint.h>
+SYMBOL(kernel_image_start)
+	/* Setup temporary stack */
+	la sp, temp_stack
+	
+	/* Create the first stack frame */
+	addi sp, sp, -16
+	
+	/* Call riscv64_pre_main() */
+	jal riscv64_pre_main
+	
+	/* Call main_bsp() */
+	jal main_bsp
+	
+	/* Not reached */
+	csrci sstatus, SSTATUS_SIE_MASK
+	hlt0:
+		wfi
+		j hlt0
 
-#define ASID_MAX_ARCH  4096
+.data
 
-typedef uint32_t asid_t;
-
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
-
-#endif
-
-/** @}
- */
+.align 16
+.space TEMP_STACK_SIZE
+temp_stack:

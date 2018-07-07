@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Vojtech Horky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,43 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
+/** @addtogroup libposix
  * @{
  */
-/** @file
- */
 
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
+#define LIBPOSIX_INTERNAL
+#define __POSIX_DEF__(x) posix_##x
 
-#include <stdint.h>
+#include "internal/common.h"
+#include "posix/dlfcn.h"
 
-#define ASID_MAX_ARCH  4096
+#include "libc/dlfcn.h"
 
-typedef uint32_t asid_t;
+void *posix_dlopen(const char *filename, int flags)
+{
+	if (flags != 0) {
+		fprintf(stderr, "dlopen() not implemented with non-zero flags (%s:%d), something will NOT work.\n", __FILE__, __LINE__);
+	}
+	
+	return dlopen(filename, 0);
+}
 
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
+void *posix_dlsym(void *handle, const char *symbol)
+{
+	return dlsym(handle, symbol);
+}
 
-#endif
+int posix_dlclose(void *handle)
+{
+	not_implemented();
+	return 0;
+}
+
+char *posix_dlerror(void)
+{
+	not_implemented();
+	return (char *)"dlerror()";
+}
 
 /** @}
  */

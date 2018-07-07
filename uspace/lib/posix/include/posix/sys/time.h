@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Vojtech Horky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
+/** @addtogroup libposix
  * @{
  */
-/** @file
- */
 
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
+#ifndef POSIX_SYS_TIME_H_
+#define POSIX_SYS_TIME_H_
 
-#include <stdint.h>
+#ifndef __POSIX_DEF__
+#define __POSIX_DEF__(x) x
+#endif
 
-#define ASID_MAX_ARCH  4096
-
-typedef uint32_t asid_t;
-
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
+#include "libc/sys/time.h"
 
 #endif
 

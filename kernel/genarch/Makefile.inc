@@ -173,6 +173,7 @@ endif
 
 ifeq ($(CONFIG_MULTIBOOT), y)
 GENARCH_SOURCES += \
+	genarch/src/multiboot/common.c \
 	genarch/src/multiboot/multiboot.c \
 	genarch/src/multiboot/multiboot2.c
 GENARCH_AUTOGENS_AG += \

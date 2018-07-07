@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,36 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
+/** @addtogroup genarch
  * @{
  */
 /** @file
  */
 
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
+#include <genarch/multiboot/multiboot.h>
+#include <config.h>
+#include <stddef.h>
 
-#include <stdint.h>
-
-#define ASID_MAX_ARCH  4096
-
-typedef uint32_t asid_t;
-
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
-
-#endif
+void multiboot_cmdline(const char *cmdline)
+{
+	/*
+	 * GRUB passes the command line in an escaped form.
+	 */
+	for (size_t i = 0, j = 0;
+	    cmdline[i] && j < CONFIG_BOOT_ARGUMENTS_BUFLEN;
+	    i++, j++) {
+		if (cmdline[i] == '\\') {
+			switch (cmdline[i + 1]) {
+			case '\\':
+			case '\'':
+			case '\"':
+				i++;
+				break;
+			}
+		}
+		bargs[j] = cmdline[i];
+	}
+}
 
 /** @}
  */

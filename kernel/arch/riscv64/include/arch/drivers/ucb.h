@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Martin Decky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
+/** @addtogroup riscv64
  * @{
  */
 /** @file
  */
 
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
+#ifndef KERN_riscv64_DRIVERS_UCB_H_
+#define KERN_riscv64_DRIVERS_UCB_H_
 
+#include <stddef.h>
 #include <stdint.h>
+#include <console/chardev.h>
 
-#define ASID_MAX_ARCH  4096
-
-typedef uint32_t asid_t;
-
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
+extern void htif_init(volatile uint64_t *, volatile uint64_t *);
+extern outdev_t *htifout_init(void);
+extern void htif_putchar(outdev_t *, const wchar_t);
 
 #endif
 

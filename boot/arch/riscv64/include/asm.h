@@ -31,7 +31,10 @@
 
 #include <stddef.h>
 
-extern void jump_to_kernel(void *, uintptr_t)
+extern char htif_page[];
+extern char pt_page[];
+
+extern void jump_to_kernel(uintptr_t)
     __attribute__((noreturn));
 
 #endif

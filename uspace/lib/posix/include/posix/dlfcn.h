@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Martin Decky
+ * Copyright (c) 2017 Vojtech Horky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,31 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup riscv64mm
+/** @addtogroup libposix
  * @{
  */
-/** @file
- */
 
-#ifndef KERN_riscv64_ASID_H_
-#define KERN_riscv64_ASID_H_
+#ifndef POSIX_DLFCN_H_
+#define POSIX_DLFCN_H_
 
-#include <stdint.h>
+#ifndef __POSIX_DEF__
+#define __POSIX_DEF__(x) x
+#endif
 
-#define ASID_MAX_ARCH  4096
+#define RTLD_LAZY 1
+#define RTLD_NOW 2
+#define RTLD_GLOBAL 32
+#define RTLD_LOCAL 0
 
-typedef uint32_t asid_t;
 
-#define asid_get()  (ASID_START + 1)
-#define asid_put(asid)
+extern void *__POSIX_DEF__(dlopen)(const char *, int);
+extern void *__POSIX_DEF__(dlsym)(void *, const char *);
+extern int __POSIX_DEF__(dlclose)(void *);
+extern char *__POSIX_DEF__(dlerror)(void);
+
 
 #endif
 
-/** @}
+/**
+ * @}
  */
