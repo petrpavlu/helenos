@@ -1014,7 +1014,7 @@ static int fdisk_part_spec_prepare(fdisk_dev_t *dev, fdisk_part_spec_t *pspec,
 	min_blocks = fdisk_ba_align_up(dev, min_blocks);
 	max_blocks = fdisk_ba_align_up(dev, max_blocks);
 
-	pcnt = -1;
+	pcnt = LPC_LIMIT;
 
 	switch (pspec->fstype) {
 	case fs_exfat:
@@ -1033,7 +1033,7 @@ static int fdisk_part_spec_prepare(fdisk_dev_t *dev, fdisk_part_spec_t *pspec,
 		return EINVAL; /* You cannot create an ISO partition */
 	}
 
-	if (pcnt < 0)
+	if (pcnt == LPC_LIMIT)
 		return EINVAL;
 
 	if (pspec->pkind == lpk_logical) {
