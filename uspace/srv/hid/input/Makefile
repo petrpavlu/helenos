@@ -39,7 +39,6 @@ SOURCES = \
 	port/adb.c \
 	port/adb_mouse.c \
 	port/chardev.c \
-	port/niagara.c \
 	proto/adb.c \
 	proto/mousedev.c \
 	ctl/apple.c \

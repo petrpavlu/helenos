@@ -142,6 +142,7 @@ DIRS = \
 	drv/block/ahci \
 	drv/block/ata_bd \
 	drv/block/ddisk \
+	drv/block/usbmast \
 	drv/bus/adb/cuda_adb \
 	drv/bus/isa \
 	drv/bus/pci/pciintel \
@@ -149,25 +150,23 @@ DIRS = \
 	drv/bus/usb/ohci \
 	drv/bus/usb/uhci \
 	drv/bus/usb/usbflbk \
-	drv/bus/usb/usbhid \
 	drv/bus/usb/usbhub \
-	drv/bus/usb/usbmast \
 	drv/bus/usb/usbmid \
 	drv/bus/usb/vhc \
-	drv/char/atkbd \
 	drv/char/i8042 \
+	drv/char/msim-con \
 	drv/char/ns8250 \
 	drv/char/pl011 \
 	drv/char/pl050 \
-	drv/char/ps2mouse \
 	drv/char/ski-con \
 	drv/char/sttykbd \
-	drv/char/xtkbd \
-	drv/test/test1 \
-	drv/test/test2 \
-	drv/test/test3 \
+	drv/char/sun4v-con \
 	drv/fb/amdm37x_dispc \
 	drv/fb/kfb \
+	drv/hid/atkbd \
+	drv/hid/ps2mouse \
+	drv/hid/usbhid \
+	drv/hid/xtkbd \
 	drv/intctl/apic \
 	drv/intctl/i8259 \
 	drv/intctl/icp-ic \
@@ -184,6 +183,10 @@ DIRS = \
 	drv/platform/msim \
 	drv/platform/pc \
 	drv/platform/ski \
+	drv/platform/sun4v \
+	drv/test/test1 \
+	drv/test/test2 \
+	drv/test/test3 \
 	drv/time/cmos-rtc
 
 ## sun4u driver won't compile on 32-bit targets

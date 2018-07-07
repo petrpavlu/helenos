@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006 Jakub Jermar
+# Copyright (c) 2017 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,11 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-#include <abi/asmtool.h>
+USPACE_PREFIX = ../../..
+LIBS = drv
+BINARY = sun4v
 
-.text
+SOURCES = \
+	sun4v.c
 
-## User-space thread entry point for all but the first threads.
-#
-#
-SYMBOL(__thread_entry)
-	alloc loc0 = ar.pfs, 0, 1, 1, 0
-
-	movl gp = __gp
-	
-	#
-	# r8 contains address of uarg structure.
-	#
-	
-	mov out0 = r8 ;;
-	br.call.sptk.many b0 = __thread_main
-	
-	#
-	# Not reached.
-	#
-
+include $(USPACE_PREFIX)/Makefile.common

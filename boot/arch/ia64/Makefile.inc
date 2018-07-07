@@ -71,7 +71,7 @@ RD_DRVS_ESSENTIAL += \
 	bus/pci/pciintel \
 	bus/isa \
 	char/i8042 \
-	char/xtkbd
+	hid/xtkbd
 
 RD_DRVS_NON_ESSENTIAL += \
 	char/ns8250 \
@@ -81,10 +81,10 @@ RD_DRVS_NON_ESSENTIAL += \
 	bus/usb/uhci \
 	bus/usb/usbflbk \
 	bus/usb/usbhub \
-	bus/usb/usbhid \
-	bus/usb/usbmast \
 	bus/usb/usbmid \
-	bus/usb/vhc
+	bus/usb/vhc \
+	block/usbmast \
+	hid/usbhid
 
 RD_DRV_CFG += \
 	bus/isa
