@@ -36,7 +36,7 @@
 #ifndef LIBC_arm64_FIBRIL_H_
 #define LIBC_arm64_FIBRIL_H_
 
-#include <sys/types.h>
+#include <types/common.h>
 #include <align.h>
 #include <libarch/fibril_context.h>
 #include <libarch/tls.h>
