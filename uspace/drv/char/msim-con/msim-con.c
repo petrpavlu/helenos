@@ -37,20 +37,12 @@
 #include <ddi.h>
 #include <errno.h>
 #include <ipc/char.h>
-#include <sysinfo.h>
 
 #include "msim-con.h"
 
 static void msim_con_connection(ipc_callid_t, ipc_call_t *, void *);
 
-static irq_pio_range_t msim_ranges[] = {
-	{
-		.base = 0,
-		.size = 1
-	}
-};
-
-static irq_cmd_t msim_cmds[] = {
+static irq_cmd_t msim_cmds_proto[] = {
 	{
 		.cmd = CMD_PIO_READ_8,
 		.addr = (void *) 0,	/* will be patched in run-time */
@@ -59,13 +51,6 @@ static irq_cmd_t msim_cmds[] = {
 	{
 		.cmd = CMD_ACCEPT
 	}
-};
-
-static irq_code_t msim_kbd = {
-	sizeof(msim_ranges) / sizeof(irq_pio_range_t),
-	msim_ranges,
-	sizeof(msim_cmds) / sizeof(irq_cmd_t),
-	msim_cmds
 };
 
 static void msim_irq_handler(ipc_callid_t iid, ipc_call_t *call, void *arg)
@@ -83,11 +68,20 @@ static void msim_irq_handler(ipc_callid_t iid, ipc_call_t *call, void *arg)
 }
 
 /** Add msim console device. */
-int msim_con_add(msim_con_t *con)
+int msim_con_add(msim_con_t *con, msim_con_res_t *res)
 {
 	ddf_fun_t *fun = NULL;
 	bool subscribed = false;
+	irq_cmd_t *msim_cmds = NULL;
 	int rc;
+
+	msim_cmds = malloc(sizeof(msim_cmds_proto));
+	if (msim_cmds == NULL) {
+		rc = ENOMEM;
+		goto error;
+	}
+
+	con->res = *res;
 
 	fun = ddf_fun_create(con->dev, fun_exposed, "a");
 	if (fun == NULL) {
@@ -98,21 +92,18 @@ int msim_con_add(msim_con_t *con)
 
 	ddf_fun_set_conn_handler(fun, msim_con_connection);
 
-	sysarg_t paddr;
-	if (sysinfo_get_value("kbd.address.physical", &paddr) != EOK) {
-		rc = ENOENT;
-		goto error;
-	}
+	con->irq_range[0].base = res->base;
+	con->irq_range[0].size = 1;
 
-	sysarg_t inr;
-	if (sysinfo_get_value("kbd.inr", &inr) != EOK) {
-		rc = ENOENT;
-		goto error;
-	}
+	memcpy(msim_cmds, msim_cmds_proto, sizeof(msim_cmds_proto));
+	msim_cmds[0].addr = (void *) res->base;
 
-	msim_ranges[0].base = paddr;
-	msim_cmds[0].addr = (void *) paddr;
-	async_irq_subscribe(inr, msim_irq_handler, con, &msim_kbd);
+	con->irq_code.rangecount = 1;
+	con->irq_code.ranges = con->irq_range;
+	con->irq_code.cmdcount = sizeof(msim_cmds_proto) / sizeof(irq_cmd_t);
+	con->irq_code.cmds = msim_cmds;
+
+	async_irq_subscribe(res->irq, msim_irq_handler, con, &con->irq_code);
 	subscribed = true;
 
 	rc = ddf_fun_bind(fun);
@@ -124,9 +115,10 @@ int msim_con_add(msim_con_t *con)
 	return EOK;
 error:
 	if (subscribed)
-		async_irq_unsubscribe(inr);
+		async_irq_unsubscribe(res->irq);
 	if (fun != NULL)
 		ddf_fun_destroy(fun);
+	free(msim_cmds);
 
 	return rc;
 }

@@ -68,6 +68,7 @@ SOURCES = \
 	mm/mapping1.c \
 	mm/pager1.c \
 	hw/misc/virtchar1.c \
-	hw/serial/serial1.c
+	hw/serial/serial1.c \
+	chardev/chardev1.c
 
 include $(USPACE_PREFIX)/Makefile.common

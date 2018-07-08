@@ -40,13 +40,22 @@
 #include <loc.h>
 #include <stdint.h>
 
+/** MSIM console resources */
+typedef struct {
+	uintptr_t base;
+	int irq;
+} msim_con_res_t;
+
 /** MSIM console */
 typedef struct {
 	async_sess_t *client_sess;
 	ddf_dev_t *dev;
+	msim_con_res_t res;
+	irq_pio_range_t irq_range[1];
+	irq_code_t irq_code;
 } msim_con_t;
 
-extern int msim_con_add(msim_con_t *);
+extern int msim_con_add(msim_con_t *, msim_con_res_t *);
 extern int msim_con_remove(msim_con_t *);
 extern int msim_con_gone(msim_con_t *);
 

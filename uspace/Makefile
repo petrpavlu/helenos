@@ -135,6 +135,7 @@ DIRS = \
 	srv/hid/remcons \
 	srv/hw/char/s3c24xx_uart \
 	srv/hid/rfb \
+	srv/test/chardev-test \
 	drv/audio/hdaudio \
 	drv/audio/sb16 \
 	drv/root/root \
@@ -156,10 +157,8 @@ DIRS = \
 	drv/char/i8042 \
 	drv/char/msim-con \
 	drv/char/ns8250 \
-	drv/char/pl011 \
 	drv/char/pl050 \
 	drv/char/ski-con \
-	drv/char/sttykbd \
 	drv/char/sun4v-con \
 	drv/fb/amdm37x_dispc \
 	drv/fb/kfb \
