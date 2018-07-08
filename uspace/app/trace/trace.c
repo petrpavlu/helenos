@@ -62,7 +62,6 @@
 
 #include "syscalls.h"
 #include "ipcp.h"
-#include "errors.h"
 #include "trace.h"
 
 #define THBUF_SIZE 64
@@ -163,13 +162,13 @@ static int connect_task(task_id_t task_id)
 	
 	int rc = udebug_begin(ksess);
 	if (rc < 0) {
-		printf("udebug_begin() -> %d\n", rc);
+		printf("udebug_begin() -> %s\n", str_error_name(rc));
 		return rc;
 	}
 	
 	rc = udebug_set_evmask(ksess, UDEBUG_EM_ALL);
 	if (rc < 0) {
-		printf("udebug_set_evmask(0x%x) -> %d\n ", UDEBUG_EM_ALL, rc);
+		printf("udebug_set_evmask(0x%x) -> %s\n ", UDEBUG_EM_ALL, str_error_name(rc));
 		return rc;
 	}
 	
@@ -187,7 +186,7 @@ static int get_thread_list(void)
 	rc = udebug_thread_read(sess, thread_hash_buf,
 		THBUF_SIZE*sizeof(unsigned), &tb_copied, &tb_needed);
 	if (rc < 0) {
-		printf("udebug_thread_read() -> %d\n", rc);
+		printf("udebug_thread_read() -> %s\n", str_error_name(rc));
 		return rc;
 	}
 
@@ -225,8 +224,8 @@ void val_print(sysarg_t val, val_type_t v_type)
 	case V_ERRNO:
 		if (sval >= -15 && sval <= 0) {
 			printf("%ld %s (%s)", sval,
-			    err_desc[-sval].name,
-			    err_desc[-sval].desc);
+			    str_error_name((int) sval),
+			    str_error((int) sval));
 		} else {
 			printf("%ld", sval);
 		}
@@ -234,8 +233,8 @@ void val_print(sysarg_t val, val_type_t v_type)
 	case V_INT_ERRNO:
 		if (sval >= -15 && sval < 0) {
 			printf("%ld %s (%s)", sval,
-			    err_desc[-sval].name,
-			    err_desc[-sval].desc);
+			    str_error_name((int) sval),
+			    str_error((int) sval));
 		} else {
 			printf("%ld", sval);
 		}
@@ -604,7 +603,7 @@ static void trace_task(task_id_t task_id)
 
 	rc = get_thread_list();
 	if (rc < 0) {
-		printf("Failed to get thread list (error %d)\n", rc);
+		printf("Failed to get thread list (%s)\n", str_error(rc));
 		return;
 	}
 
@@ -643,7 +642,7 @@ static void trace_task(task_id_t task_id)
 			printf("Pause...\n");
 			rc = udebug_stop(sess, thash);
 			if (rc != EOK)
-				printf("Error: stop -> %d\n", rc);
+				printf("Error: stop -> %s\n", str_error_name(rc));
 			break;
 		case KC_R:
 			fibril_mutex_lock(&state_lock);

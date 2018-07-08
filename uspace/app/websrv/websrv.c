@@ -167,7 +167,7 @@ static int recv_char(recv_t *recv, char *c)
 		
 		rc = tcp_conn_recv_wait(recv->conn, recv->rbuf, BUFFER_SIZE, &nrecv);
 		if (rc != EOK) {
-			fprintf(stderr, "tcp_conn_recv() failed (%d)\n", rc);
+			fprintf(stderr, "tcp_conn_recv() failed: %s\n", str_error(rc));
 			return rc;
 		}
 		
@@ -264,8 +264,8 @@ static int uri_get(const char *uri, tcp_conn_t *conn)
 		goto out;
 	}
 	
-	fd = vfs_lookup_open(fname, WALK_REGULAR, MODE_READ);
-	if (fd < 0) {
+	rc = vfs_lookup_open(fname, WALK_REGULAR, MODE_READ, &fd);
+	if (rc != EOK) {
 		rc = send_response(conn, msg_not_found);
 		goto out;
 	}
