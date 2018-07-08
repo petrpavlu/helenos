@@ -161,13 +161,13 @@ static int connect_task(task_id_t task_id)
 	}
 	
 	int rc = udebug_begin(ksess);
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("udebug_begin() -> %s\n", str_error_name(rc));
 		return rc;
 	}
 	
 	rc = udebug_set_evmask(ksess, UDEBUG_EM_ALL);
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("udebug_set_evmask(0x%x) -> %s\n ", UDEBUG_EM_ALL, str_error_name(rc));
 		return rc;
 	}
@@ -185,7 +185,7 @@ static int get_thread_list(void)
 
 	rc = udebug_thread_read(sess, thread_hash_buf,
 		THBUF_SIZE*sizeof(unsigned), &tb_copied, &tb_needed);
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("udebug_thread_read() -> %s\n", str_error_name(rc));
 		return rc;
 	}
@@ -259,7 +259,7 @@ void val_print(sysarg_t val, val_type_t v_type)
 }
 
 
-static void print_sc_retval(sysarg_t retval, val_type_t val_type)
+static void print_sc_retval(int retval, val_type_t val_type)
 {
 	printf(" -> ");
 	val_print(retval, val_type);
@@ -278,12 +278,12 @@ static void print_sc_args(sysarg_t *sc_args, int n)
 	putchar(')');
 }
 
-static void sc_ipc_call_async_fast(sysarg_t *sc_args, sysarg_t sc_rc)
+static void sc_ipc_call_async_fast(sysarg_t *sc_args, int sc_rc)
 {
 	ipc_call_t call;
 	sysarg_t phoneid;
 	
-	if (sc_rc != (sysarg_t) EOK)
+	if (sc_rc != EOK)
 		return;
 
 	phoneid = sc_args[0];
@@ -324,7 +324,7 @@ static void sc_ipc_wait(sysarg_t *sc_args, int sc_rc)
 	memset(&call, 0, sizeof(call));
 	rc = udebug_mem_read(sess, &call, sc_args[0], sizeof(call));
 	
-	if (rc >= 0)
+	if (rc == EOK)
 		ipcp_call_in(&call, sc_rc);
 }
 
@@ -337,7 +337,7 @@ static void event_syscall_b(unsigned thread_id, uintptr_t thread_hash,
 	/* Read syscall arguments */
 	rc = udebug_args_read(sess, thread_hash, sc_args);
 
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("error\n");
 		return;
 	}
@@ -367,7 +367,7 @@ static void event_syscall_e(unsigned thread_id, uintptr_t thread_hash,
 
 //	printf("[%d] ", thread_id);
 
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("error\n");
 		return;
 	}
@@ -444,7 +444,7 @@ static int trace_loop(void *thread_hash_arg)
 			break;
 		}
 
-		if (rc >= 0) {
+		if (rc == EOK) {
 			switch (ev_type) {
 			case UDEBUG_EVENT_SYSCALL_B:
 				event_syscall_b(thread_id, thread_hash, val0, (int)val1);
@@ -602,7 +602,7 @@ static void trace_task(task_id_t task_id)
 	ipcp_init();
 
 	rc = get_thread_list();
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("Failed to get thread list (%s)\n", str_error(rc));
 		return;
 	}
@@ -858,7 +858,7 @@ int main(int argc, char *argv[])
 	main_init();
 
 	rc = connect_task(task_id);
-	if (rc < 0) {
+	if (rc != EOK) {
 		printf("Failed connecting to task %" PRIu64 ".\n", task_id);
 		return 1;
 	}

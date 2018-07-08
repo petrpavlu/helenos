@@ -74,7 +74,7 @@ int task_set_name(const char *name)
 {
 	assert(name);
 	
-	return __SYSCALL2(SYS_TASK_SET_NAME, (sysarg_t) name, str_size(name));
+	return (int) __SYSCALL2(SYS_TASK_SET_NAME, (sysarg_t) name, str_size(name));
 }
 
 /** Kill a task.
@@ -368,7 +368,7 @@ int task_wait(task_wait_t *wait, task_exit_t *texit, int *retval)
 	assert(texit);
 	assert(retval);
 
-	sysarg_t rc;
+	int rc;
 	async_wait_for(wait->aid, &rc);
 
 	if (rc == EOK) {

@@ -113,7 +113,7 @@ int chardev_read(chardev_t *chardev, void *buf, size_t size, size_t *nread)
 		return rc;
 	}
 
-	sysarg_t retval;
+	int retval;
 	async_wait_for(req, &retval);
 
 	if (retval != EOK) {
@@ -123,7 +123,7 @@ int chardev_read(chardev_t *chardev, void *buf, size_t size, size_t *nread)
 
 	*nread = IPC_GET_ARG2(answer);
 	/* In case of partial success, ARG1 contains the error code */
-	return IPC_GET_ARG1(answer);
+	return (int) IPC_GET_ARG1(answer);
 
 }
 
@@ -165,7 +165,7 @@ static int chardev_write_once(chardev_t *chardev, const void *data,
 		return rc;
 	}
 
-	sysarg_t retval;
+	int retval;
 	async_wait_for(req, &retval);
 	if (retval != EOK) {
 		*nwritten = 0;
@@ -174,7 +174,7 @@ static int chardev_write_once(chardev_t *chardev, const void *data,
 
 	*nwritten = IPC_GET_ARG2(answer);
 	/* In case of partial success, ARG1 contains the error code */
-	return IPC_GET_ARG1(answer);
+	return (int) IPC_GET_ARG1(answer);
 }
 
 /** Write to character device.
