@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Jiri Svoboda
+ * Copyright (c) 2011 Petr Koupy
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup softint
  * @{
  */
-/** @file
- */
 
-#ifndef LIBC_INTTYPES_H_
-#define LIBC_INTTYPES_H_
+#ifndef __SOFTINT_ALIAS_H__
+#define __SOFTINT_ALIAS_H__
 
-#include <_bits/inttypes.h>
+#include <limits.h>
 
-#ifndef __HELENOS_DISABLE_INTMAX__
-intmax_t strtoimax(const char *__restrict__ nptr,
-    char **__restrict__ endptr, int base);
-uintmax_t strtoumax(const char *__restrict__ nptr,
-    char **__restrict__ endptr, int base);
+/* A utility macro for creating aliases for type `long`. */
+
+#if LONG_MAX == LLONG_MAX
+#define ALIAS(pre, post) pre##d##post() __attribute__((alias(#pre "t" #post)))
+#else
+#define ALIAS(pre, post) pre##d##post() __attribute__((alias(#pre "s" #post)))
 #endif
 
 #endif
