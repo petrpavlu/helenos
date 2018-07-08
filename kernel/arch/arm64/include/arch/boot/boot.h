@@ -37,7 +37,7 @@
 
 #define BOOT_OFFSET  0x80000
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 #include <stddef.h>
 
 #define BOOTINFO_TASK_NAME_BUFLEN  32
@@ -98,7 +98,7 @@ typedef struct {
 	memmap_t memmap;
 } bootinfo_t;
 
-#endif /* __ASM__ */
+#endif /* __ASSEMBLER__ */
 
 #endif
 

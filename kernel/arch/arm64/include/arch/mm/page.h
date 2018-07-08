@@ -40,14 +40,14 @@
 #include <mm/mm.h>
 #include <trace.h>
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 #include <typedefs.h>
-#endif /* __ASM__ */
+#endif /* __ASSEMBLER__ */
 
 #define PAGE_WIDTH  FRAME_WIDTH
 #define PAGE_SIZE   FRAME_SIZE
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 
 extern uintptr_t physmem_base;
 
@@ -56,7 +56,7 @@ extern uintptr_t physmem_base;
 #define PA2KA(x) \
 	(((uintptr_t) (x)) + UINT64_C(0xffffffff80000000) - physmem_base)
 
-#endif /* __ASM__ */
+#endif /* __ASSEMBLER__ */
 
 /** Log2 size of each translation table entry. */
 #define PTL_ENTRY_SIZE_SHIFT  3
@@ -234,7 +234,7 @@ extern uintptr_t physmem_base;
 /** The present bit in a page table entry. */
 #define PTE_PRESENT_FLAG  (1 << PTE_PRESENT_SHIFT)
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 
 #include <arch/interrupt.h>
 
@@ -412,7 +412,7 @@ NO_TRACE static inline bool get_pt_writable(pte_t *pte)
 
 extern void page_arch_init(void);
 
-#endif /* __ASM__ */
+#endif /* __ASSEMBLER__ */
 
 #endif
 

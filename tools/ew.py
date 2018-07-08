@@ -272,7 +272,9 @@ emulators = {
 			'run' : qemu_run,
 			'image' : 'image.boot',
 			'net' : False,
-			'audio' : False
+			'audio' : False,
+			'xhci' : False,
+			'tablet' : False
 		}
 	},
 	'arm64' : {
@@ -325,8 +327,10 @@ emulators = {
 				'image' : 'image.iso',
 				'audio' : False,
 				'console' : False,
-                                'net' : False,
-                                'usb' : False
+				'net' : False,
+				'usb' : False,
+				'xhci' : False,
+				'tablet' : False
 			},
 			'sun4v' : {
 				'run' : qemu_run,
@@ -335,6 +339,8 @@ emulators = {
 				'console' : False,
 				'net' : False,
 				'usb' : False,
+				'xhci' : False,
+				'tablet' : False,
 				'expect' : {
 					'src' : 'ok ',
 					'dst' : 'boot\n'

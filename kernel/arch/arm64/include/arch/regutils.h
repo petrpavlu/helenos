@@ -36,7 +36,7 @@
 #ifndef KERN_arm64_REGUTILS_H_
 #define KERN_arm64_REGUTILS_H_
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 #if defined(KERNEL) || defined(BOOT)
 #include <stddef.h>
 #else
@@ -64,12 +64,12 @@
 		); \
 	}
 
-#else /* __ASM__ */
+#else /* __ASSEMBLER__ */
 
 #define SPECIAL_REG_GEN_READ(name)
 #define SPECIAL_REG_GEN_WRITE(name)
 
-#endif /* __ASM__*/
+#endif /* __ASSEMBLER__*/
 
 /* CurrentEL */
 SPECIAL_REG_GEN_READ(CurrentEL)

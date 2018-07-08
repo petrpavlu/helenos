@@ -80,9 +80,9 @@
  * the target level is using AArch32, SError or vSError. */
 #define EXC_LOWER_EL_AARCH32_SERROR    15
 
-#ifndef __ASM__
+#ifndef __ASSEMBLER__
 extern void exception_init(void);
-#endif /* __ASM__ */
+#endif /* __ASSEMBLER__ */
 
 #endif
 
