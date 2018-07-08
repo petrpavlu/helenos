@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2010 Lenka Trochtova
+ * Copyright (c) 2008 Pavel Rimsky
+ * Copyright (c) 2017 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +27,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup sparc64
  * @{
  */
-/** @file
+/**
+ * @file
+ * @brief Niagara input/output buffer shared between kernel and user space
  */
 
-#ifndef LIBDRV_CHAR_DEV_IFACE_H_
-#define LIBDRV_CHAR_DEV_IFACE_H_
-
-#include <async.h>
-
-typedef enum {
-	CHAR_DEV_READ = 0,
-	CHAR_DEV_WRITE
-} char_dev_method_t;
-
-extern ssize_t char_dev_read(async_sess_t *, void *, size_t);
-extern ssize_t char_dev_write(async_sess_t *, void *, size_t);
-
+#ifdef KERNEL
+#include <mm/as.h>
+#else
+#include <as.h>
 #endif
+
+#include <stdint.h>
+
+#define OUTPUT_BUFFER_SIZE  ((PAGE_SIZE) - 2 * 8)
+
+typedef struct {
+	uint64_t read_ptr;
+	uint64_t write_ptr;
+	char data[OUTPUT_BUFFER_SIZE];
+} __attribute__ ((packed)) niagara_output_buffer_t;
+
+#define INPUT_BUFFER_SIZE  ((PAGE_SIZE) - 2 * 8)
+
+typedef struct {
+	uint64_t write_ptr;
+	uint64_t read_ptr;
+	char data[INPUT_BUFFER_SIZE];
+} __attribute__ ((packed)) niagara_input_buffer_t;
 
 /** @}
  */

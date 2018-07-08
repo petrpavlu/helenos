@@ -112,7 +112,7 @@
 #include <sys/time.h>
 #include <libarch/barrier.h>
 #include <stdbool.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <mem.h>
 #include <stdlib.h>
 #include <macros.h>
@@ -1867,6 +1867,25 @@ void async_usleep(suseconds_t timeout)
 	/* Futex is up automatically after fibril_switch() */
 	
 	amsg_destroy(msg);
+}
+
+/** Delay execution for the specified number of seconds
+ *
+ * @param sec Number of seconds to sleep
+ */
+void async_sleep(unsigned int sec)
+{
+	/*
+	 * Sleep in 1000 second steps to support
+	 * full argument range
+	 */
+
+	while (sec > 0) {
+		unsigned int period = (sec > 1000) ? 1000 : sec;
+
+		async_usleep(period * 1000000);
+		sec -= period;
+	}
 }
 
 /** Pseudo-synchronous message sending - fast version.

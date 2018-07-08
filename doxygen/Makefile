@@ -1,6 +1,5 @@
 #
-# Copyright (c) 2005 Martin Decky
-# Copyright (c) 2007 Jakub Jermar
+# Copyright (c) 2017 Jiri Svoboda
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,16 +26,21 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-USPACE_PREFIX = ../../..
-BINARY = output
-LIBS = drv
+cfg_file = doxygen.cfg
+gen_cfg = doxygen.cfg.gen
+patch_file = doxygen.cfg.diff
+output_dirs = latex html
 
-SOURCES = \
-	ctl/serial.c \
-	port/ega.c \
-	port/pl011.c \
-	port/chardev.c \
-	proto/vt100.c \
-	output.c
+all: doxygen.cfg
+	doxygen $^
 
-include $(USPACE_PREFIX)/Makefile.common
+clean:
+	rm -f $(gen_cfg) $(cfg_file)
+	rm -rf $(output_dirs)
+
+$(cfg_file): $(gen_cfg)
+	cp $^ $@
+	patch $@ $(patch_file)
+
+$(gen_cfg):
+	doxygen -g $@

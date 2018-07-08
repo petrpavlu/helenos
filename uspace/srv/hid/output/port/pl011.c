@@ -84,6 +84,11 @@ static void pl011_control_puts(const char *str)
 		pl011_sendb(*str++);
 }
 
+static void pl011_flush(void)
+{
+	// TODO
+}
+
 int pl011_init(void)
 {
 	sysarg_t present;
@@ -119,7 +124,7 @@ int pl011_init(void)
 		return rc;
 
 	printf("pl011_init(), serial_init\n");
-	return serial_init(pl011_putchar, pl011_control_puts);
+	return serial_init(pl011_putchar, pl011_control_puts, pl011_flush);
 }
 
 /** @}

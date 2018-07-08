@@ -26,16 +26,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stddef.h>
 #include <errno.h>
-#include <malloc.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <macros.h>
 #include <as.h>
 #include <task.h>
 #include <ipc/output.h>
 #include <config.h>
 #include "port/ega.h"
-#include "port/kchar.h"
 #include "port/pl011.h"
 #include "port/chardev.h"
 #include "output.h"
@@ -220,6 +219,8 @@ static void srv_cursor_update(ipc_callid_t iid, ipc_call_t *icall)
 		
 		dev->ops.cursor_update(dev, prev_col, prev_row, col, row,
 		    visible);
+		dev->ops.flush(dev);
+
 	}
 	
 	async_answer_0(iid, EOK);
@@ -343,7 +344,10 @@ static void srv_update(ipc_callid_t iid, ipc_call_t *icall)
 					dev->ops.char_update(dev, x, y);
 			}
 		}
+		
+		dev->ops.flush(dev);
 	}
+	
 	
 	async_answer_0(iid, EOK);
 }
@@ -381,8 +385,9 @@ static void srv_damage(ipc_callid_t iid, ipc_call_t *icall)
 				dev->ops.char_update(dev, col + x, row + y);
 			}
 		}
+		dev->ops.flush(dev);
+
 	}
-	
 	async_answer_0(iid, EOK);
 }
 
@@ -477,7 +482,6 @@ int main(int argc, char *argv[])
 	
 	if (!config_key_exists("console")) {
 		ega_init();
-		kchar_init();
 		pl011_init();
 	}
 	

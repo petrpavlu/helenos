@@ -44,31 +44,6 @@ static void sun4v_con_connection(ipc_callid_t, ipc_call_t *, void *);
 
 #define POLL_INTERVAL  10000
 
-/*
- * Kernel counterpart of the driver pushes characters (it has read) here.
- * Keep in sync with the definition from
- * kernel/arch/sparc64/src/drivers/niagara.c.
- */
-#define INPUT_BUFFER_SIZE  ((PAGE_SIZE) - 2 * 8)
-
-typedef volatile struct {
-	uint64_t write_ptr;
-	uint64_t read_ptr;
-	char data[INPUT_BUFFER_SIZE];
-} __attribute__((packed)) __attribute__((aligned(PAGE_SIZE))) *input_buffer_t;
-
-#define OUTPUT_FIFO_SIZE  ((PAGE_SIZE) - 2 * sizeof(uint64_t))
-
-typedef volatile struct {
-	uint64_t read_ptr;
-	uint64_t write_ptr;
-	char data[OUTPUT_FIFO_SIZE];
-} __attribute__((packed)) output_fifo_t;
-
-/* virtual address of the shared buffer */
-static input_buffer_t input_buffer;
-static output_fifo_t *output_fifo;
-
 static int sun4v_con_read(chardev_srv_t *, void *, size_t, size_t *);
 static int sun4v_con_write(chardev_srv_t *, const void *, size_t, size_t *);
 
@@ -82,13 +57,13 @@ static void sun4v_con_putchar(sun4v_con_t *con, uint8_t data)
 	if (data == '\n')
 		sun4v_con_putchar(con, '\r');
 
-	while (output_fifo->write_ptr ==
-	    (output_fifo->read_ptr + OUTPUT_FIFO_SIZE - 1)
-	    % OUTPUT_FIFO_SIZE);
+	while (con->output_buffer->write_ptr ==
+	    (con->output_buffer->read_ptr + OUTPUT_BUFFER_SIZE - 1)
+	    % OUTPUT_BUFFER_SIZE);
 
-	output_fifo->data[output_fifo->write_ptr] = data;
-	output_fifo->write_ptr =
-	    ((output_fifo->write_ptr) + 1) % OUTPUT_FIFO_SIZE;
+	con->output_buffer->data[con->output_buffer->write_ptr] = data;
+	con->output_buffer->write_ptr =
+	    ((con->output_buffer->write_ptr) + 1) % OUTPUT_BUFFER_SIZE;
 }
 
 /** Add sun4v console device. */
@@ -98,7 +73,7 @@ int sun4v_con_add(sun4v_con_t *con, sun4v_con_res_t *res)
 	int rc;
 
 	con->res = *res;
-	input_buffer = (input_buffer_t) AS_AREA_ANY;
+	con->input_buffer = (niagara_input_buffer_t *) AS_AREA_ANY;
 
 	fun = ddf_fun_create(con->dev, fun_exposed, "a");
 	if (fun == NULL) {
@@ -114,16 +89,16 @@ int sun4v_con_add(sun4v_con_t *con, sun4v_con_res_t *res)
 	ddf_fun_set_conn_handler(fun, sun4v_con_connection);
 
 	rc = physmem_map(res->in_base, 1, AS_AREA_READ | AS_AREA_WRITE,
-	    (void *) &input_buffer);
+	    (void *) &con->input_buffer);
 	if (rc != EOK) {
 		ddf_msg(LVL_ERROR, "Error mapping memory: %d", rc);
 		goto error;
 	}
 
-	output_fifo = (output_fifo_t *) AS_AREA_ANY;
+	con->output_buffer = (niagara_output_buffer_t *) AS_AREA_ANY;
 
 	rc = physmem_map(res->out_base, 1, AS_AREA_READ | AS_AREA_WRITE,
-	    (void *) &output_fifo);
+	    (void *) &con->output_buffer);
 	if (rc != EOK) {
 		ddf_msg(LVL_ERROR, "Error mapping memory: %d", rc);
 		return rc;
@@ -139,11 +114,11 @@ int sun4v_con_add(sun4v_con_t *con, sun4v_con_res_t *res)
 
 	return EOK;
 error:
-	if (input_buffer != (input_buffer_t) AS_AREA_ANY)
-		physmem_unmap((void *) input_buffer);
+	if (con->input_buffer != (niagara_input_buffer_t *) AS_AREA_ANY)
+		physmem_unmap((void *) con->input_buffer);
 
-	if (output_fifo != (output_fifo_t *) AS_AREA_ANY)
-		physmem_unmap((void *) output_fifo);
+	if (con->output_buffer != (niagara_output_buffer_t *) AS_AREA_ANY)
+		physmem_unmap((void *) con->output_buffer);
 
 	if (fun != NULL)
 		ddf_fun_destroy(fun);
@@ -167,18 +142,19 @@ int sun4v_con_gone(sun4v_con_t *con)
 static int sun4v_con_read(chardev_srv_t *srv, void *buf, size_t size,
     size_t *nread)
 {
+	sun4v_con_t *con = (sun4v_con_t *) srv->srvs->sarg;
 	size_t p;
 	uint8_t *bp = (uint8_t *) buf;
 	char c;
 
-	while (input_buffer->read_ptr == input_buffer->write_ptr)
-		fibril_usleep(POLL_INTERVAL);
+	while (con->input_buffer->read_ptr == con->input_buffer->write_ptr)
+		async_usleep(POLL_INTERVAL);
 
 	p = 0;
-	while (p < size && input_buffer->read_ptr != input_buffer->write_ptr) {
-		c = input_buffer->data[input_buffer->read_ptr];
-		input_buffer->read_ptr =
-		    ((input_buffer->read_ptr) + 1) % INPUT_BUFFER_SIZE;
+	while (p < size && con->input_buffer->read_ptr != con->input_buffer->write_ptr) {
+		c = con->input_buffer->data[con->input_buffer->read_ptr];
+		con->input_buffer->read_ptr =
+		    ((con->input_buffer->read_ptr) + 1) % INPUT_BUFFER_SIZE;
 		bp[p++] = c;
 	}
 
