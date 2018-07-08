@@ -31,35 +31,35 @@
  */
 /**
  * @file
- * 
- * User space RCU is based on URCU utilizing signals [1]. This 
- * implementation does not however signal each thread of the process 
+ *
+ * User space RCU is based on URCU utilizing signals [1]. This
+ * implementation does not however signal each thread of the process
  * to issue a memory barrier. Instead, we introduced a syscall that
  * issues memory barriers (via IPIs) on cpus that are running threads
  * of the current process. First, it does not require us to schedule
- * and run every thread of the process. Second, IPIs are less intrusive 
+ * and run every thread of the process. Second, IPIs are less intrusive
  * than switching contexts and entering user space.
- * 
+ *
  * This algorithm is further modified to require a single instead of
  * two reader group changes per grace period. Signal-URCU flips
- * the reader group and waits for readers of the previous group 
+ * the reader group and waits for readers of the previous group
  * twice in succession in order to wait for new readers that were
- * delayed and mistakenly associated with the previous reader group. 
+ * delayed and mistakenly associated with the previous reader group.
  * The modified algorithm ensures that the new reader group is
  * always empty (by explicitly waiting for it to become empty).
  * Only then does it flip the reader group and wait for preexisting
  * readers of the old reader group (invariant of SRCU [2, 3]).
- * 
- * 
+ *
+ *
  * [1] User-level implementations of read-copy update,
  *     2012, appendix
  *     http://www.rdrop.com/users/paulmck/RCU/urcu-supp-accepted.2011.08.30a.pdf
- * 
+ *
  * [2] linux/kernel/srcu.c in Linux 3.5-rc2,
  *     2012
  *     http://tomoyo.sourceforge.jp/cgi-bin/lxr/source/kernel/srcu.c?v=linux-3.5-rc2-ccs-1.8.3
  *
- * [3] [RFC PATCH 5/5 single-thread-version] implement 
+ * [3] [RFC PATCH 5/5 single-thread-version] implement
  *     per-domain single-thread state machine,
  *     2012, Lai
  *     https://lkml.org/lkml/2012/3/6/586
@@ -161,39 +161,39 @@ static size_t get_other_group(size_t group);
 
 
 /** Registers a fibril so it may start using RCU read sections.
- * 
+ *
  * A fibril must be registered with rcu before it can enter RCU critical
  * sections delineated by rcu_read_lock() and rcu_read_unlock().
  */
 void rcu_register_fibril(void)
 {
 	assert(!fibril_rcu.registered);
-	
+
 	futex_down(&rcu.list_futex);
 	list_append(&fibril_rcu.link, &rcu.fibrils_list);
 	futex_up(&rcu.list_futex);
-	
+
 	fibril_rcu.registered = true;
 }
 
 /** Deregisters a fibril that had been using RCU read sections.
- * 
+ *
  * A fibril must be deregistered before it exits if it had
  * been registered with rcu via rcu_register_fibril().
  */
 void rcu_deregister_fibril(void)
 {
 	assert(fibril_rcu.registered);
-	
-	/* 
+
+	/*
 	 * Forcefully unlock any reader sections. The fibril is exiting
 	 * so it is not holding any references to data protected by the
-	 * rcu section. Therefore, it is safe to unlock. Otherwise, 
+	 * rcu section. Therefore, it is safe to unlock. Otherwise,
 	 * rcu_synchronize() would wait indefinitely.
 	 */
 	memory_barrier();
 	fibril_rcu.nesting_cnt = 0;
-	
+
 	futex_down(&rcu.list_futex);
 	list_remove(&fibril_rcu.link);
 	futex_up(&rcu.list_futex);
@@ -201,16 +201,16 @@ void rcu_deregister_fibril(void)
 	fibril_rcu.registered = false;
 }
 
-/** Delimits the start of an RCU reader critical section. 
- * 
- * RCU reader sections may be nested.  
+/** Delimits the start of an RCU reader critical section.
+ *
+ * RCU reader sections may be nested.
  */
 void rcu_read_lock(void)
 {
 	assert(fibril_rcu.registered);
-	
+
 	size_t nesting_cnt = ACCESS_ONCE(fibril_rcu.nesting_cnt);
-	
+
 	if (0 == (nesting_cnt >> RCU_NESTING_SHIFT)) {
 		ACCESS_ONCE(fibril_rcu.nesting_cnt) = ACCESS_ONCE(rcu.reader_group);
 		/* Required by MB_FORCE_L */
@@ -225,7 +225,7 @@ void rcu_read_unlock(void)
 {
 	assert(fibril_rcu.registered);
 	assert(rcu_read_locked());
-	
+
 	/* Required by MB_FORCE_U */
 	compiler_barrier(); /* CC_BAR_U */
 	/* todo: ACCESS_ONCE(nesting_cnt) ? */
@@ -242,17 +242,17 @@ bool rcu_read_locked(void)
 void _rcu_synchronize(blocking_mode_t blocking_mode)
 {
 	assert(!rcu_read_locked());
-	
+
 	/* Contain load of rcu.cur_gp. */
 	memory_barrier();
 
 	/* Approximately the number of the GP in progress. */
 	size_t gp_in_progress = ACCESS_ONCE(rcu.cur_gp);
-	
+
 	lock_sync(blocking_mode);
-	
-	/* 
-	 * Exit early if we were stuck waiting for the mutex for a full grace 
+
+	/*
+	 * Exit early if we were stuck waiting for the mutex for a full grace
 	 * period. Started waiting during gp_in_progress (or gp_in_progress + 1
 	 * if the value propagated to this cpu too late) so wait for the next
 	 * full GP, gp_in_progress + 1, to finish. Ie don't wait if the GP
@@ -263,65 +263,65 @@ void _rcu_synchronize(blocking_mode_t blocking_mode)
 		unlock_sync();
 		return;
 	}
-	
+
 	++ACCESS_ONCE(rcu.cur_gp);
-	
-	/* 
-	 * Pairs up with MB_FORCE_L (ie CC_BAR_L). Makes changes prior 
-	 * to rcu_synchronize() visible to new readers. 
+
+	/*
+	 * Pairs up with MB_FORCE_L (ie CC_BAR_L). Makes changes prior
+	 * to rcu_synchronize() visible to new readers.
 	 */
 	memory_barrier(); /* MB_A */
-	
-	/* 
-	 * Pairs up with MB_A. 
-	 * 
+
+	/*
+	 * Pairs up with MB_A.
+	 *
 	 * If the memory barrier is issued before CC_BAR_L in the target
 	 * thread, it pairs up with MB_A and the thread sees all changes
 	 * prior to rcu_synchronize(). Ie any reader sections are new
-	 * rcu readers.  
-	 * 
+	 * rcu readers.
+	 *
 	 * If the memory barrier is issued after CC_BAR_L, it pairs up
 	 * with MB_B and it will make the most recent nesting_cnt visible
 	 * in this thread. Since the reader may have already accessed
 	 * memory protected by RCU (it ran instructions passed CC_BAR_L),
-	 * it is a preexisting reader. Seeing the most recent nesting_cnt 
+	 * it is a preexisting reader. Seeing the most recent nesting_cnt
 	 * ensures the thread will be identified as a preexisting reader
 	 * and we will wait for it in wait_for_readers(old_reader_group).
 	 */
 	force_mb_in_all_threads(); /* MB_FORCE_L */
-	
-	/* 
+
+	/*
 	 * Pairs with MB_FORCE_L (ie CC_BAR_L, CC_BAR_U) and makes the most
 	 * current fibril.nesting_cnt visible to this cpu.
 	 */
 	read_barrier(); /* MB_B */
-	
+
 	size_t new_reader_group = get_other_group(rcu.reader_group);
 	wait_for_readers(new_reader_group, blocking_mode);
-	
+
 	/* Separates waiting for readers in new_reader_group from group flip. */
 	memory_barrier();
-	
+
 	/* Flip the group new readers should associate with. */
 	size_t old_reader_group = rcu.reader_group;
 	rcu.reader_group = new_reader_group;
 
 	/* Flip the group before waiting for preexisting readers in the old group.*/
 	memory_barrier();
-	
+
 	wait_for_readers(old_reader_group, blocking_mode);
-	
+
 	/* MB_FORCE_U  */
 	force_mb_in_all_threads(); /* MB_FORCE_U */
-	
+
 	unlock_sync();
 }
 
 /** Issues a memory barrier in each thread of this process. */
 static void force_mb_in_all_threads(void)
 {
-	/* 
-	 * Only issue barriers in running threads. The scheduler will 
+	/*
+	 * Only issue barriers in running threads. The scheduler will
 	 * execute additional memory barriers when switching to threads
 	 * of the process that are currently not running.
 	 */
@@ -332,15 +332,15 @@ static void force_mb_in_all_threads(void)
 static void wait_for_readers(size_t reader_group, blocking_mode_t blocking_mode)
 {
 	futex_down(&rcu.list_futex);
-	
+
 	list_t quiescent_fibrils;
 	list_initialize(&quiescent_fibrils);
-	
+
 	while (!list_empty(&rcu.fibrils_list)) {
 		list_foreach_safe(rcu.fibrils_list, fibril_it, next_fibril) {
-			fibril_rcu_data_t *fib = member_to_inst(fibril_it, 
+			fibril_rcu_data_t *fib = member_to_inst(fibril_it,
 				fibril_rcu_data_t, link);
-			
+
 			if (is_preexisting_reader(fib, reader_group)) {
 				futex_up(&rcu.list_futex);
 				sync_sleep(blocking_mode);
@@ -353,7 +353,7 @@ static void wait_for_readers(size_t reader_group, blocking_mode_t blocking_mode)
 			}
 		}
 	}
-	
+
 	list_concat(&rcu.fibrils_list, &quiescent_fibrils);
 	futex_up(&rcu.list_futex);
 }
@@ -365,16 +365,16 @@ static void lock_sync(blocking_mode_t blocking_mode)
 		if (blocking_mode == BM_BLOCK_FIBRIL) {
 			blocked_fibril_t blocked_fib;
 			blocked_fib.id = fibril_get_id();
-				
+
 			list_append(&blocked_fib.link, &rcu.sync_lock.blocked_fibrils);
-			
+
 			do {
 				blocked_fib.is_ready = false;
 				futex_up(&rcu.sync_lock.futex);
 				fibril_switch(FIBRIL_TO_MANAGER);
 				futex_down(&rcu.sync_lock.futex);
 			} while (rcu.sync_lock.locked);
-			
+
 			list_remove(&blocked_fib.link);
 			rcu.sync_lock.locked = true;
 		} else {
@@ -391,8 +391,8 @@ static void lock_sync(blocking_mode_t blocking_mode)
 static void unlock_sync(void)
 {
 	assert(rcu.sync_lock.locked);
-	
-	/* 
+
+	/*
 	 * Blocked threads have a priority over fibrils when accessing sync().
 	 * Pass the lock onto a waiting thread.
 	 */
@@ -401,17 +401,17 @@ static void unlock_sync(void)
 		futex_up(&rcu.sync_lock.futex_blocking_threads);
 	} else {
 		/* Unlock but wake up any fibrils waiting for the lock. */
-		
+
 		if (!list_empty(&rcu.sync_lock.blocked_fibrils)) {
 			blocked_fibril_t *blocked_fib = member_to_inst(
 				list_first(&rcu.sync_lock.blocked_fibrils), blocked_fibril_t, link);
-	
+
 			if (!blocked_fib->is_ready) {
 				blocked_fib->is_ready = true;
 				fibril_add_ready(blocked_fib->id);
 			}
 		}
-		
+
 		rcu.sync_lock.locked = false;
 		futex_up(&rcu.sync_lock.futex);
 	}
@@ -420,9 +420,9 @@ static void unlock_sync(void)
 static void sync_sleep(blocking_mode_t blocking_mode)
 {
 	assert(rcu.sync_lock.locked);
-	/* 
-	 * Release the futex to avoid deadlocks in singlethreaded apps 
-	 * but keep sync locked. 
+	/*
+	 * Release the futex to avoid deadlocks in singlethreaded apps
+	 * but keep sync locked.
 	 */
 	futex_up(&rcu.sync_lock.futex);
 
@@ -431,7 +431,7 @@ static void sync_sleep(blocking_mode_t blocking_mode)
 	} else {
 		thread_usleep(RCU_SLEEP_MS * 1000);
 	}
-		
+
 	futex_down(&rcu.sync_lock.futex);
 }
 
@@ -439,13 +439,13 @@ static void sync_sleep(blocking_mode_t blocking_mode)
 static bool is_preexisting_reader(const fibril_rcu_data_t *fib, size_t group)
 {
 	size_t nesting_cnt = ACCESS_ONCE(fib->nesting_cnt);
-	
+
 	return is_in_group(nesting_cnt, group) && is_in_reader_section(nesting_cnt);
 }
 
 static size_t get_other_group(size_t group)
 {
-	if (group == RCU_GROUP_A) 
+	if (group == RCU_GROUP_A)
 		return RCU_GROUP_B;
 	else
 		return RCU_GROUP_A;

@@ -36,7 +36,7 @@
  * function. There is more code than necessary to account for the possibility
  * of adding POSIX-like locale support to the system in the future. Functions
  * that are only necessary for locale support currently simply use single
- * characters for "collation elements". 
+ * characters for "collation elements".
  * When (or if) locales are properly implemented, extending this implementation
  * will be fairly straightforward.
  */
@@ -193,7 +193,7 @@ static const struct _char_class _char_classes[] = {
 
 /**
  * Compare function for binary search in the _char_classes array.
- * 
+ *
  * @param key Key of the searched element.
  * @param elem Element of _char_classes array.
  * @return Ordering indicator (-1 less than, 0 equal, 1 greater than).
@@ -206,7 +206,7 @@ static int _class_compare(const void *key, const void *elem)
 
 /**
  * Returns whether the given character belongs to the specified character class.
- * 
+ *
  * @param cname Name of the character class.
  * @param c Character.
  * @return True if the character belongs to the class, false otherwise.
@@ -230,7 +230,7 @@ static bool _is_in_class (const char *cname, int c)
 /**
  * Tries to parse an initial part of the pattern as a character class pattern,
  * and if successful, matches the beginning of the given string against the class.
- * 
+ *
  * @param pattern Pointer to the pattern to match. Must begin with a class
  *    specifier and is repositioned to the first character after the specifier
  *    if successful.
@@ -256,7 +256,7 @@ static int _match_char_class(const char **pattern, const char *str, int flags)
 /**
  * Reads the next collating element in the pattern, taking into account
  * locale (if supported) and flags (see fnmatch()).
- * 
+ *
  * @param pattern Pattern.
  * @param flags Flags given to fnmatch().
  * @return Collating element on success,
@@ -300,7 +300,7 @@ static coll_elm_t _next_coll_elm(const char **pattern, int flags)
 	if (pathname && *p == '/') {
 		return COLL_ELM_INVALID;
 	}
-	
+
 	*pattern = p + 1;
 	return _coll_elm_char(*p);
 }
@@ -308,7 +308,7 @@ static coll_elm_t _next_coll_elm(const char **pattern, int flags)
 /**
  * Matches the beginning of the given string against a bracket expression
  * the pattern begins with.
- * 
+ *
  * @param pattern Pointer to the beginning of a bracket expression in a pattern.
  *     On success, the pointer is moved to the first character after the
  *     bracket expression.
@@ -358,9 +358,9 @@ static int _match_bracket_expr(const char **pattern, const char *str, int flags)
 		_matched(*str == ']');
 		p++;
 	}
-	
+
 	coll_elm_t current_elm = COLL_ELM_INVALID;
-	
+
 	while (*p != ']') {
 		if (*p == '-' && *(p + 1) != ']' &&
 		    current_elm != COLL_ELM_INVALID) {
@@ -373,13 +373,13 @@ static int _match_bracket_expr(const char **pattern, const char *str, int flags)
 			_matched(_coll_elm_between(current_elm, end_elm, str));
 			continue;
 		}
-	
+
 		if (*p == '[' && *(p + 1) == ':') {
 			current_elm = COLL_ELM_INVALID;
 			_matched(_match_char_class(&p, str, flags));
 			continue;
 		}
-		
+
 		current_elm = _next_coll_elm(&p, flags);
 		if (current_elm == COLL_ELM_INVALID) {
 			return INVALID_PATTERN;
@@ -404,7 +404,7 @@ static int _match_bracket_expr(const char **pattern, const char *str, int flags)
 /**
  * Matches a portion of the pattern containing no asterisks (*) against
  * the given string.
- * 
+ *
  * @param pattern Pointer to the unmatched portion of the pattern.
  *     On success, the pointer is moved to the first asterisk, or to the
  *     terminating nul character, whichever occurs first.
@@ -459,7 +459,7 @@ static bool _partial_match(const char **pattern, const char **string, int flags)
 				/* Initial period must be matched explicitly. */
 				return false;
 			}
-			
+
 			/* None of the above, match anything else. */
 			p++;
 			s++;
@@ -495,11 +495,11 @@ static bool _partial_match(const char **pattern, const char **string, int flags)
 	}
 
 	/* Entire sub-pattern matched. */
-	
+
 	/* postconditions */
 	assert(*p == '\0' || *p == '*');
 	assert(*p != '\0' || *s == '\0' || (leading_dir && *s == '/'));
-	
+
 	*pattern = p;
 	*string = s;
 	return true;
@@ -507,7 +507,7 @@ static bool _partial_match(const char **pattern, const char **string, int flags)
 
 /**
  * Match string against a pattern.
- * 
+ *
  * @param pattern Pattern.
  * @param string String to match.
  * @param flags Flags given to fnmatch().
@@ -570,7 +570,7 @@ static bool _full_match(const char *pattern, const char *string, int flags)
 
 /**
  * Transform the entire string to lowercase.
- * 
+ *
  * @param s Input string.
  * @return Newly allocated copy of the input string with all uppercase
  *     characters folded to their lowercase variants.
@@ -666,10 +666,10 @@ void __posix_fnmatch_test()
 	nomatch("[^a-ce-z]", "z", 0);
 	match("helen??", "helenos", 0);
 	match("****booo****", "booo", 0);
-	
+
 	match("hello[[:space:]]world", "hello world", 0);
 	nomatch("hello[[:alpha:]]world", "hello world", 0);
-	
+
 	match("/hoooo*", "/hooooooo/hooo", 0);
 	nomatch("/hoooo*", "/hooooooo/hooo", FNM_PATHNAME);
 	nomatch("/hoooo*/", "/hooooooo/hooo", FNM_PATHNAME);
@@ -679,20 +679,20 @@ void __posix_fnmatch_test()
 	nomatch("/hoooo*/", "/hooooooo/hooo", FNM_PATHNAME | FNM_LEADING_DIR);
 	nomatch("/hoooo", "/hooooooo/hooo", FNM_LEADING_DIR);
 	match("/hooooooo", "/hooooooo/hooo", FNM_LEADING_DIR);
-	
+
 	match("*", "hell", 0);
 	match("*?", "hell", 0);
 	match("?*?", "hell", 0);
 	match("?*??", "hell", 0);
 	match("??*??", "hell", 0);
 	nomatch("???*??", "hell", 0);
-	
+
 	nomatch("", "hell", 0);
 	nomatch("?", "hell", 0);
 	nomatch("??", "hell", 0);
 	nomatch("???", "hell", 0);
 	match("????", "hell", 0);
-	
+
 	match("*", "h.ello", FNM_PERIOD);
 	match("*", "h.ello", FNM_PATHNAME | FNM_PERIOD);
 	nomatch("*", ".hello", FNM_PERIOD);

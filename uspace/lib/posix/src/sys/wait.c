@@ -67,7 +67,7 @@ int __posix_wtermsig(int status) {
 
 /**
  * Wait for any child process to stop or terminate.
- * 
+ *
  * @param stat_ptr Location of the final status code of the child process.
  * @return ID of the child process for which status is reported,
  *     -1 on signal interrupt, (pid_t)-1 otherwise.
@@ -81,7 +81,7 @@ pid_t wait(int *stat_ptr)
 
 /**
  * Wait for a child process to stop or terminate.
- * 
+ *
  * @param pid What child process shall the caller wait for. See POSIX manual
  *     for details.
  * @param stat_ptr Location of the final status code of the child process.
@@ -94,15 +94,15 @@ pid_t waitpid(pid_t pid, int *stat_ptr, int options)
 {
 	assert(stat_ptr != NULL);
 	assert(options == 0 /* None of the options are supported. */);
-	
+
 	task_exit_t texit;
 	int retval;
-	
+
 	if (failed(task_wait_task_id((task_id_t) pid, &texit, &retval))) {
 		/* Unable to retrieve status. */
 		return (pid_t) -1;
 	}
-	
+
 	if (texit == TASK_EXIT_NORMAL) {
 		// FIXME: relies on application not returning this value
 		assert(retval != INT_MIN);
@@ -111,7 +111,7 @@ pid_t waitpid(pid_t pid, int *stat_ptr, int options)
 		/* Reserve the lowest value for unexpected termination. */
 		*stat_ptr = INT_MIN;
 	}
-	
+
 	return pid;
 }
 

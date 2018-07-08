@@ -311,7 +311,7 @@ static errno_t fat_node_get_core(fat_node_t **nodepp, fat_idx_t *idxp)
 
 	d = ((fat_dentry_t *)b->data) + (idxp->pdi % DPS(bs));
 	if (FAT_IS_FAT32(bs)) {
-		nodep->firstc = uint16_t_le2host(d->firstc_lo) | 
+		nodep->firstc = uint16_t_le2host(d->firstc_lo) |
 		    (uint16_t_le2host(d->firstc_hi) << 16);
 	} else
 		nodep->firstc = uint16_t_le2host(d->firstc);
@@ -380,7 +380,7 @@ errno_t fat_match(fs_node_t **rfn, fs_node_t *pfn, const char *component)
 	fibril_mutex_lock(&parentp->idx->lock);
 	service_id = parentp->idx->service_id;
 	fibril_mutex_unlock(&parentp->idx->lock);
-	
+
 	fat_directory_t di;
 	rc = fat_directory_open(parentp, &di);
 	if (rc != EOK)
@@ -534,7 +534,7 @@ errno_t fat_create_node(fs_node_t **rfn, service_id_t service_id, int flags)
 error:
 	if (flags & L_DIRECTORY)
 		(void) fat_free_clusters(bs, service_id, mcl);
-	return rc;		
+	return rc;
 }
 
 errno_t fat_destroy_node(fs_node_t *fn)
@@ -715,7 +715,7 @@ errno_t fat_unlink(fs_node_t *pfn, fs_node_t *cfn, const char *nm)
 	fibril_mutex_lock(&childp->lock);
 	assert(childp->lnkcnt == 1);
 	fibril_mutex_lock(&childp->idx->lock);
-	
+
 	fat_directory_t di;
 	rc = fat_directory_open(parentp, &di);
 	if (rc != EOK)
@@ -855,7 +855,7 @@ errno_t fat_size_block(service_id_t service_id, uint32_t *size)
 errno_t fat_total_block_count(service_id_t service_id, uint64_t *count)
 {
 	fat_bs_t *bs;
-	
+
 	bs = block_bb_get(service_id);
 	*count = (SPC(bs)) ? TS(bs) / SPC(bs) : 0;
 
@@ -882,7 +882,7 @@ errno_t fat_free_block_count(service_id_t service_id, uint64_t *count)
 			block_count++;
 	}
 	*count = block_count;
-	
+
 	return EOK;
 }
 
@@ -1329,7 +1329,7 @@ fat_write(service_id_t service_id, fs_index_t index, aoff64_t pos,
 	aoff64_t boundary;
 	int flags = BLOCK_FLAGS_NONE;
 	errno_t rc;
-	
+
 	rc = fat_node_get(&fn, service_id, index);
 	if (rc != EOK)
 		return rc;

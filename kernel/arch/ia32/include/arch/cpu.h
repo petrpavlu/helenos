@@ -42,7 +42,7 @@
 #define EFLAGS_RF	(1 << 16)
 #define EFLAGS_ID	(1 << 21)
 
-#define CR0_PE		(1 << 0) 
+#define CR0_PE		(1 << 0)
 #define CR0_TS		(1 << 3)
 #define CR0_AM		(1 << 18)
 #define CR0_NW		(1 << 29)
@@ -79,7 +79,7 @@ typedef struct {
 	unsigned int id; /** CPU's local, ie physical, APIC ID. */
 
 	tss_t *tss;
-	
+
 	size_t iomapver_copy;  /** Copy of TASK's I/O Permission bitmap generation count. */
 } cpu_arch_t;
 

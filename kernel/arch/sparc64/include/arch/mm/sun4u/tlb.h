@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup sparc64mm	
+/** @addtogroup sparc64mm
  * @{
  */
 /** @file
@@ -78,7 +78,7 @@
 #define TLB_DSMALL	0
 #define TLB_DBIG_0	2
 #define TLB_DBIG_1	3
-	
+
 /* I-MMU: one small (16-entry) TLB and one big TLB */
 #define TLB_ISMALL	0
 #define TLB_IBIG	2
@@ -142,7 +142,7 @@ typedef union tlb_data_access_addr itlb_tag_read_addr_t;
  * for the US data access register VA structure. The rationale
  * behind this is to prevent careless mistakes in the code
  * caused by setting only the entry number and not the TLB
- * number in the US3 code (when taking the code from US). 
+ * number in the US3 code (when taking the code from US).
  */
 
 union dtlb_data_access_addr {
@@ -240,7 +240,7 @@ typedef union tlb_sfsr_reg tlb_sfsr_reg_t;
  */
 
 /**
- * Determine the number of entries in the DMMU's small TLB. 
+ * Determine the number of entries in the DMMU's small TLB.
  */
 NO_TRACE static inline uint16_t tlb_dsmall_size(void)
 {
@@ -248,7 +248,7 @@ NO_TRACE static inline uint16_t tlb_dsmall_size(void)
 }
 
 /**
- * Determine the number of entries in each DMMU's big TLB. 
+ * Determine the number of entries in each DMMU's big TLB.
  */
 NO_TRACE static inline uint16_t tlb_dbig_size(void)
 {
@@ -256,7 +256,7 @@ NO_TRACE static inline uint16_t tlb_dbig_size(void)
 }
 
 /**
- * Determine the number of entries in the IMMU's small TLB. 
+ * Determine the number of entries in the IMMU's small TLB.
  */
 NO_TRACE static inline uint16_t tlb_ismall_size(void)
 {
@@ -264,7 +264,7 @@ NO_TRACE static inline uint16_t tlb_ismall_size(void)
 }
 
 /**
- * Determine the number of entries in the IMMU's big TLB. 
+ * Determine the number of entries in the IMMU's big TLB.
  */
 NO_TRACE static inline uint16_t tlb_ibig_size(void)
 {
@@ -326,7 +326,7 @@ NO_TRACE static inline void mmu_secondary_context_write(uint64_t v)
 NO_TRACE static inline uint64_t itlb_data_access_read(size_t entry)
 {
 	itlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_entry = entry;
 	return asi_u64_read(ASI_ITLB_DATA_ACCESS_REG, reg.value);
@@ -340,7 +340,7 @@ NO_TRACE static inline uint64_t itlb_data_access_read(size_t entry)
 NO_TRACE static inline void itlb_data_access_write(size_t entry, uint64_t value)
 {
 	itlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_entry = entry;
 	asi_u64_write(ASI_ITLB_DATA_ACCESS_REG, reg.value, value);
@@ -357,7 +357,7 @@ NO_TRACE static inline void itlb_data_access_write(size_t entry, uint64_t value)
 NO_TRACE static inline uint64_t dtlb_data_access_read(size_t entry)
 {
 	dtlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_entry = entry;
 	return asi_u64_read(ASI_DTLB_DATA_ACCESS_REG, reg.value);
@@ -371,7 +371,7 @@ NO_TRACE static inline uint64_t dtlb_data_access_read(size_t entry)
 NO_TRACE static inline void dtlb_data_access_write(size_t entry, uint64_t value)
 {
 	dtlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_entry = entry;
 	asi_u64_write(ASI_DTLB_DATA_ACCESS_REG, reg.value, value);
@@ -422,7 +422,7 @@ NO_TRACE static inline uint64_t dtlb_tag_read_read(size_t entry)
 NO_TRACE static inline uint64_t itlb_data_access_read(int tlb, size_t entry)
 {
 	itlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_number = tlb;
 	reg.local_tlb_entry = entry;
@@ -438,7 +438,7 @@ NO_TRACE static inline void itlb_data_access_write(int tlb, size_t entry,
 	uint64_t value)
 {
 	itlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_number = tlb;
 	reg.local_tlb_entry = entry;
@@ -448,7 +448,7 @@ NO_TRACE static inline void itlb_data_access_write(int tlb, size_t entry,
 
 /** Read DMMU TLB Data Access Register.
  *
- * @param tlb		TLB number (one of TLB_DSMALL, TLB_DBIG, TLB_DBIG) 
+ * @param tlb		TLB number (one of TLB_DSMALL, TLB_DBIG, TLB_DBIG)
  * @param entry		TLB Entry index.
  *
  * @return		Current value of specified DMMU TLB Data Access
@@ -457,7 +457,7 @@ NO_TRACE static inline void itlb_data_access_write(int tlb, size_t entry,
 NO_TRACE static inline uint64_t dtlb_data_access_read(int tlb, size_t entry)
 {
 	dtlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_number = tlb;
 	reg.local_tlb_entry = entry;
@@ -466,7 +466,7 @@ NO_TRACE static inline uint64_t dtlb_data_access_read(int tlb, size_t entry)
 
 /** Write DMMU TLB Data Access Register.
  *
- * @param tlb		TLB number (one of TLB_DSMALL, TLB_DBIG_0, TLB_DBIG_1)  
+ * @param tlb		TLB number (one of TLB_DSMALL, TLB_DBIG_0, TLB_DBIG_1)
  * @param entry		TLB Entry index.
  * @param value		Value to be written.
  */
@@ -474,7 +474,7 @@ NO_TRACE static inline void dtlb_data_access_write(int tlb, size_t entry,
 	uint64_t value)
 {
 	dtlb_data_access_addr_t reg;
-	
+
 	reg.value = 0;
 	reg.tlb_number = tlb;
 	reg.local_tlb_entry = entry;
@@ -484,7 +484,7 @@ NO_TRACE static inline void dtlb_data_access_write(int tlb, size_t entry,
 
 /** Read IMMU TLB Tag Read Register.
  *
- * @param tlb		TLB number (one of TLB_ISMALL or TLB_IBIG) 
+ * @param tlb		TLB number (one of TLB_ISMALL or TLB_IBIG)
  * @param entry		TLB Entry index.
  *
  * @return		Current value of specified IMMU TLB Tag Read Register.
@@ -637,15 +637,15 @@ NO_TRACE static inline void itlb_demap(int type, int context_encoding, uintptr_t
 {
 	tlb_demap_addr_t da;
 	page_address_t pg;
-	
+
 	da.value = 0;
 	pg.address = page;
-	
+
 	da.type = type;
 	da.context = context_encoding;
 	da.vpn = pg.vpn;
-	
-	/* da.value is the address within the ASI */ 
+
+	/* da.value is the address within the ASI */
 	asi_u64_write(ASI_IMMU_DEMAP, da.value, 0);
 
 	flush_pipeline();
@@ -663,15 +663,15 @@ NO_TRACE static inline void dtlb_demap(int type, int context_encoding, uintptr_t
 {
 	tlb_demap_addr_t da;
 	page_address_t pg;
-	
+
 	da.value = 0;
 	pg.address = page;
-	
+
 	da.type = type;
 	da.context = context_encoding;
 	da.vpn = pg.vpn;
-	
-	/* da.value is the address within the ASI */ 
+
+	/* da.value is the address within the ASI */
 	asi_u64_write(ASI_DMMU_DEMAP, da.value, 0);
 
 	membar();

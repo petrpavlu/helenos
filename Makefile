@@ -47,7 +47,7 @@ CONFIG_HEADER = config.h
 ERRNO_HEADER = abi/include/abi/errno.h
 ERRNO_INPUT = abi/include/abi/errno.in
 
-.PHONY: all precheck cscope cscope_parts autotool config_auto config_default config distclean clean check releasefile release common boot kernel uspace export-posix
+.PHONY: all precheck cscope cscope_parts autotool config_auto config_default config distclean clean check releasefile release common boot kernel uspace export-posix space
 
 all: kernel uspace
 	$(MAKE) -r -C boot PRECHECK=$(PRECHECK)
@@ -88,6 +88,9 @@ ccheck: $(CCHECK)
 ccheck-fix: $(CCHECK)
 	tools/ccheck.sh --fix
 
+space:
+	tools/srepl '[ \t]\+$$' ''
+
 $(CCHECK):
 	cd tools && ./build-ccheck.sh
 
@@ -96,7 +99,7 @@ doxy:
 
 # Pre-integration build check
 check: $(CHECK)
-ifdef JOBS 
+ifdef JOBS
 	$(CHECK) -j $(JOBS)
 else
 	$(CHECK)

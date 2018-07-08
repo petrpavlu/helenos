@@ -65,7 +65,7 @@
 avltree_node_t *avltree_search(avltree_t *t, avltree_key_t key)
 {
 	avltree_node_t *p;
-	
+
 	/*
 	 * Iteratively descend to the leaf that can contain the searched key.
 	 */
@@ -75,7 +75,7 @@ avltree_node_t *avltree_search(avltree_t *t, avltree_key_t key)
 			p = p->lft;
 		else if (p->key < key)
 			p = p->rgt;
-		else 
+		else
 			return p;
 	}
 	return NULL;
@@ -91,19 +91,19 @@ avltree_node_t *avltree_search(avltree_t *t, avltree_key_t key)
 avltree_node_t *avltree_find_min(avltree_t *t)
 {
 	avltree_node_t *p = t->root;
-	
+
 	/*
 	 * Check whether the tree is empty.
 	 */
 	if (!p)
 		return NULL;
-	
+
 	/*
 	 * Iteratively descend to the leftmost leaf in the tree.
 	 */
-	while (p->lft != NULL) 
+	while (p->lft != NULL)
 		p = p->lft;
-	
+
 	return p;
 }
 
@@ -150,15 +150,15 @@ avltree_node_t *avltree_find_min(avltree_t *t)
 
 #define REBALANCE_INSERT_LR()		REBALANCE_INSERT_XY(lft, rgt, 1)
 #define REBALANCE_INSERT_RL()		REBALANCE_INSERT_XY(rgt, lft, -1)
-	
+
 /** Insert new node into AVL tree.
  *
  * @param t AVL tree.
  * @param newnode New node to be inserted.
- */ 
+ */
 void avltree_insert(avltree_t *t, avltree_node_t *newnode)
-{	
-	avltree_node_t *par; 
+{
+	avltree_node_t *par;
 	avltree_node_t *gpa;
 	avltree_node_t *top;
 	avltree_node_t **dpc;
@@ -169,9 +169,9 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
 
 	/*
 	 * Creating absolute key.
-	 */	
+	 */
 	key = newnode->key + t->base;
-	
+
 	/*
 	 * Iteratively descend to the leaf that can contain the new node.
 	 * Last node with non-zero balance in the way to leaf is stored as top -
@@ -222,7 +222,7 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
 	 */
 	if (top->par == NULL) {
 		dpc = &t->root;
-	} else { 
+	} else {
 		if (top->par->lft == top)
 			dpc = &top->par->lft;
 		else
@@ -243,7 +243,7 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
 			par = par->rgt;
 		}
 	}
-	
+
 	/*
 	 * To balance the tree, we must check and balance top node.
 	 */
@@ -254,15 +254,15 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
 			 * LL rotation.
 			 */
 			REBALANCE_INSERT_LL();
-		} else { 
+		} else {
 			/*
 			 * LR rotation.
 			 */
 			assert(par->balance == 1);
-			
+
 			REBALANCE_INSERT_LR();
 		}
-	} else if (top->balance == 2) { 
+	} else if (top->balance == 2) {
 		par = top->rgt;
 		if (par->balance == 1) {
 			/*
@@ -274,10 +274,10 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
 			 * RL rotation.
 			 */
 			assert(par->balance == -1);
-		
+
 			REBALANCE_INSERT_RL();
 		}
-	} else { 
+	} else {
 		/*
 		 * Balance is not broken, insertion is finised.
 		 */
@@ -302,7 +302,7 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
  * 		u's new parent.
  * @param ro	Read only operation; do not modify any tree pointers. This is
  *		useful for tracking direction via the dir pointer.
- * 
+ *
  * @return	Zero if w became the new root of the tree, otherwise return
  * 		non-zero.
  */
@@ -312,9 +312,9 @@ repair(avltree_t *t, avltree_node_t *u, avltree_node_t *v, avltree_node_t *w,
 {
 	if (u->par == NULL) {
 		if (!ro)
-			t->root = w;	
+			t->root = w;
 		return 0;
-	} else {	
+	} else {
 		if (u->par->lft == v) {
 			if (!ro)
 				u->par->lft = w;
@@ -361,7 +361,7 @@ repair(avltree_t *t, avltree_node_t *u, avltree_node_t *v, avltree_node_t *w,
  *
  * Because multiple identical keys are allowed, the parent pointers are
  * essential during deletion.
- * 
+ *
  * @param t AVL tree structure.
  * @param node Address of the node which will be deleted.
  */
@@ -374,11 +374,11 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 
 	assert(t);
 	assert(node);
-	
+
 	if (node->lft == NULL) {
 		if (node->rgt) {
 			/*
-			 * Replace the node with its only right son. 
+			 * Replace the node with its only right son.
 			 *
 			 * Balance of the right son will be repaired in the
 			 * balancing cycle.
@@ -387,7 +387,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 			cur->par = node->par;
 			gpa = cur;
 			dir = RIGHT;
-			cur->balance = node->balance; 
+			cur->balance = node->balance;
 		} else {
 			if (node->par == NULL) {
 				/*
@@ -420,7 +420,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 			 * was found. Replace the deleted node with this node.
 			 * Cutting off of the found node has two cases that
 			 * depend on its left son.
-			 */ 
+			 */
 			if (cur->lft) {
 				/*
 				 * The found node has a left son.
@@ -428,35 +428,35 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 				gpa = cur->lft;
 				gpa->par = cur->par;
 				dir = LEFT;
-				gpa->balance = cur->balance; 
+				gpa->balance = cur->balance;
 			} else {
 				dir = RIGHT;
 				gpa = cur->par;
 			}
 			cur->par->rgt = cur->lft;
 			cur->lft = node->lft;
-			cur->lft->par = cur; 
-		} else { 
+			cur->lft->par = cur;
+		} else {
 			/*
 			 * The left son of the node hasn't got a right son. The
 			 * left son will take the deleted node's place.
 			 */
 			dir = LEFT;
-			gpa = cur; 
+			gpa = cur;
 		}
 		if (node->rgt)
-			node->rgt->par = cur; 
+			node->rgt->par = cur;
 		cur->rgt = node->rgt;
 		cur->balance = node->balance;
 		cur->par = node->par;
 	}
-	
+
 	/*
 	 * Repair the parent node's pointer which pointed previously to the
 	 * deleted node.
 	 */
 	(void) repair(t, node, node, cur, NULL, false);
-	
+
 	/*
 	 * Repair cycle which repairs balances of nodes on the way from from the
 	 * cut-off node up to the root.
@@ -472,7 +472,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 				 * Stop balancing, the tree is balanced.
 				 */
 				break;
-			} else if (gpa->balance == 2) { 
+			} else if (gpa->balance == 2) {
 				/*
 				 * Bad balance, heights of left and right
 				 * subtrees differ more than by one.
@@ -483,20 +483,20 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 					/*
 					 * RL rotation.
 					 */
-					
+
 					cur = par->lft;
 					par->lft = cur->rgt;
 					cur->rgt = par;
 					gpa->rgt = cur->lft;
 					cur->lft = gpa;
-					
+
 					/*
 					 * Repair balances and paternity of
 					 * children, depending on the balance
 					 * factor of the grand child (cur).
 					 */
 					REBALANCE_DELETE_RL();
-					
+
 					/*
 					 * Repair paternity.
 					 */
@@ -512,18 +512,18 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 					/*
 					 * RR rotation.
 					 */
-					
+
 					gpa->rgt = par->lft;
 					if (par->lft)
 						par->lft->par = gpa;
 					par->lft = gpa;
-					
+
 					/*
 					 * Repair paternity.
 					 */
 					par->par = gpa->par;
 					gpa->par = par;
-					
+
 					if (par->balance == 0) {
 						/*
 						 * The right child of the
@@ -537,7 +537,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 
 						(void) repair(t, par, gpa, par,
 						    NULL, false);
-						break; 
+						break;
 					} else {
 						par->balance = 0;
 						gpa->balance = 0;
@@ -558,7 +558,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 					break;
 				gpa = gpa->par;
 			}
-		} else { 
+		} else {
 			/*
 			 * Deletion was made in the right subtree.
 			 */
@@ -574,18 +574,18 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 				 * subtrees differ more than by one.
 				 */
 				par = gpa->lft;
-				
+
 				if (par->balance == 1) {
 					/*
 					 * LR rotation.
 					 */
-					
+
 					cur = par->rgt;
 					par->rgt = cur->lft;
 					cur->lft = par;
 					gpa->lft = cur->rgt;
 					cur->rgt = gpa;
-					
+
 					/*
 					 * Repair balances and paternity of
 					 * children, depending on the balance
@@ -604,7 +604,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 					    false))
 						break;
 					gpa = cur->par;
-				} else { 
+				} else {
 					/*
 					 * LL rotation.
 					 */
@@ -618,7 +618,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 					 */
 					par->par = gpa->par;
 					gpa->par = par;
-					
+
 					if (par->balance == 0) {
 						/*
 						 * The left child of the
@@ -629,14 +629,14 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 						 */
 						par->balance = 1;
 						gpa->balance = -1;
-						
+
 						(void) repair(t, par, gpa, par,
 						    NULL, false);
 						break;
 					} else {
 						par->balance = 0;
 						gpa->balance = 0;
-						
+
 						if (!repair(t, par, gpa, par,
 						    &dir, false))
 							break;
@@ -666,21 +666,21 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 bool avltree_delete_min(avltree_t *t)
 {
 	avltree_node_t *node;
-	
+
 	/*
 	 * Start searching for the smallest key in the tree starting in the root
 	 * node and continue in cycle to the leftmost node in the tree (which
 	 * must have the smallest key).
 	 */
-	 
+
 	node = t->root;
 	if (!node)
 		return false;
-	
+
 	while (node->lft != NULL)
 		node = node->lft;
-	
-	avltree_delete(t, node); 
+
+	avltree_delete(t, node);
 
 	return true;
 }

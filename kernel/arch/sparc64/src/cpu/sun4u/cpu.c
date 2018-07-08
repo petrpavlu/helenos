@@ -58,7 +58,7 @@ static int find_cpu_frequency(ofw_tree_node_t *node)
 		prop = ofw_tree_getprop(node, "portid");
 	if ((!prop) || (!prop->value))
 		prop = ofw_tree_getprop(node, "cpuid");
-	
+
 	if (prop && prop->value) {
 		mid = *((uint32_t *) prop->value);
 		if (mid == CPU->arch.mid) {
@@ -68,7 +68,7 @@ static int find_cpu_frequency(ofw_tree_node_t *node)
 			}
 		}
 	}
-	
+
 	return -1;
 }
 
@@ -79,17 +79,17 @@ void cpu_arch_init(void)
 {
 	ofw_tree_node_t *node;
 	uint32_t clock_frequency = 0;
-	
+
 	CPU->arch.mid = read_mid();
-	
+
 	/*
 	 * Detect processor frequency.
 	 */
-	if (is_us() || is_us_iii()) { 
+	if (is_us() || is_us_iii()) {
 		node = ofw_tree_find_child_by_device_type(cpus_parent(), "cpu");
 		while (node) {
 			int f = find_cpu_frequency(node);
-			if (f != -1) 
+			if (f != -1)
 				clock_frequency = (uint32_t) f;
 			node = ofw_tree_find_peer_by_device_type(node, "cpu");
 		}
@@ -99,16 +99,16 @@ void cpu_arch_init(void)
 			int f;
 			f = find_cpu_frequency(
 				ofw_tree_find_child(node, "cpu@0"));
-			if (f != -1) 
+			if (f != -1)
 				clock_frequency = (uint32_t) f;
 			f = find_cpu_frequency(
 				ofw_tree_find_child(node, "cpu@1"));
-			if (f != -1) 
+			if (f != -1)
 				clock_frequency = (uint32_t) f;
 			node = ofw_tree_find_peer_by_name(node, "cmp");
 		}
 	}
-		
+
 	CPU->arch.clock_frequency = clock_frequency;
 	tick_init();
 }
@@ -145,7 +145,7 @@ void cpu_print_report(cpu_t *m)
 		manuf = "Unknown";
 		break;
 	}
-	
+
 	switch (CPU->arch.ver.impl) {
 	case IMPL_ULTRASPARCI:
 		impl = "UltraSPARC I";

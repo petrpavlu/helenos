@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup sparc64	
+/** @addtogroup sparc64
  * @{
  */
 /** @file
@@ -95,7 +95,7 @@ uint64_t ipi_unicast_to(void (*func)(void), uint16_t cpu_id) {
 void ipi_broadcast_arch(int ipi)
 {
 	void (* func)(void);
-	
+
 	switch (ipi) {
 	case IPI_TLB_SHOOTDOWN:
 		func = tlb_shootdown_ipi_recv;

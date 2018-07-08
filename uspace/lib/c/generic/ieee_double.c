@@ -38,7 +38,7 @@ ieee_double_t extract_ieee_double(double val)
 	const uint64_t exponent_mask = 0x7ff0000000000000ULL;
 	const int exponent_shift = 64 - 11 - 1;
 	const uint64_t sign_mask = 0x8000000000000000ULL;
-	
+
 	const int special_exponent = 0x7ff;
 	const int denormal_exponent = 0;
 	const uint64_t hidden_bit = (1ULL << 52);
@@ -53,11 +53,11 @@ ieee_double_t extract_ieee_double(double val)
 
 	bits.val = val;
 
-	/* 
-	 * Extract the binary ieee representation of the double. 
+	/*
+	 * Extract the binary ieee representation of the double.
 	 * Relies on integers having the same endianness as doubles.
 	 */
-	uint64_t num = bits.num;	
+	uint64_t num = bits.num;
 
 	ieee_double_t ret;
 
@@ -97,12 +97,12 @@ ieee_double_t extract_ieee_double(double val)
 			ret.pos_val.significand = raw_significand + hidden_bit;
 			ret.pos_val.exponent = raw_exponent - exponent_bias;
 
-			/* The predecessor is closer to val than the successor 
+			/* The predecessor is closer to val than the successor
 			 * if val is a normal value of the form 2^k (hence
-			 * raw_significand == 0) with the only exception being 
-			 * the smallest normal (raw_exponent == 1). The smallest 
-			 * normal's predecessor is the largest denormal and denormals 
-			 * do not get an extra bit of precision because their exponent 
+			 * raw_significand == 0) with the only exception being
+			 * the smallest normal (raw_exponent == 1). The smallest
+			 * normal's predecessor is the largest denormal and denormals
+			 * do not get an extra bit of precision because their exponent
 			 * stays the same (ie it does not decrease from k to k-1).
 			 */
 			ret.is_accuracy_step = (raw_significand == 0) && (raw_exponent != 1);

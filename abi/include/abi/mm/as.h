@@ -46,16 +46,16 @@
 #define AS_AREA_ANY    ((void *) -1)
 #define AS_MAP_FAILED  ((void *) -1)
 
-#define AS_AREA_UNPAGED NULL 
+#define AS_AREA_UNPAGED NULL
 
 /** Address space area info exported to uspace. */
 typedef struct {
 	/** Starting address */
 	uintptr_t start_addr;
-	
+
 	/** Area size */
 	size_t size;
-	
+
 	/** Area flags */
 	unsigned int flags;
 } as_area_info_t;

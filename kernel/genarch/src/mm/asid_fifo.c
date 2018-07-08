@@ -29,7 +29,7 @@
 /** @addtogroup genarchmm
  * @{
  */
- 
+
 /**
  * @file
  * @brief	FIFO queue ASID management.
@@ -37,7 +37,7 @@
  * Architectures that link with this file keep the unallocated ASIDs
  * in FIFO queue. The queue can be statically (e.g. mips32) or
  * dynamically allocated (e.g ia64 and sparc64).
- */ 
+ */
 
 #include <genarch/mm/asid_fifo.h>
 #include <arch/mm/asid.h>
@@ -48,7 +48,7 @@
 #define FIFO_STATIC		(ASIDS_ALLOCABLE<FIFO_STATIC_LIMIT)
 
 /**
- * FIFO queue containing unassigned ASIDs. 
+ * FIFO queue containing unassigned ASIDs.
  * Can be only accessed when asidlock is held.
  */
 #if FIFO_STATIC
@@ -65,7 +65,7 @@ void asid_fifo_init(void)
 #if (!FIFO_STATIC)
 	fifo_create(free_asids);
 #endif
-		
+
 	for (i = 0; i < ASIDS_ALLOCABLE; i++) {
 		fifo_push(free_asids, ASID_START + i);
 	}

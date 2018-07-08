@@ -65,14 +65,14 @@ extern unsigned long list_count(const list_t *);
 	list_t name = LIST_INITIALIZER(name)
 
 /** Initializer for statically allocated list.
- * 
+ *
  * @code
  * struct named_list {
  *     const char *name;
  *     list_t list;
- * } var = { 
- *     .name = "default name", 
- *     .list = LIST_INITIALIZER(name_list.list) 
+ * } var = {
+ *     .name = "default name",
+ *     .list = LIST_INITIALIZER(name_list.list)
  * };
  * @endcode
  *
@@ -110,9 +110,9 @@ extern unsigned long list_count(const list_t *);
  *     int value;
  *     link_t item_link;
  * } item_t;
- * 
+ *
  * //..
- * 
+ *
  * // Print each list element's value and remove the element from the list.
  * list_foreach_safe(mylist, cur_link, next_link) {
  *     item_t *cur_item = list_get_instance(cur_link, item_t, item_link);
@@ -120,7 +120,7 @@ extern unsigned long list_count(const list_t *);
  *     list_remove(cur_link);
  * }
  * @endcode
- * 
+ *
  * @param list List to traverse.
  * @param iterator Iterator to the current element of the list.
  *             The item this iterator points may be safely removed
@@ -230,7 +230,7 @@ NO_TRACE static inline void list_remove(link_t *link)
 		link->next->prev = link->prev;
 		link->prev->next = link->next;
 	}
-	
+
 	link_initialize(link);
 }
 
@@ -313,9 +313,9 @@ NO_TRACE static inline void headless_list_split_or_concat(link_t *part1, link_t 
 {
 	part1->prev->next = part2;
 	part2->prev->next = part1;
-	
+
 	link_t *hlp = part1->prev;
-	
+
 	part1->prev = part2->prev;
 	part2->prev = hlp;
 }
@@ -377,16 +377,16 @@ NO_TRACE static inline void list_concat(list_t *list1, list_t *list2)
 static inline link_t *list_nth(const list_t *list, unsigned long n)
 {
 	unsigned long cnt = 0;
-	
+
 	link_t *link = list_first(list);
 	while (link != NULL) {
 		if (cnt == n)
 			return link;
-		
+
 		cnt++;
 		link = list_next(link, list);
 	}
-	
+
 	return NULL;
 }
 

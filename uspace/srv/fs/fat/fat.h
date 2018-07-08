@@ -29,7 +29,7 @@
 
 /** @addtogroup fs
  * @{
- */ 
+ */
 
 #ifndef FAT_FAT_H_
 #define FAT_FAT_H_
@@ -212,7 +212,7 @@ typedef struct {
 typedef struct fat_node {
 	/** Back pointer to the FS node. */
 	fs_node_t		*bp;
-	
+
 	fibril_mutex_t		lock;
 	fat_node_type_t		type;
 	fat_idx_t		*idx;

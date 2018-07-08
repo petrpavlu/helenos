@@ -28,7 +28,7 @@
 
 #include <abi/asmtool.h>
 
-.text   
+.text
 
 # Switches to kernel stack and saves all registers there.
 #
@@ -96,7 +96,7 @@
 
 	# Stop stack traces here
 	mov fp, #0
-	
+
 	b 2f
 
 	# mode was not usermode

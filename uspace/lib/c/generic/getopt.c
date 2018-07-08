@@ -98,14 +98,14 @@ static const char illoptstring[] = "unknown option -- %s\n";
 static int gcd(int a, int b)
 {
 	int c;
-	
+
 	c = a % b;
 	while (c != 0) {
 		a = b;
 		b = c;
 		c = a % b;
 	}
-	
+
 	return b;
 }
 
@@ -196,7 +196,7 @@ start:
 			place = EMSG;
 			if (IN_ORDER) {
 				/*
-				 * GNU extension: 
+				 * GNU extension:
 				 * return non-option as argument to option 1
 				 */
 				optarg = nargv[optind++];
@@ -242,7 +242,7 @@ start:
 	}
 	if (optchar == 'W' && oli[1] == ';') {		/* -W long-option */
 		/* XXX: what if no long options provided (called by getopt)? */
-		if (*place) 
+		if (*place)
 			return -2;
 
 		if (++optind >= nargc) {	/* no arg */
@@ -365,7 +365,7 @@ int getopt_long(int nargc, char * const *nargv, const char *options,
 			has_equal++;
 		} else
 			current_argv_len = str_size(current_argv);
-	    
+
 		for (i = 0; long_options[i].name; i++) {
 			/* find matching long option */
 			if (str_lcmp(current_argv, long_options[i].name,
@@ -449,7 +449,7 @@ int getopt_long(int nargc, char * const *nargv, const char *options,
 		if (long_options[match].flag) {
 			*long_options[match].flag = long_options[match].val;
 			retval = 0;
-		} else 
+		} else
 			retval = long_options[match].val;
 		if (idx)
 			*idx = match;

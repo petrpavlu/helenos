@@ -125,12 +125,12 @@ const char *md_get_node_name(md_node_t node)
 /**
  * Returns the value of the integer property of the given node.
  *
- * @param 
+ * @param
  */
 bool md_get_integer_property(md_node_t node, const char *key,
 	uint64_t *result)
 {
-	element_idx_t idx = node;	
+	element_idx_t idx = node;
 
 	while (get_element(idx)->tag != NODE_END) {
 		idx++;
@@ -148,7 +148,7 @@ bool md_get_integer_property(md_node_t node, const char *key,
 /**
  * Returns the value of the string property of the given node.
  *
- * @param 
+ * @param
  */
 bool md_get_string_property(md_node_t node, const char *key,
 	const char **result)
@@ -243,7 +243,7 @@ md_node_t md_get_child(md_node_t node, char *name)
 	do {
 		char *head;
 		more = str_parse_head(&name, &head);
-		
+
 		while (md_next_child(&node)) {
 			element_idx_t child = md_get_child_node(node);
 			if (str_cmp(head, get_element_name(child)) == 0) {
@@ -277,7 +277,7 @@ md_child_iter_t md_get_child_iterator(md_node_t node)
 
 /**
  * Moves "node" to the node following "node" in the list of all the existing
- * nodes of the MD whose name is "name". 
+ * nodes of the MD whose name is "name".
  */
 bool md_next_node(md_node_t *node, const char *name)
 {
@@ -291,7 +291,7 @@ bool md_next_node(md_node_t *node, const char *name)
 		    str_cmp(name, get_element_name(*node)) == 0) {
 			return true;
 		}
-		
+
 		(*node)++;
 	} while (element->tag != LIST_END);
 

@@ -78,7 +78,7 @@ errno_t nic_wol_virtues_init(nic_wol_virtues_t *wvs)
 	wvs->table_operations.key_equal = nic_wv_key_equal;
 	wvs->table_operations.equal = 0;
 	wvs->table_operations.remove_callback = 0;
-	
+
 	if (!hash_table_create(&wvs->table, 0, 0, &wvs->table_operations)) {
 		return ENOMEM;
 	}
@@ -186,7 +186,7 @@ errno_t nic_wol_virtues_add(nic_wol_virtues_t *wvs, nic_wol_virtue_t *virtue)
  */
 nic_wol_virtue_t *nic_wol_virtues_remove(nic_wol_virtues_t *wvs, nic_wv_id_t id)
 {
-	nic_wol_virtue_t *virtue = 
+	nic_wol_virtue_t *virtue =
 		(nic_wol_virtue_t *) hash_table_find(&wvs->table, &id);
 	if (virtue == NULL) {
 		return NULL;

@@ -343,7 +343,7 @@ fat_get_cluster_fat12(fat_bs_t *bs, service_id_t service_id, unsigned fatno,
 		*value = (*value) >> 4;
 	else
 		*value = (*value) & FAT12_MASK;
-	
+
 	rc = block_put(b);
 
 	return rc;
@@ -462,7 +462,7 @@ fat_set_cluster_fat12(fat_bs_t *bs, service_id_t service_id, unsigned fatno,
 	offset = (clst + clst / 2);
 	if (offset / BPS(bs) >= SF(bs))
 		return ERANGE;
-	
+
 	rc = block_get(&b, service_id, RSCNT(bs) + SF(bs) * fatno +
 	    offset / BPS(bs), BLOCK_FLAGS_NONE);
 	if (rc != EOK)
@@ -519,7 +519,7 @@ fat_set_cluster_fat12(fat_bs_t *bs, service_id_t service_id, unsigned fatno,
 			block_put(b);
 			return rc;
 		}
-	} else 
+	} else
 		((uint8_t *) b->data)[(offset % BPS(bs)) + 1] = byte2;
 
 	b->dirty = true;	/* need to sync block */
@@ -686,7 +686,7 @@ fat_alloc_clusters(fat_bs_t *bs, service_id_t service_id, unsigned nclsts,
 	lifo = (fat_cluster_t *) malloc(nclsts * sizeof(fat_cluster_t));
 	if (!lifo)
 		return ENOMEM;
-	
+
 	/*
 	 * Search FAT1 for unused clusters.
 	 */
@@ -965,7 +965,7 @@ errno_t fat_sanity_check(fat_bs_t *bs, service_id_t service_id)
 		 * Check that remaining bits of the first two entries are
 		 * set to one.
 		 */
-		if (!FAT_IS_FAT12(bs) && 
+		if (!FAT_IS_FAT12(bs) &&
 		    ((e0 >> 8) != (FAT_MASK(bs) >> 8) || e1 != FAT_MASK(bs)))
 			return ENOTSUP;
 	}

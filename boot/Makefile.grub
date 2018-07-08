@@ -62,7 +62,7 @@ build_dist: clean $(COMPONENTS)
 ifeq ($(GRUB_ARCH),efi)
 	gunzip $(IMAGE)
 endif
-	
+
 ifeq ($(GRUB_LOADER),multiboot)
 	for module in $(COMPONENTS) ; do \
 		cp "$$module" $(BOOT)/ ; \
@@ -71,11 +71,11 @@ endif
 ifeq ($(GRUB_LOADER),chainloader)
 	cp "$(BOOT_OUTPUT)" $(BOOT)/
 endif
-	
+
 	echo "set default=0" > $(BOOT_CONFIG)
 	echo "set timeout=10" >> $(BOOT_CONFIG)
 	echo "" >> $(BOOT_CONFIG)
-	
+
 ifeq ($(GRUB_ARCH),pc)
 	echo "insmod vbe" >> $(BOOT_CONFIG)
 	echo "insmod vga" >> $(BOOT_CONFIG)
@@ -85,7 +85,7 @@ ifeq ($(GRUB_ARCH),efi)
 	echo "insmod efi_uga" >> $(BOOT_CONFIG)
 endif
 	echo "" >> $(BOOT_CONFIG)
-	
+
 	echo "menuentry 'HelenOS $(RELEASE)' --class helenos --class os {" >> $(BOOT_CONFIG)
 ifeq ($(GRUB_LOADER),multiboot)
 	for module in $(MODULES) ; do \

@@ -71,33 +71,33 @@ static const char *vendor_str[] = {
 
 void fpu_disable(void)
 {
-	write_cr0(read_cr0() & ~CR0_TS); 
+	write_cr0(read_cr0() & ~CR0_TS);
 }
 
 void fpu_enable(void)
 {
-	write_cr0(read_cr0() | CR0_TS); 
+	write_cr0(read_cr0() | CR0_TS);
 }
 
 void cpu_arch_init(void)
 {
 	cpu_info_t info;
 	uint32_t help = 0;
-	
+
 	CPU->arch.tss = tss_p;
 	CPU->arch.tss->iomap_base = &CPU->arch.tss->iomap[0] - ((uint8_t *) CPU->arch.tss);
-	
+
 	CPU->fpu_owner = NULL;
-	
+
 	cpuid(INTEL_CPUID_STANDARD, &info);
-	
+
 	CPU->arch.fi.word = info.cpuid_edx;
-	
+
 	if (CPU->arch.fi.bits.fxsr)
 		fpu_fxsr();
 	else
 		fpu_fsr();
-	
+
 	if (CPU->arch.fi.bits.sse) {
 		asm volatile (
 			"mov %%cr4, %[help]\n"
@@ -107,7 +107,7 @@ void cpu_arch_init(void)
 			: [mask] "i" (CR4_OSFXSR | CR4_OSXMMEXCPT)
 		);
 	}
-	
+
 #ifndef PROCESSOR_i486
 	if (CPU->arch.fi.bits.sep) {
 		/* Setup fast SYSENTER/SYSEXIT syscalls */
@@ -131,7 +131,7 @@ void cpu_identify(void)
 		    && (info.cpuid_ecx == AMD_CPUID_ECX)
 		    && (info.cpuid_edx == AMD_CPUID_EDX))
 			CPU->arch.vendor = VendorAMD;
-		
+
 		/*
 		 * Check for Intel processor.
 		 */
@@ -139,7 +139,7 @@ void cpu_identify(void)
 		    && (info.cpuid_ecx == INTEL_CPUID_ECX)
 		    && (info.cpuid_edx == INTEL_CPUID_EDX))
 			CPU->arch.vendor = VendorIntel;
-		
+
 		cpuid(INTEL_CPUID_STANDARD, &info);
 		CPU->arch.family = (info.cpuid_eax >> 8) & 0x0fU;
 		CPU->arch.model = (info.cpuid_eax >> 4) & 0x0fU;
@@ -149,7 +149,7 @@ void cpu_identify(void)
 
 void cpu_print_report(cpu_t* cpu)
 {
-	printf("cpu%u: (%s family=%u model=%u stepping=%u apicid=%u) %" PRIu16 
+	printf("cpu%u: (%s family=%u model=%u stepping=%u apicid=%u) %" PRIu16
 		" MHz\n", cpu->id, vendor_str[cpu->arch.vendor], cpu->arch.family,
 		cpu->arch.model, cpu->arch.stepping, cpu->arch.id, cpu->frequency_mhz);
 }

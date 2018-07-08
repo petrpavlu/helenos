@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup genarch	
+/** @addtogroup genarch
  * @{
  */
 /**
@@ -63,7 +63,7 @@ static void pl050_irq_handler(irq_t *irq)
 	uint8_t data;
 	uint8_t status;
 	pl050_instance_t *instance = irq->instance;
-	
+
 	while ((status = pio_read_8(pl050->status)) & PL050_STAT_RXFULL) {
 		data = pio_read_8(pl050->data);
 		indev_push_character(instance->kbrdin, data);
@@ -80,7 +80,7 @@ pl050_instance_t *pl050_init(pl050_t *dev, inr_t inr)
 
 	pl050 = dev;
 
-	if (instance) {	
+	if (instance) {
 		instance->pl050 = dev;
 		instance->kbrdin = NULL;
 
@@ -97,7 +97,7 @@ pl050_instance_t *pl050_init(pl050_t *dev, inr_t inr)
 void pl050_wire(pl050_instance_t *instance, indev_t *kbrdin)
 {
 	uint8_t val;
-	
+
 	instance->kbrdin = kbrdin;
 	irq_register(&instance->irq);
 
@@ -105,9 +105,9 @@ void pl050_wire(pl050_instance_t *instance, indev_t *kbrdin)
 
 	pio_write_8(pl050->ctrl, val);
 
-	/* reset the data buffer */	
+	/* reset the data buffer */
 	pio_read_8(pl050->data);
-	
+
 }
 
 

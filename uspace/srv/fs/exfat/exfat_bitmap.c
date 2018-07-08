@@ -47,7 +47,7 @@
 #include <mem.h>
 
 
-errno_t exfat_bitmap_is_free(exfat_bs_t *bs, service_id_t service_id, 
+errno_t exfat_bitmap_is_free(exfat_bs_t *bs, service_id_t service_id,
     exfat_cluster_t clst)
 {
 	fs_node_t *fn;
@@ -58,12 +58,12 @@ errno_t exfat_bitmap_is_free(exfat_bs_t *bs, service_id_t service_id,
 	bool alloc;
 
 	clst -= EXFAT_CLST_FIRST;
-	
+
 	rc = exfat_bitmap_get(&fn, service_id);
 	if (rc != EOK)
 		return rc;
 	bitmapp = EXFAT_NODE(fn);
-	
+
 	aoff64_t offset = clst / 8;
 	rc = exfat_block_get(&b, bs, bitmapp, offset / BPS(bs), BLOCK_FLAGS_NONE);
 	if (rc != EOK) {
@@ -88,7 +88,7 @@ errno_t exfat_bitmap_is_free(exfat_bs_t *bs, service_id_t service_id,
 	return EOK;
 }
 
-errno_t exfat_bitmap_set_cluster(exfat_bs_t *bs, service_id_t service_id, 
+errno_t exfat_bitmap_set_cluster(exfat_bs_t *bs, service_id_t service_id,
     exfat_cluster_t clst)
 {
 	fs_node_t *fn;
@@ -98,12 +98,12 @@ errno_t exfat_bitmap_set_cluster(exfat_bs_t *bs, service_id_t service_id,
 	errno_t rc;
 
 	clst -= EXFAT_CLST_FIRST;
-	
+
 	rc = exfat_bitmap_get(&fn, service_id);
 	if (rc != EOK)
 		return rc;
 	bitmapp = EXFAT_NODE(fn);
-	
+
 	aoff64_t offset = clst / 8;
 	rc = exfat_block_get(&b, bs, bitmapp, offset / BPS(bs), BLOCK_FLAGS_NONE);
 	if (rc != EOK) {
@@ -119,11 +119,11 @@ errno_t exfat_bitmap_set_cluster(exfat_bs_t *bs, service_id_t service_id,
 		(void) exfat_node_put(fn);
 		return rc;
 	}
-	
+
 	return exfat_node_put(fn);
 }
 
-errno_t exfat_bitmap_clear_cluster(exfat_bs_t *bs, service_id_t service_id, 
+errno_t exfat_bitmap_clear_cluster(exfat_bs_t *bs, service_id_t service_id,
     exfat_cluster_t clst)
 {
 	fs_node_t *fn;
@@ -133,12 +133,12 @@ errno_t exfat_bitmap_clear_cluster(exfat_bs_t *bs, service_id_t service_id,
 	errno_t rc;
 
 	clst -= EXFAT_CLST_FIRST;
-	
+
 	rc = exfat_bitmap_get(&fn, service_id);
 	if (rc != EOK)
 		return rc;
 	bitmapp = EXFAT_NODE(fn);
-	
+
 	aoff64_t offset = clst / 8;
 	rc = exfat_block_get(&b, bs, bitmapp, offset / BPS(bs),
 	    BLOCK_FLAGS_NONE);
@@ -155,11 +155,11 @@ errno_t exfat_bitmap_clear_cluster(exfat_bs_t *bs, service_id_t service_id,
 		(void) exfat_node_put(fn);
 		return rc;
 	}
-	
+
 	return exfat_node_put(fn);
 }
 
-errno_t exfat_bitmap_set_clusters(exfat_bs_t *bs, service_id_t service_id, 
+errno_t exfat_bitmap_set_clusters(exfat_bs_t *bs, service_id_t service_id,
     exfat_cluster_t firstc, exfat_cluster_t count)
 {
 	errno_t rc;
@@ -179,7 +179,7 @@ errno_t exfat_bitmap_set_clusters(exfat_bs_t *bs, service_id_t service_id,
 	return EOK;
 }
 
-errno_t exfat_bitmap_clear_clusters(exfat_bs_t *bs, service_id_t service_id, 
+errno_t exfat_bitmap_clear_clusters(exfat_bs_t *bs, service_id_t service_id,
     exfat_cluster_t firstc, exfat_cluster_t count)
 {
 	errno_t rc;
@@ -195,7 +195,7 @@ errno_t exfat_bitmap_clear_clusters(exfat_bs_t *bs, service_id_t service_id,
 	return EOK;
 }
 
-errno_t exfat_bitmap_alloc_clusters(exfat_bs_t *bs, service_id_t service_id, 
+errno_t exfat_bitmap_alloc_clusters(exfat_bs_t *bs, service_id_t service_id,
     exfat_cluster_t *firstc, exfat_cluster_t count)
 {
 	exfat_cluster_t startc, endc;
@@ -216,11 +216,11 @@ errno_t exfat_bitmap_alloc_clusters(exfat_bs_t *bs, service_id_t service_id,
 }
 
 
-errno_t exfat_bitmap_append_clusters(exfat_bs_t *bs, exfat_node_t *nodep, 
+errno_t exfat_bitmap_append_clusters(exfat_bs_t *bs, exfat_node_t *nodep,
     exfat_cluster_t count)
 {
 	if (nodep->firstc == 0) {
-		return exfat_bitmap_alloc_clusters(bs, nodep->idx->service_id, 
+		return exfat_bitmap_alloc_clusters(bs, nodep->idx->service_id,
 		    &nodep->firstc, count);
 	} else {
 		exfat_cluster_t lastc, clst;
@@ -229,7 +229,7 @@ errno_t exfat_bitmap_append_clusters(exfat_bs_t *bs, exfat_node_t *nodep,
 		clst = lastc + 1;
 		while (exfat_bitmap_is_free(bs, nodep->idx->service_id, clst) == EOK) {
 			if (clst - lastc == count){
-				return exfat_bitmap_set_clusters(bs, nodep->idx->service_id, 
+				return exfat_bitmap_set_clusters(bs, nodep->idx->service_id,
 				    lastc + 1, count);
 			} else
 				clst++;
@@ -239,7 +239,7 @@ errno_t exfat_bitmap_append_clusters(exfat_bs_t *bs, exfat_node_t *nodep,
 }
 
 
-errno_t exfat_bitmap_free_clusters(exfat_bs_t *bs, exfat_node_t *nodep, 
+errno_t exfat_bitmap_free_clusters(exfat_bs_t *bs, exfat_node_t *nodep,
     exfat_cluster_t count)
 {
 	exfat_cluster_t lastc;

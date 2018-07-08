@@ -383,7 +383,7 @@ static inline int is_length_mod(int c, int _c, int *modifier)
 /**
  * Decides whether provided character specifies integer conversion. If so, the
  * semantics of the conversion is stored through provided pointers..
- * 
+ *
  * @param c Candidate on the integer conversion.
  * @param is_unsigned Pointer to store whether the conversion is signed or not.
  * @param base Pointer to store the base of the integer conversion.
@@ -458,7 +458,7 @@ static inline int is_float_conv(int c)
 static inline int is_seq_conv(int c, int *modifier)
 {
 	assert(modifier);
-	
+
 	switch (c) {
 	case 'S':
 		*modifier = LMOD_l;
@@ -483,7 +483,7 @@ static inline int is_seq_conv(int c, int *modifier)
  * POSIX compliant (apart from the not supported stuff).
  *
  * NOT SUPPORTED: locale (see strtold), wide chars, numbered output arguments
- * 
+ *
  * @param in Input provider.
  * @param fmt Format description.
  * @param arg Output arguments.
@@ -879,7 +879,7 @@ static inline int _internal_scanf(
 				++fmt;
 			} else if (is_seq_conv(*fmt, &length_mod)) {
 				/* Character sequence conversion. */
-				
+
 				/* Check sanity of optional parts of conversion specifier. */
 				if (length_mod != LMOD_NONE &&
 				    length_mod != LMOD_l) {
@@ -1073,7 +1073,7 @@ static inline int _internal_scanf(
 					}
 					++converted_cnt;
 				}
-				
+
 				converting = false;
 				/* Format string pointer already incremented. */
 			} else if (*fmt == 'n') {
@@ -1101,7 +1101,7 @@ static inline int _internal_scanf(
 				/* Illegal format string. */
 				break;
 			}
-			
+
 		} else {
 
 			/* Processing outside conversion specifier. Either skip white
@@ -1151,7 +1151,7 @@ static inline int _internal_scanf(
 					++fmt;
 				}
 			}
-			
+
 		}
 
 	}

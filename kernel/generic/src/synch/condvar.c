@@ -106,7 +106,7 @@ errno_t _condvar_wait_timeout(condvar_t *cv, mutex_t *mtx, uint32_t usec, int fl
 }
 
 /** Wait for the condition to become true with a locked spinlock.
- * 
+ *
  * The function is not aware of irq_spinlock. Therefore do not even
  * try passing irq_spinlock_t to it. Use _condvar_wait_timeout_irq_spinlock()
  * instead.
@@ -123,7 +123,7 @@ errno_t _condvar_wait_timeout(condvar_t *cv, mutex_t *mtx, uint32_t usec, int fl
  *
  * @return See comment for waitq_sleep_timeout().
  */
-errno_t _condvar_wait_timeout_spinlock_impl(condvar_t *cv, spinlock_t *lock, 
+errno_t _condvar_wait_timeout_spinlock_impl(condvar_t *cv, spinlock_t *lock,
 	uint32_t usec, int flags)
 {
 	errno_t rc;
@@ -142,12 +142,12 @@ errno_t _condvar_wait_timeout_spinlock_impl(condvar_t *cv, spinlock_t *lock,
 	waitq_sleep_finish(&cv->wq, blocked, ipl);
 	/* Lock only after releasing the waitq to avoid a possible deadlock. */
 	spinlock_lock(lock);
-	
+
 	return rc;
 }
 
 /** Wait for the condition to become true with a locked irq spinlock.
- * 
+ *
  * @param cv		Condition variable.
  * @param lock		Locked irq spinlock.
  * @param usec		Timeout value in microseconds.
@@ -160,31 +160,31 @@ errno_t _condvar_wait_timeout_spinlock_impl(condvar_t *cv, spinlock_t *lock,
  *
  * @return See comment for waitq_sleep_timeout().
  */
-errno_t _condvar_wait_timeout_irq_spinlock(condvar_t *cv, irq_spinlock_t *irq_lock, 
+errno_t _condvar_wait_timeout_irq_spinlock(condvar_t *cv, irq_spinlock_t *irq_lock,
 	uint32_t usec, int flags)
 {
 	errno_t rc;
 	/* Save spinlock's state so we can restore it correctly later on. */
 	ipl_t ipl = irq_lock->ipl;
 	bool guard = irq_lock->guard;
-	
+
 	irq_lock->guard = false;
-	
-	/* 
-	 * waitq_prepare() restores interrupts to the current state, 
-	 * ie disabled. Therefore, interrupts will remain disabled while 
-	 * it spins waiting for a pending timeout handler to complete. 
+
+	/*
+	 * waitq_prepare() restores interrupts to the current state,
+	 * ie disabled. Therefore, interrupts will remain disabled while
+	 * it spins waiting for a pending timeout handler to complete.
 	 * Although it spins with interrupts disabled there can only
 	 * be a pending timeout if we failed to cancel an imminent
-	 * timeout (on another cpu) during a wakeup. As a result the 
-	 * timeout handler is guaranteed to run (it is most likely already 
+	 * timeout (on another cpu) during a wakeup. As a result the
+	 * timeout handler is guaranteed to run (it is most likely already
 	 * running) and there is no danger of a deadlock.
 	 */
 	rc = _condvar_wait_timeout_spinlock(cv, &irq_lock->lock, usec, flags);
-	
+
 	irq_lock->guard = guard;
 	irq_lock->ipl = ipl;
-	
+
 	return rc;
 }
 

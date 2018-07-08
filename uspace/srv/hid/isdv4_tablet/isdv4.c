@@ -281,7 +281,7 @@ static bool parse_response_touch(uint8_t *packet, size_t size,
 	    (packet[4] & 124);
 	state->touch_max_y = ((packet[2] >> 3) & 3) | ((packet[5] & 127) << 7) |
 	    (packet[6] & 124);
-	
+
 	if (touch_resolution == 0)
 		touch_resolution = 10;
 
@@ -331,7 +331,7 @@ static errno_t read_packets(isdv4_state_t *state, packet_consumer_fn consumer)
 
 			/* Find the end of the packet */
 			i++; /* We need to skip the first byte with START_OF_PACKET set */
-			packet_remaining--; 
+			packet_remaining--;
 			while (packet_remaining > 0 && i < state->buf_end &&
 			    (state->buf[i] & START_OF_PACKET) == 0) {
 				i++;

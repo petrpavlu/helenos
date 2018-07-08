@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Jakub Jermar 
+ * Copyright (c) 2016 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@ static errno_t pagein_answer_preprocess(call_t *answer, ipc_data_t *olddata)
 		}
 		page_table_unlock(AS, true);
 	}
-	
+
 	return EOK;
 }
 

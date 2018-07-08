@@ -58,7 +58,7 @@ char zeroTable[256] = {
 /**
  * Take fraction shifted by 10 bits to the left, round it, normalize it
  * and detect exceptions
- * 
+ *
  * @param cexp Exponent with bias.
  * @param cfrac Fraction shifted 10 bits to the left with added hidden bit.
  * @param sign Resulting sign.
@@ -77,7 +77,7 @@ float64 finish_float64(int32_t cexp, uint64_t cfrac, char sign)
 		cfrac <<= 1;
 		/* TODO: fix underflow */
 	}
-	
+
 	if ((cexp < 0) || (cexp == 0 &&
 	    (!(cfrac & (FLOAT64_HIDDEN_BIT_MASK << (64 - FLOAT64_FRACTION_SIZE - 1)))))) {
 		/* FIXME: underflow */
@@ -86,23 +86,23 @@ float64 finish_float64(int32_t cexp, uint64_t cfrac, char sign)
 			result.parts.fraction = 0;
 			return result;
 		}
-		
+
 		while (cexp < 0) {
 			cexp++;
 			cfrac >>= 1;
 		}
-	
-		cfrac += (0x1 << (64 - FLOAT64_FRACTION_SIZE - 3)); 
-		
+
+		cfrac += (0x1 << (64 - FLOAT64_FRACTION_SIZE - 3));
+
 		if (!(cfrac & (FLOAT64_HIDDEN_BIT_MASK << (64 - FLOAT64_FRACTION_SIZE - 1)))) {
 			result.parts.fraction =
 			    ((cfrac >> (64 - FLOAT64_FRACTION_SIZE - 2)) & (~FLOAT64_HIDDEN_BIT_MASK));
 			return result;
-		}	
+		}
 	} else {
-		cfrac += (0x1 << (64 - FLOAT64_FRACTION_SIZE - 3)); 
+		cfrac += (0x1 << (64 - FLOAT64_FRACTION_SIZE - 3));
 	}
-	
+
 	++cexp;
 
 	if (cfrac & (FLOAT64_HIDDEN_BIT_MASK << (64 - FLOAT64_FRACTION_SIZE - 1))) {
@@ -119,16 +119,16 @@ float64 finish_float64(int32_t cexp, uint64_t cfrac, char sign)
 	}
 
 	result.parts.exp = (uint32_t) cexp;
-	
-	result.parts.fraction = 
+
+	result.parts.fraction =
 	    ((cfrac >> (64 - FLOAT64_FRACTION_SIZE - 2)) & (~FLOAT64_HIDDEN_BIT_MASK));
-	
-	return result;	
+
+	return result;
 }
 
 /**
  * Take fraction, round it, normalize it and detect exceptions
- * 
+ *
  * @param cexp Exponent with bias.
  * @param cfrac_hi High part of the fraction shifted 14 bits to the left
  *     with added hidden bit.
@@ -138,7 +138,7 @@ float64 finish_float64(int32_t cexp, uint64_t cfrac, char sign)
  * @param shift_out Bits right-shifted out from fraction by the caller.
  * @return Finished quadruple-precision float.
  */
-float128 finish_float128(int32_t cexp, uint64_t cfrac_hi, uint64_t cfrac_lo, 
+float128 finish_float128(int32_t cexp, uint64_t cfrac_hi, uint64_t cfrac_lo,
     char sign, uint64_t shift_out)
 {
 	float128 result;
@@ -227,7 +227,7 @@ float128 finish_float128(int32_t cexp, uint64_t cfrac_hi, uint64_t cfrac_lo,
 	result.parts.frac_hi = tmp_hi;
 	result.parts.frac_lo = tmp_lo;
 
-	return result;	
+	return result;
 }
 
 /**
@@ -241,7 +241,7 @@ int count_zeroes8(uint8_t i)
 	return zeroTable[i];
 }
 
-/** 
+/**
  * Counts leading zeroes in 32bit unsigned integer.
  *
  * @param i Integer for which to count leading zeroes.
@@ -288,14 +288,14 @@ void round_float32(int32_t *exp, uint32_t *fraction)
 {
 	/* rounding - if first bit after fraction is set then round up */
 	(*fraction) += (0x1 << (32 - FLOAT32_FRACTION_SIZE - 3));
-	
-	if ((*fraction) & 
+
+	if ((*fraction) &
 	    (FLOAT32_HIDDEN_BIT_MASK << (32 - FLOAT32_FRACTION_SIZE - 1))) {
 		/* rounding overflow */
 		++(*exp);
 		(*fraction) >>= 1;
 	}
-	
+
 	if (((*exp) >= FLOAT32_MAX_EXPONENT) || ((*exp) < 0)) {
 		/* overflow - set infinity as result */
 		(*exp) = FLOAT32_MAX_EXPONENT;
@@ -321,15 +321,15 @@ void round_float64(int32_t *exp, uint64_t *fraction)
 	 * current shift to bit 62 and see if there will be a carry to bit 63.
 	 */
 	(*fraction) += (0x1 << (64 - FLOAT64_FRACTION_SIZE - 3));
-	
+
 	/* See if there was a carry to bit 63. */
-	if ((*fraction) & 
+	if ((*fraction) &
 	    (FLOAT64_HIDDEN_BIT_MASK << (64 - FLOAT64_FRACTION_SIZE - 1))) {
 		/* rounding overflow */
 		++(*exp);
 		(*fraction) >>= 1;
 	}
-	
+
 	if (((*exp) >= FLOAT64_MAX_EXPONENT) || ((*exp) < 0)) {
 		/* overflow - set infinity as result */
 		(*exp) = FLOAT64_MAX_EXPONENT;
@@ -588,7 +588,7 @@ void sub128(uint64_t a_hi, uint64_t a_lo,
 
 /**
  * Multiplication of two 64-bit unsigned integers.
- * 
+ *
  * @param a First input operand.
  * @param b Second input operand.
  * @param r_hi Address to store high part of the result.
@@ -621,7 +621,7 @@ void mul64(uint64_t a, uint64_t b, uint64_t *r_hi, uint64_t *r_lo)
 
 /**
  * Multiplication of two 128-bit unsigned integers.
- * 
+ *
  * @param a_hi High part of the first input operand.
  * @param a_lo Low part of the first input operand.
  * @param b_hi High part of the second input operand.
@@ -655,7 +655,7 @@ void mul128(uint64_t a_hi, uint64_t a_lo, uint64_t b_hi, uint64_t b_lo,
 /**
  * Estimate the quotient of 128-bit unsigned divident and 64-bit unsigned
  * divisor.
- * 
+ *
  * @param a_hi High part of the divident.
  * @param a_lo Low part of the divident.
  * @param b Divisor.
@@ -676,7 +676,7 @@ uint64_t div128est(uint64_t a_hi, uint64_t a_lo, uint64_t b)
 	result = ((b_hi << 32) <= a_hi) ? (0xFFFFFFFFull << 32) : (a_hi / b_hi) << 32;
 	mul64(b, result, &tmp_hi, &tmp_lo);
 	sub128(a_hi, a_lo, tmp_hi, tmp_lo, &rem_hi, &rem_lo);
-	
+
 	while ((int64_t) rem_hi < 0) {
 		result -= 0x1ll << 32;
 		b_lo = b << 32;

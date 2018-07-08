@@ -74,30 +74,30 @@ pte_t *ptl0_create(unsigned int flags)
 {
 	pte_t *dst_ptl0 = (pte_t *)
 	    PA2KA(frame_alloc(PTL0_FRAMES, FRAME_LOWMEM, PTL0_SIZE - 1));
-	
+
 	memsetb(dst_ptl0, PTL0_SIZE, 0);
 
 	if (!KERNEL_SEPARATE_PTL0 && !(flags & FLAG_AS_KERNEL)) {
 		/*
 		 * Copy the kernel address space portion to new PTL0.
 		 */
-		
+
 		mutex_lock(&AS_KERNEL->lock);
-		
+
 		pte_t *src_ptl0 =
 		    (pte_t *) PA2KA((uintptr_t) AS_KERNEL->genarch.page_table);
-		
+
 		uintptr_t src = (uintptr_t)
 		    &src_ptl0[PTL0_INDEX(KERNEL_ADDRESS_SPACE_START)];
 		uintptr_t dst = (uintptr_t)
 		    &dst_ptl0[PTL0_INDEX(KERNEL_ADDRESS_SPACE_START)];
-		
+
 		memcpy((void *) dst, (void *) src,
 		    PTL0_SIZE - (src - (uintptr_t) src_ptl0));
-		
+
 		mutex_unlock(&AS_KERNEL->lock);
 	}
-	
+
 	return (pte_t *) KA2PA((uintptr_t) dst_ptl0);
 }
 

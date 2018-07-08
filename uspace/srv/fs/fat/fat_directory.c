@@ -28,7 +28,7 @@
 
 /** @addtogroup fs
  * @{
- */ 
+ */
 
 /**
  * @file	fat_directory.c
@@ -48,7 +48,7 @@
 errno_t fat_directory_open(fat_node_t *nodep, fat_directory_t *di)
 {
 	di->b = NULL;
-	di->nodep = nodep;	
+	di->nodep = nodep;
 	if (di->nodep->type != FAT_DIRECTORY)
 		return EINVAL;
 
@@ -64,10 +64,10 @@ errno_t fat_directory_open(fat_node_t *nodep, fat_directory_t *di)
 errno_t fat_directory_close(fat_directory_t *di)
 {
 	errno_t rc = EOK;
-	
+
 	if (di->b)
 		rc = block_put(di->b);
-	
+
 	return rc;
 }
 
@@ -105,23 +105,23 @@ errno_t fat_directory_next(fat_directory_t *di)
 	rc = fat_directory_block_load(di);
 	if (rc != EOK)
 		di->pos -= 1;
-	
+
 	return rc;
 }
 
 errno_t fat_directory_prev(fat_directory_t *di)
 {
 	errno_t rc = EOK;
-	
+
 	if (di->pos > 0) {
 		di->pos -= 1;
 		rc = fat_directory_block_load(di);
 	} else
 		return ENOENT;
-	
+
 	if (rc != EOK)
 		di->pos += 1;
-	
+
 	return rc;
 }
 
@@ -134,20 +134,20 @@ errno_t fat_directory_seek(fat_directory_t *di, aoff64_t pos)
 	rc = fat_directory_block_load(di);
 	if (rc != EOK)
 		di->pos = _pos;
-	
+
 	return rc;
 }
 
 errno_t fat_directory_get(fat_directory_t *di, fat_dentry_t **d)
 {
 	errno_t rc;
-	
+
 	rc = fat_directory_block_load(di);
 	if (rc == EOK) {
 		aoff64_t o = di->pos % (BPS(di->bs) / sizeof(fat_dentry_t));
 		*d = ((fat_dentry_t *)di->b->data) + o;
 	}
-	
+
 	return rc;
 }
 
@@ -167,7 +167,7 @@ errno_t fat_directory_read(fat_directory_t *di, char *name, fat_dentry_t **de)
 	rc = fs_instance_get(di->nodep->idx->service_id, &data);
 	assert(rc == EOK);
 	instance = (fat_instance_t *) data;
-	
+
 	do {
 		rc = fat_directory_get(di, &d);
 		if (rc != EOK)
@@ -182,7 +182,7 @@ errno_t fat_directory_read(fat_directory_t *di, char *name, fat_dentry_t **de)
 			if (long_entry) {
 				/* We found long entry */
 				long_entry_count--;
-				if ((FAT_LFN_ORDER(d) == long_entry_count) && 
+				if ((FAT_LFN_ORDER(d) == long_entry_count) &&
 				    (checksum == FAT_LFN_CHKSUM(d))) {
 					/* Right order! */
 					fat_lfn_get_entry(d, wname,
@@ -200,7 +200,7 @@ errno_t fat_directory_read(fat_directory_t *di, char *name, fat_dentry_t **de)
 				if (FAT_LFN_COUNT(d) <= FAT_LFN_MAX_COUNT) {
 					long_entry = true;
 					long_entry_count = FAT_LFN_COUNT(d);
-					lfn_size = (FAT_LFN_ENTRY_SIZE * 
+					lfn_size = (FAT_LFN_ENTRY_SIZE *
 					    (FAT_LFN_COUNT(d) - 1)) +
 					    fat_lfn_size(d);
 					lfn_offset = lfn_size;
@@ -211,7 +211,7 @@ errno_t fat_directory_read(fat_directory_t *di, char *name, fat_dentry_t **de)
 			}
 			break;
 		case FAT_DENTRY_VALID:
-			if (long_entry && 
+			if (long_entry &&
 			    (checksum == fat_dentry_chksum(d->name))) {
 				wname[lfn_size] = '\0';
 				if (utf16_to_str(name, FAT_LFN_NAME_SIZE,
@@ -219,7 +219,7 @@ errno_t fat_directory_read(fat_directory_t *di, char *name, fat_dentry_t **de)
 					fat_dentry_name_get(d, name);
 			} else
 				fat_dentry_name_get(d, name);
-				
+
 			*de = d;
 			return EOK;
 		case FAT_DENTRY_SKIP:
@@ -231,7 +231,7 @@ errno_t fat_directory_read(fat_directory_t *di, char *name, fat_dentry_t **de)
 			break;
 		}
 	} while (fat_directory_next(di) == EOK);
-	
+
 	return ENOENT;
 }
 
@@ -249,10 +249,10 @@ errno_t fat_directory_erase(fat_directory_t *di)
 
 	d->name[0] = FAT_DENTRY_ERASED;
 	di->b->dirty = true;
-	
+
 	while (!flag && fat_directory_prev(di) == EOK) {
 		if (fat_directory_get(di, &d) == EOK &&
-		    fat_classify_dentry(d) == FAT_DENTRY_LFN &&	
+		    fat_classify_dentry(d) == FAT_DENTRY_LFN &&
 		    checksum == FAT_LFN_CHKSUM(d)) {
 			if (FAT_IS_LFN(d))
 				flag = true;
@@ -275,7 +275,7 @@ errno_t fat_directory_write(fat_directory_t *di, const char *name, fat_dentry_t 
 	rc = fs_instance_get(di->nodep->idx->service_id, &data);
 	assert(rc == EOK);
 	instance = (fat_instance_t *) data;
-	
+
 	if (fat_valid_short_name(name)) {
 		/*
 		 * NAME could be directly stored in dentry without creating
@@ -295,11 +295,11 @@ errno_t fat_directory_write(fat_directory_t *di, const char *name, fat_dentry_t 
 		uint8_t checksum;
 		uint16_t wname[FAT_LFN_NAME_LEN];
 		size_t lfn_size, lfn_offset;
-		
+
 		rc = str_to_utf16(wname, FAT_LFN_NAME_LEN, name);
 		if (rc != EOK)
 			return rc;
-		
+
 		lfn_size = utf16_wsize(wname);
 		long_entry_count = lfn_size / FAT_LFN_ENTRY_SIZE;
 		if (lfn_size % FAT_LFN_ENTRY_SIZE)
@@ -439,7 +439,7 @@ errno_t fat_directory_expand(fat_directory_t *di)
 	di->nodep->size += BPS(di->bs) * SPC(di->bs);
 	di->nodep->dirty = true;		/* need to sync node */
 	di->blocks = di->nodep->size / BPS(di->bs);
-	
+
 	return EOK;
 }
 
@@ -449,7 +449,7 @@ errno_t fat_directory_lookup_free(fat_directory_t *di, size_t count)
 	size_t found;
 	aoff64_t pos;
 	errno_t rc;
-	
+
 	do {
 		found = 0;
 		pos = 0;
@@ -478,7 +478,7 @@ errno_t fat_directory_lookup_free(fat_directory_t *di, size_t count)
 				found = 0;
 				break;
 			}
-		} while (fat_directory_next(di) == EOK);	
+		} while (fat_directory_next(di) == EOK);
 	} while (fat_directory_expand(di) == EOK);
 
 	return ENOSPC;
@@ -563,4 +563,4 @@ errno_t fat_directory_vollabel_get(fat_directory_t *di, char *label)
 
 /**
  * @}
- */ 
+ */

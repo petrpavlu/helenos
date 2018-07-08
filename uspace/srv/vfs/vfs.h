@@ -109,7 +109,7 @@ typedef struct _vfs_node {
 	 * structures that reference this node.
 	 */
 	unsigned refcnt;
-	
+
 	ht_link_t nh_link;		/**< Node hash-table link. */
 
 	vfs_node_type_t type;	/**< Partial info about the node type. */
@@ -120,7 +120,7 @@ typedef struct _vfs_node {
 	 * Holding this rwlock prevents modifications of the node's contents.
 	 */
 	fibril_rwlock_t contents_rwlock;
-	
+
 	struct _vfs_node *mount;
 } vfs_node_t;
 
@@ -133,7 +133,7 @@ typedef struct {
 	fibril_mutex_t _lock;
 
 	vfs_node_t *node;
-	
+
 	/** Number of file handles referencing this file. */
 	unsigned refcnt;
 
@@ -167,7 +167,7 @@ extern fibril_mutex_t plb_mutex;/**< Mutex protecting plb and plb_entries. */
 extern uint8_t *plb;		/**< Path Lookup Buffer */
 extern list_t plb_entries;	/**< List of active PLB entries. */
 
-/** Holding this rwlock prevents changes in file system namespace. */ 
+/** Holding this rwlock prevents changes in file system namespace. */
 extern fibril_rwlock_t namespace_rwlock;
 
 extern async_exch_t *vfs_exchange_grab(fs_handle_t);

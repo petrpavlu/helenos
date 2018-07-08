@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup ia64	
+/** @addtogroup ia64
  * @{
  */
 /** @file
@@ -70,7 +70,7 @@ void fpu_context_save(fpu_context_t *fctx)
 		"stf.spill %[f59] = f59\n"
 		"stf.spill %[f60] = f60\n"
 		"stf.spill %[f61] = f61\n"
-		: 
+		:
 		[f32] "=m" (fctx->fr[0]),
 		[f33] "=m" (fctx->fr[1]),
 		[f34] "=m" (fctx->fr[2]),
@@ -101,8 +101,8 @@ void fpu_context_save(fpu_context_t *fctx)
 		[f59] "=m" (fctx->fr[27]),
 		[f60] "=m" (fctx->fr[28]),
 		[f61] "=m" (fctx->fr[29])
-	); 
-	
+	);
+
 	asm volatile (
 		"stf.spill %[f62] = f62\n"
 		"stf.spill %[f63] = f63\n"
@@ -312,8 +312,8 @@ void fpu_context_restore(fpu_context_t *fctx)
 		[f59] "m" (fctx->fr[27]),
 		[f60] "m" (fctx->fr[28]),
 		[f61] "m" (fctx->fr[29])
-	); 
-	
+	);
+
 	asm volatile (
 		"ldf.fill f62 = %[f62]\n"
 		"ldf.fill f63 = %[f63]\n"

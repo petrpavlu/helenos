@@ -47,7 +47,7 @@
 		(c)->tls = (sysarg_t) (ptls); \
 	} while (0)
 
-#define FIBRIL_WRITER	1 
+#define FIBRIL_WRITER	1
 
 struct fibril;
 
@@ -72,11 +72,11 @@ typedef struct fibril {
 	void *arg;
 	errno_t (*func)(void *);
 	tcb_t *tcb;
-	
+
 	struct fibril *clean_after_me;
 	errno_t retval;
 	int flags;
-	
+
 	fibril_owner_info_t *waits_for;
 
 	unsigned int switches;

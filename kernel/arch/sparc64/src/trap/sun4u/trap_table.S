@@ -63,35 +63,35 @@ SYMBOL(instruction_access_exception_tl0)
 	wrpr %g0, PSTATE_AG_BIT | PSTATE_PRIV_BIT, %pstate
 	mov TT_INSTRUCTION_ACCESS_EXCEPTION, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x0a, TL = 0, instruction_access_error */
 .org trap_table + TT_INSTRUCTION_ACCESS_ERROR*ENTRY_SIZE
 SYMBOL(instruction_access_error_tl0)
 	mov TT_INSTRUCTION_ACCESS_ERROR, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x10, TL = 0, illegal_instruction */
 .org trap_table + TT_ILLEGAL_INSTRUCTION*ENTRY_SIZE
 SYMBOL(illegal_instruction_tl0)
 	mov TT_ILLEGAL_INSTRUCTION, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x11, TL = 0, privileged_opcode */
 .org trap_table + TT_PRIVILEGED_OPCODE*ENTRY_SIZE
 SYMBOL(privileged_opcode_tl0)
 	mov TT_PRIVILEGED_OPCODE, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x12, TL = 0, unimplemented_LDD */
 .org trap_table + TT_UNIMPLEMENTED_LDD*ENTRY_SIZE
 SYMBOL(unimplemented_LDD_tl0)
 	mov TT_UNIMPLEMENTED_LDD, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x13, TL = 0, unimplemented_STD */
 .org trap_table + TT_UNIMPLEMENTED_STD*ENTRY_SIZE
@@ -105,7 +105,7 @@ SYMBOL(unimplemented_STD_tl0)
 SYMBOL(fp_disabled_tl0)
 	mov TT_FP_DISABLED, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x21, TL = 0, fb_exception_ieee_754 handler */
 .org trap_table + TT_FP_EXCEPTION_IEEE_754*ENTRY_SIZE
@@ -167,7 +167,7 @@ SYMBOL(mem_address_not_aligned_tl0)
 SYMBOL(LDDF_mem_address_not_aligned_tl0)
 	mov TT_LDDF_MEM_ADDRESS_NOT_ALIGNED, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x36, TL = 0, STDF_mem_address_not_aligned */
 .org trap_table + TT_STDF_MEM_ADDRESS_NOT_ALIGNED*ENTRY_SIZE
@@ -381,7 +381,7 @@ SYMBOL(instruction_access_exception_tl1)
 	wrpr %g0, PSTATE_AG_BIT | PSTATE_PRIV_BIT, %pstate
 	mov TT_INSTRUCTION_ACCESS_EXCEPTION, %g2
 	clr %g5
-	PREEMPTIBLE_HANDLER exc_dispatch 
+	PREEMPTIBLE_HANDLER exc_dispatch
 
 /* TT = 0x0a, TL > 0, instruction_access_error */
 .org trap_table + (TT_INSTRUCTION_ACCESS_ERROR+512)*ENTRY_SIZE
@@ -488,7 +488,7 @@ SYMBOL(fill_0_normal_tl1)
  * TL0: kernel thread runs (CANSAVE=0, kernel stack not in DTLB)
  * TL1: preemptible trap handler started after a tick interrupt
  * TL2: preemptible trap handler did SAVE
- * TL3: spill handler touched the kernel stack  
+ * TL3: spill handler touched the kernel stack
  * TL4: hardware or software failure
  *
  * Input registers:
@@ -501,7 +501,7 @@ SYMBOL(fill_0_normal_tl1)
 .macro PREEMPTIBLE_HANDLER_TEMPLATE is_syscall
 .if NOT(\is_syscall)
 	rdpr %tstate, %g3
-	
+
 	/*
 	 * One of the ways this handler can be invoked is after a nested MMU trap from
 	 * either spill_1_normal or fill_1_normal traps. Both of these traps manipulate
@@ -509,7 +509,7 @@ SYMBOL(fill_0_normal_tl1)
 	 * on TL=1 and restart the respective SAVE or RESTORE instruction once the MMU
 	 * trap is resolved. However, because we are in the wrong window from the
 	 * perspective of the MMU trap, we need to synchronize CWP with CWP from TL=0.
-	 */ 
+	 */
 	and %g3, TSTATE_CWP_MASK, %g4
 	wrpr %g4, 0, %cwp			! resynchronize CWP
 
@@ -565,7 +565,7 @@ SYMBOL(fill_0_normal_tl1)
 	save %sp, -ISTATE_SIZE, %sp
 
 	/*
-	 * At this moment, we are using the kernel stack 
+	 * At this moment, we are using the kernel stack
 	 * and have successfully allocated a register window.
 	 */
 1:
@@ -575,7 +575,7 @@ SYMBOL(fill_0_normal_tl1)
 	 * and normal spills will go to the kernel stack.
 	 */
 	wrpr %g0, WSTATE_OTHER(0) | WSTATE_NORMAL(0), %wstate
-	
+
 	/*
 	 * Copy arguments.
 	 */
@@ -584,7 +584,7 @@ SYMBOL(fill_0_normal_tl1)
 	mov %g2, %o0
 .else
 	! store the syscall number on the stack as 7th argument
-	stx %g2, [%sp + STACK_BIAS + ISTATE_OFFSET_ARG6] 
+	stx %g2, [%sp + STACK_BIAS + ISTATE_OFFSET_ARG6]
 .endif
 
 	/*
@@ -604,11 +604,11 @@ SYMBOL(fill_0_normal_tl1)
 	 * Save the Y register.
 	 */
 	stx %g4, [%sp + STACK_BIAS + ISTATE_OFFSET_Y]
-	
+
 	wrpr %g0, 0, %tl
 	wrpr %g0, PSTATE_PRIV_BIT | PSTATE_PEF_BIT, %pstate
 	SAVE_GLOBALS
-	
+
 .if NOT(\is_syscall)
 	/*
 	 * Call the higher-level handler and pass istate as second parameter.
@@ -628,7 +628,7 @@ SYMBOL(fill_0_normal_tl1)
 	rdpr %pstate, %l1			! we must preserve the PEF bit
 	wrpr %g0, PSTATE_AG_BIT | PSTATE_PRIV_BIT, %pstate
 	wrpr %g0, 1, %tl
-	
+
 	/*
 	 * Read TSTATE, TPC and TNPC from saved copy.
 	 */
@@ -741,7 +741,7 @@ SYMBOL(fill_0_normal_tl1)
 	stxa %g1, [VA_PRIMARY_CONTEXT_REG] %asi
 	rd %pc, %g1
 	flush %g1
-	
+
 	rdpr %cwp, %g1
 	rdpr %otherwin, %g2
 
@@ -799,7 +799,7 @@ SYMBOL(fill_0_normal_tl1)
 	bg %xcc, 2f				! fix the CANRESTORE=NWINDOWS-1 anomaly
 	mov NWINDOWS - 2, %g1			! use dealy slot for both cases
 	sub %g1, %g2, %g1
-	
+
 	wrpr %g0, 0, %otherwin
 	wrpr %g1, 0, %cansave			! NWINDOWS - 2 - CANRESTORE
 	wrpr %g2, 0, %canrestore		! OTHERWIN + windows in the buffer
@@ -844,7 +844,7 @@ SYMBOL(fill_0_normal_tl1)
 	dec %g1
 	and %g1, NWINDOWS - 1, %g1
 	wrpr %g1, 0, %cwp			! CWP--
-	
+
 .if \is_syscall
 	done
 .else

@@ -26,14 +26,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup generic	
+/** @addtogroup generic
  * @{
  */
 
 /**
  * @file
  */
- 
+
 #include <smp/smp.h>
 
 #ifdef CONFIG_SMP

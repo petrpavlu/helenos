@@ -28,7 +28,7 @@
 
 /** @addtogroup fs
  * @{
- */ 
+ */
 
 /**
  * @file	fat_idx.c
@@ -91,7 +91,7 @@ static unused_t *unused_find(service_id_t service_id, bool lock)
 		fibril_mutex_lock(&unused_lock);
 
 	list_foreach(unused_list, link, unused_t, u) {
-		if (u->service_id == service_id) 
+		if (u->service_id == service_id)
 			return u;
 	}
 
@@ -107,7 +107,7 @@ static FIBRIL_MUTEX_INITIALIZE(used_lock);
  * Global hash table of all used fat_idx_t structures.
  * The index structures are hashed by the service_id, parent node's first
  * cluster and index within the parent directory.
- */ 
+ */
 static hash_table_t up_hash;
 
 typedef struct {
@@ -119,7 +119,7 @@ typedef struct {
 static inline size_t pos_key_hash(void *key)
 {
 	pos_key_t *pos = (pos_key_t*)key;
-	
+
 	size_t hash = 0;
 	hash = hash_combine(pos->pfc, pos->pdi);
 	return hash_combine(hash, pos->service_id);
@@ -128,13 +128,13 @@ static inline size_t pos_key_hash(void *key)
 static size_t pos_hash(const ht_link_t *item)
 {
 	fat_idx_t *fidx = hash_table_get_inst(item, fat_idx_t, uph_link);
-	
+
 	pos_key_t pkey = {
 		.service_id = fidx->service_id,
 		.pfc = fidx->pfc,
 		.pdi = fidx->pdi,
 	};
-	
+
 	return pos_key_hash(&pkey);
 }
 
@@ -142,7 +142,7 @@ static bool pos_key_equal(void *key, const ht_link_t *item)
 {
 	pos_key_t *pos = (pos_key_t*)key;
 	fat_idx_t *fidx = hash_table_get_inst(item, fat_idx_t, uph_link);
-	
+
 	return pos->service_id == fidx->service_id
 		&& pos->pdi == fidx->pdi
 		&& pos->pfc == fidx->pfc;
@@ -183,7 +183,7 @@ static bool idx_key_equal(void *key_arg, const ht_link_t *item)
 {
 	fat_idx_t *fidx = hash_table_get_inst(item, fat_idx_t, uih_link);
 	idx_key_t *key = (idx_key_t*)key_arg;
-	
+
 	return key->index == fidx->index && key->service_id == fidx->service_id;
 }
 
@@ -206,14 +206,14 @@ static hash_table_ops_t uih_ops = {
 static bool fat_index_alloc(service_id_t service_id, fs_index_t *index)
 {
 	unused_t *u;
-	
+
 	assert(index);
 	u = unused_find(service_id, true);
 	if (!u)
-		return false;	
+		return false;
 
 	if (list_empty(&u->freed_list)) {
-		if (u->remaining) { 
+		if (u->remaining) {
 			/*
 			 * There are no freed indices, allocate one directly
 			 * from the counter.
@@ -332,13 +332,13 @@ static errno_t fat_idx_create(fat_idx_t **fidxp, service_id_t service_id)
 	fat_idx_t *fidx;
 
 	fidx = (fat_idx_t *) malloc(sizeof(fat_idx_t));
-	if (!fidx) 
+	if (!fidx)
 		return ENOMEM;
 	if (!fat_index_alloc(service_id, &fidx->index)) {
 		free(fidx);
 		return ENOSPC;
 	}
-		
+
 	fibril_mutex_initialize(&fidx->lock);
 	fidx->service_id = service_id;
 	fidx->pfc = FAT_CLST_RES0;	/* no parent yet */
@@ -360,7 +360,7 @@ errno_t fat_idx_get_new(fat_idx_t **fidxp, service_id_t service_id)
 		fibril_mutex_unlock(&used_lock);
 		return rc;
 	}
-		
+
 	hash_table_insert(&ui_hash, &fidx->uih_link);
 	fibril_mutex_lock(&fidx->lock);
 	fibril_mutex_unlock(&used_lock);
@@ -392,7 +392,7 @@ fat_idx_get_by_pos(service_id_t service_id, fat_cluster_t pfc, unsigned pdi)
 			fibril_mutex_unlock(&used_lock);
 			return NULL;
 		}
-		
+
 		fidx->pfc = pfc;
 		fidx->pdi = pdi;
 
@@ -468,7 +468,7 @@ void fat_idx_destroy(fat_idx_t *idx)
 
 errno_t fat_idx_init(void)
 {
-	if (!hash_table_create(&up_hash, 0, 0, &uph_ops)) 
+	if (!hash_table_create(&up_hash, 0, 0, &uph_ops))
 		return ENOMEM;
 	if (!hash_table_create(&ui_hash, 0, 0, &uih_ops)) {
 		hash_table_destroy(&up_hash);
@@ -513,7 +513,7 @@ static bool rm_pos_service_id(ht_link_t *item, void *arg)
 	if (fidx->service_id == service_id) {
 		hash_table_remove_item(&up_hash, item);
 	}
-	
+
 	return true;
 }
 
@@ -525,7 +525,7 @@ static bool rm_idx_service_id(ht_link_t *item, void *arg)
 	if (fidx->service_id == service_id) {
 		hash_table_remove_item(&ui_hash, item);
 	}
-	
+
 	return true;
 }
 
@@ -534,7 +534,7 @@ void fat_idx_fini_by_service_id(service_id_t service_id)
 	/*
 	 * Remove this instance's index structure from up_hash and ui_hash.
 	 * Process up_hash first and ui_hash second because the index structure
-	 * is actually removed in idx_remove_callback(). 
+	 * is actually removed in idx_remove_callback().
 	 */
 	fibril_mutex_lock(&used_lock);
 	hash_table_apply(&up_hash, rm_pos_service_id, &service_id);
@@ -555,9 +555,9 @@ void fat_idx_fini_by_service_id(service_id_t service_id)
 		list_remove(&f->link);
 		free(f);
 	}
-	free(u); 
+	free(u);
 }
 
 /**
  * @}
- */ 
+ */

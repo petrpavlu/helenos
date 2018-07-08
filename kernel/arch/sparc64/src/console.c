@@ -55,7 +55,7 @@
  * Initialize kernel console to use framebuffer and keyboard directly.
  * Called on UltraSPARC machines with standard keyboard and framebuffer.
  *
- * @param aliases	the "/aliases" OBP node 
+ * @param aliases	the "/aliases" OBP node
  */
 static void standard_console_init(ofw_tree_node_t *aliases)
 {
@@ -68,7 +68,7 @@ static void standard_console_init(ofw_tree_node_t *aliases)
 	ofw_tree_node_t *screen = ofw_tree_lookup(prop_scr->value);
 	if (!screen)
 		panic("Cannot find %s.", (char *) prop_scr->value);
-	
+
 	scr_init(screen);
 #endif
 
@@ -81,27 +81,27 @@ static void standard_console_init(ofw_tree_node_t *aliases)
 	ofw_tree_node_t *keyboard = ofw_tree_lookup(prop_kbd->value);
 	if (!keyboard)
 		panic("Cannot find %s.", (char *) prop_kbd->value);
-	
+
 	kbd_init(keyboard);
 #endif
 }
 
 /**
  * Initialize input/output. Auto-detects the type of machine
- * and calls the appropriate I/O init routine. 
+ * and calls the appropriate I/O init routine.
  */
 void standalone_sparc64_console_init(void)
 {
 	ofw_tree_node_t *aliases;
 	ofw_tree_property_t *prop;
-	
+
 	aliases = ofw_tree_lookup("/aliases");
 	if (!aliases)
 		panic("Cannot find '/aliases'.");
-	
+
 	/* "def-cn" = "default console" */
 	prop = ofw_tree_getprop(aliases, "def-cn");
-	
+
 	if ((!prop) || (!prop->value))
 		standard_console_init(aliases);
 }

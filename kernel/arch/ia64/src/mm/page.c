@@ -84,7 +84,7 @@ void set_environment(void)
 		srlz_d();
 	}
 
-#ifdef CONFIG_VHPT	
+#ifdef CONFIG_VHPT
 	vhpt_base = vhpt_set_up();
 #endif
 	/*
@@ -123,7 +123,7 @@ vhpt_entry_t *vhpt_hash(uintptr_t page, asid_t asid)
 
 	vrn = page >> VRN_SHIFT;
 	rid = ASID2RID(asid, vrn);
-	
+
 	rr_save.word = rr_read(vrn);
 	if (rr_save.map.rid == rid) {
 		/*
@@ -132,7 +132,7 @@ vhpt_entry_t *vhpt_hash(uintptr_t page, asid_t asid)
 		v = (vhpt_entry_t *) thash(page);
 		return v;
 	}
-	
+
 	/*
 	 * The RID must be written to some region register.
 	 * To speed things up, register indexed by vrn is used.
@@ -170,7 +170,7 @@ bool vhpt_compare(uintptr_t page, asid_t asid, vhpt_entry_t *v)
 
 	vrn = page >> VRN_SHIFT;
 	rid = ASID2RID(asid, vrn);
-	
+
 	rr_save.word = rr_read(vrn);
 	if (rr_save.map.rid == rid) {
 		/*
@@ -178,7 +178,7 @@ bool vhpt_compare(uintptr_t page, asid_t asid, vhpt_entry_t *v)
 		 */
 		return ttag(page) == v->present.tag.tag_word;
 	}
-	
+
 	/*
 	 * The RID must be written to some region register.
 	 * To speed things up, register indexed by vrn is used.
@@ -192,7 +192,7 @@ bool vhpt_compare(uintptr_t page, asid_t asid, vhpt_entry_t *v)
 	srlz_i();
 	srlz_d();
 
-	return match;		
+	return match;
 }
 
 /** Set up one VHPT entry.
@@ -217,7 +217,7 @@ vhpt_set_record(vhpt_entry_t *v, uintptr_t page, asid_t asid, uintptr_t frame,
 
 	vrn = page >> VRN_SHIFT;
 	rid = ASID2RID(asid, vrn);
-	
+
 	/*
 	 * Compute ttag.
 	 */
@@ -230,7 +230,7 @@ vhpt_set_record(vhpt_entry_t *v, uintptr_t page, asid_t asid, uintptr_t frame,
 	rr_write(vrn, rr_save.word);
 	srlz_i();
 	srlz_d();
-	
+
 	/*
 	 * Clear the entry.
 	 */
@@ -238,7 +238,7 @@ vhpt_set_record(vhpt_entry_t *v, uintptr_t page, asid_t asid, uintptr_t frame,
 	v->word[1] = 0;
 	v->word[2] = 0;
 	v->word[3] = 0;
-	
+
 	v->present.p = true;
 	v->present.ma = (flags & PAGE_CACHEABLE) ?
 	    MA_WRITEBACK : MA_UNCACHEABLE;
@@ -246,7 +246,7 @@ vhpt_set_record(vhpt_entry_t *v, uintptr_t page, asid_t asid, uintptr_t frame,
 	v->present.d = false;  /* not dirty */
 	v->present.pl = (flags & PAGE_USER) ? PL_USER : PL_KERNEL;
 	v->present.ar = (flags & PAGE_WRITE) ? AR_WRITE : AR_READ;
-	v->present.ar |= (flags & PAGE_EXEC) ? AR_EXECUTE : 0; 
+	v->present.ar |= (flags & PAGE_EXEC) ? AR_EXECUTE : 0;
 	v->present.ppn = frame >> PPN_SHIFT;
 	v->present.ed = false;  /* exception not deffered */
 	v->present.ps = PAGE_WIDTH;

@@ -69,29 +69,29 @@ typedef struct rcu_cpu_data {
 	 * detector. Once it reaches a QS it must sema_up(rcu.remaining_readers).
 	 */
 	bool is_delaying_gp;
-	
+
 	/** True if we should signal the detector that we exited a reader section.
-	 * 
+	 *
 	 * Equal to (THREAD->rcu.was_preempted || CPU->rcu.is_delaying_gp).
 	 */
 	bool signal_unlock;
 
-	/** The number of times an RCU reader section is nested on this cpu. 
-	 * 
-	 * If positive, it is definitely executing reader code. If zero, 
+	/** The number of times an RCU reader section is nested on this cpu.
+	 *
+	 * If positive, it is definitely executing reader code. If zero,
 	 * the thread might already be executing reader code thanks to
 	 * cpu instruction reordering.
 	 */
 	size_t nesting_cnt;
 #endif
-	
+
 	/** Callbacks to invoke once the current grace period ends, ie cur_cbs_gp.
 	 * Accessed by the local reclaimer only.
 	 */
 	rcu_item_t *cur_cbs;
 	/** Number of callbacks in cur_cbs. */
 	size_t cur_cbs_cnt;
-	/** Callbacks to invoke once the next grace period ends, ie next_cbs_gp. 
+	/** Callbacks to invoke once the next grace period ends, ie next_cbs_gp.
 	 * Accessed by the local reclaimer only.
 	 */
 	rcu_item_t *next_cbs;
@@ -101,7 +101,7 @@ typedef struct rcu_cpu_data {
 	rcu_item_t *arriving_cbs;
 	/** Tail of arriving_cbs list. Disable interrupts to access. */
 	rcu_item_t **parriving_cbs_tail;
-	/** Number of callbacks currently in arriving_cbs. 
+	/** Number of callbacks currently in arriving_cbs.
 	 * Disable interrupts to access.
 	 */
 	size_t arriving_cbs_cnt;
@@ -109,27 +109,27 @@ typedef struct rcu_cpu_data {
 	/** At the end of this grace period callbacks in cur_cbs will be invoked.*/
 	rcu_gp_t cur_cbs_gp;
 	/** At the end of this grace period callbacks in next_cbs will be invoked.
-	 * 
-	 * Should be the next grace period but it allows the reclaimer to 
+	 *
+	 * Should be the next grace period but it allows the reclaimer to
 	 * notice if it missed a grace period end announcement. In that
 	 * case it can execute next_cbs without waiting for another GP.
-	 * 
+	 *
 	 * Invariant: next_cbs_gp >= cur_cbs_gp
 	 */
 	rcu_gp_t next_cbs_gp;
-	
+
 	/** Positive if there are callbacks pending in arriving_cbs. */
 	semaphore_t arrived_flag;
-	
+
 	/** The reclaimer should expedite GPs for cbs in arriving_cbs. */
 	bool expedite_arriving;
-	
+
 	/** Protected by global rcu.barrier_mtx. */
 	rcu_item_t barrier_item;
-	
+
 	/** Interruptable attached reclaimer thread. */
 	struct thread *reclaimer_thr;
-	
+
 	/* Some statistics. */
 	size_t stat_max_cbs;
 	size_t stat_avg_cbs;
@@ -142,24 +142,24 @@ typedef struct rcu_cpu_data {
 
 /** RCU related per-thread data. */
 typedef struct rcu_thread_data {
-	/** 
-	 * Nesting count of the thread's RCU read sections when the thread 
+	/**
+	 * Nesting count of the thread's RCU read sections when the thread
 	 * is not running.
 	 */
 	size_t nesting_cnt;
 
 #ifdef RCU_PREEMPT_PODZIMEK
-	
-	/** True if the thread was preempted in a reader section. 
+
+	/** True if the thread was preempted in a reader section.
 	 *
 	 * The thread is placed into rcu.cur_preempted or rcu.next_preempted
-	 * and must remove itself in rcu_read_unlock(). 
-	 * 
+	 * and must remove itself in rcu_read_unlock().
+	 *
 	 * Access with interrupts disabled.
 	 */
 	bool was_preempted;
 #endif
-	
+
 	/** Preempted threads link. Access with rcu.prempt_lock.*/
 	link_t preempt_link;
 } rcu_thread_data_t;

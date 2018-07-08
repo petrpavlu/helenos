@@ -307,19 +307,19 @@ ifeq ($(CONFIG_TEST),y)
 		test/print/print5.c \
 		test/thread/thread1.c \
 		test/smpcall/smpcall1.c
-	
+
 	ifeq ($(KARCH),mips32)
 		GENERIC_SOURCES += test/debug/mips1.c
 	else
 		GENERIC_SOURCES += test/debug/mips1_skip.c
 	endif
-	
+
 	ifeq ($(KARCH),ia64)
 		GENERIC_SOURCES += test/mm/purge1.c
 	else
 		GENERIC_SOURCES += test/mm/purge1_skip.c
 	endif
-	
+
 endif
 
 ## Sources where instrumentation is enabled
@@ -404,7 +404,7 @@ $(LINK): $(LINK).in | depend
 %.h: %.ag
 	$(AUTOGEN) probe $< >$<.probe.c
 	$(CC_AUTOGEN) $(DEFS) $(CFLAGS) -S -o $<.probe.s $<.probe.c
-	$(AUTOGEN) generate $< <$<.probe.s >$@   
+	$(AUTOGEN) generate $< <$<.probe.s >$@
 
 %.o: %.S | depend
 	$(CC_JOB) -c -MD -MP $(DEFS) $(CFLAGS) $(AS_CFLAGS) -D__ASM__
@@ -427,10 +427,10 @@ else
 endif
 	$(OBJDUMP) -t $(ARCH_OBJECTS) $(GENARCH_OBJECTS) $(GENERIC_OBJECTS) > $(DUMP)
 	$(GENMAP) $(MAP_PREV) $(DUMP) $@
-	
+
 	# Do it once again, this time to get correct even the symbols
 	# on architectures that have bss after symtab
-	
+
 	echo "$(AS_PROLOG)""$(SYMTAB_SECTION)"" .incbin \"$@\"" | $(CC) $(CFLAGS) $(AS_CFLAGS) -x assembler -c -o $(SIZEOK_MAP) -
 ifeq ($(CONFIG_LTO),y)
 	$(CC) $(DEFS) $(CFLAGS) $(LD_CFLAGS) -Xlinker -Map -Xlinker $(MAP_PREV) -o $@ $(ARCH_OBJECTS) $(GENARCH_OBJECTS) $(GENERIC_OBJECTS) $(EXTRA_OBJECTS) $(SIZEOK_MAP)
