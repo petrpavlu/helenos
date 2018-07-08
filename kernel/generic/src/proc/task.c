@@ -206,6 +206,10 @@ size_t tsk_destructor(void *obj)
 task_t *task_create(as_t *as, const char *name)
 {
 	task_t *task = (task_t *) slab_alloc(task_cache, 0);
+	if (task == NULL) {
+		return NULL;
+	}
+	
 	task_create_arch(task);
 	
 	task->as = as;
@@ -240,7 +244,15 @@ task_t *task_create(as_t *as, const char *name)
 	
 	if ((ipc_phone_0) &&
 	    (container_check(ipc_phone_0->task->container, task->container))) {
-		cap_handle_t phone_handle = phone_alloc(task);
+		cap_handle_t phone_handle;
+		int rc = phone_alloc(task, &phone_handle);
+		if (rc != EOK) {
+			task->as = NULL;
+			task_destroy_arch(task);
+			slab_free(task_cache, task);
+			return NULL;
+		}
+		
 		kobject_t *phone_obj = kobject_get(task, phone_handle,
 		    KOBJECT_TYPE_PHONE);
 		(void) ipc_phone_connect(phone_obj->phone, ipc_phone_0);
