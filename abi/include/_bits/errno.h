@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Jiri Zarevucky
+ * Copyright (c) 2017 CZ.NIC, z.s.p.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,50 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libposix
+/* Authors:
+ *	Jiří Zárevúcky (jzr) <zarevucky.jiri@gmail.com>
+ */
+
+/** @addtogroup bits
  * @{
  */
-/** @file System error numbers.
+/** @file
  */
-#define LIBPOSIX_INTERNAL
-#define __POSIX_DEF__(x) posix_##x
 
-#include "posix/errno.h"
+#ifndef _BITS_ERRNO_H_
+#define _BITS_ERRNO_H_
 
-#include "posix/stdlib.h"
-#include "libc/fibril.h"
+#ifdef __OPAQUE_ERRNO__
+#include <_bits/opaque_handle.h>
 
-static fibril_local int _posix_errno;
+opaque_handle(errno_t);
+typedef errno_t sys_errno_t;
+#define __errno_t(val) ((errno_t) val)
 
-int *__posix_errno(void)
-{
-	if (*__errno() != 0) {
-		_posix_errno = posix_abs(*__errno());
-		*__errno() = 0;
-	}
-	return &_posix_errno;
-}
+#else
 
-/** @}
+#include <_bits/native.h>
+
+/**
+ * The type of <errno.h> constants. Normally, this is an alias for `int`,
+ * but we support an alternative definition that allows us to verify
+ * integrity of error handling without using external tools.
  */
+typedef int errno_t;
+
+/**
+ * Same as `errno_t`, except represented as `sysarg_t`. Used in kernel in
+ * places where error number is always passed, but the type must be `sysarg_t`.
+ */
+typedef sysarg_t sys_errno_t;
+
+/**
+ * A C++-style "cast" to `errno_t`.
+ * Used in <abi/errno.h> to define error constants. Normally, it doesn't do
+ * anything at all.
+ */
+#define __errno_t(val) val
+
+#endif
+
+#endif

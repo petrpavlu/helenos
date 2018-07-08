@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Martin Sucha
+ * Copyright (c) 2017 CZ.NIC, z.s.p.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup http
+/* Authors:
+ *	Jiří Zárevúcky (jzr) <zarevucky.jiri@gmail.com>
+ */
+
+/** @addtogroup bits
  * @{
  */
-/**
- * @file
- */
 
-#ifndef HTTP_ERRNO_H_
-#define HTTP_ERRNO_H_
+#ifndef _BITS_OPAQUE_HANDLE_H_
+#define _BITS_OPAQUE_HANDLE_H_
 
-#include <errno.h>
-
-#define HTTP_EMULTIPLE_HEADERS -20001
-#define HTTP_EMISSING_HEADER -20002
-#define HTTP_EPARSE -20003
+#define opaque_handle(__name) typedef struct __opaque_##__name *__name
 
 #endif
 
