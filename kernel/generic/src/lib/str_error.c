@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2006 Ondrej Palkovsky
+ * Copyright (c) 2010 Martin Decky
+ * Copyright (c) 2017 CZ.NIC, z.s.p.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +27,73 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
- * @{
+#include <errno.h>
+#include <str.h>
+
+/* The arrays below are automatically generated from the same file that
+ * errno.h constants are generated from. Triple-include of the same list
+ * with redefinitions of __errno() macro are used to ensure that the
+ * information cannot get out of synch. This is inpired by musl libc.
  */
-/** @file
- */
 
-#ifndef LIBC_ERRNO_H_
-#define LIBC_ERRNO_H_
+#undef __errno_entry
+#define __errno_entry(name, num, desc) num,
 
-typedef int errno_t;
+static const int err_num[] = {
+#include <abi/errno.in>
+};
 
-#include <abi/errno.h>
+#undef __errno_entry
+#define __errno_entry(name, num, desc) #name,
 
-#define errno  (*(__errno()))
+static const char* err_name[] = {
+#include <abi/errno.in>
+};
 
-extern errno_t *__errno(void) __attribute__((const));
+#undef __errno_entry
+#define __errno_entry(name, num, desc) "[" #name "]" desc,
 
-#endif
+static const char* err_desc[] = {
+#include <abi/errno.in>
+};
 
-/** @}
- */
+/* Returns index corresponding to the given errno, or -1 if not found. */
+static int find_errno(errno_t e)
+{
+	/* Just a dumb linear search.
+	 * There too few entries to warrant anything smarter.
+	 */
+
+	int len = sizeof(err_num) / sizeof(errno_t);
+
+	for (int i = 0; i < len; i++) {
+		if (err_num[i] == e) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+const char *str_error_name(errno_t e)
+{
+	int i = find_errno(e);
+
+	if (i >= 0) {
+		return err_name[i];
+	}
+
+	return "(unknown)";
+}
+
+const char *str_error(errno_t e)
+{
+	int i = find_errno(e);
+
+	if (i >= 0) {
+		return err_desc[i];
+	}
+
+	return "Unknown error code";
+}
+

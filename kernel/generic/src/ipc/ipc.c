@@ -370,7 +370,7 @@ static void _ipc_call_actions_internal(phone_t *phone, call_t *call,
  * @param err   Return value to be used for the answer.
  *
  */
-void ipc_backsend_err(phone_t *phone, call_t *call, sysarg_t err)
+void ipc_backsend_err(phone_t *phone, call_t *call, int err)
 {
 	_ipc_call_actions_internal(phone, call, false);
 	IPC_SET_RETVAL(call->data, err);
@@ -443,8 +443,8 @@ int ipc_call(phone_t *phone, call_t *call)
  *
  * @param phone Phone structure to be hung up.
  *
- * @return 0 if the phone is disconnected.
- * @return -1 if the phone was already disconnected.
+ * @return EOK if the phone is disconnected.
+ * @return EINVAL if the phone was already disconnected.
  *
  */
 int ipc_phone_hangup(phone_t *phone)
@@ -454,7 +454,7 @@ int ipc_phone_hangup(phone_t *phone)
 	    phone->state == IPC_PHONE_HUNGUP ||
 	    phone->state == IPC_PHONE_CONNECTING) {
 		mutex_unlock(&phone->lock);
-		return -1;
+		return EINVAL;
 	}
 	
 	answerbox_t *box = phone->callee;
@@ -477,7 +477,7 @@ int ipc_phone_hangup(phone_t *phone)
 	phone->state = IPC_PHONE_HUNGUP;
 	mutex_unlock(&phone->lock);
 	
-	return 0;
+	return EOK;
 }
 
 /** Forwards call from one answerbox to another one.
@@ -537,8 +537,8 @@ call_t *ipc_wait_for_call(answerbox_t *box, uint32_t usec, unsigned int flags)
 	int rc;
 	
 restart:
-	rc = waitq_sleep_timeout(&box->wq, usec, flags);
-	if (SYNCH_FAILED(rc))
+	rc = waitq_sleep_timeout(&box->wq, usec, flags, NULL);
+	if (rc != EOK)
 		return NULL;
 	
 	irq_spinlock_lock(&box->lock, true);
@@ -637,7 +637,7 @@ restart_phones:
 	while (!list_empty(&box->connected_phones)) {
 		phone = list_get_instance(list_first(&box->connected_phones),
 		    phone_t, link);
-		if (SYNCH_FAILED(mutex_trylock(&phone->lock))) {
+		if (mutex_trylock(&phone->lock) != EOK) {
 			irq_spinlock_unlock(&box->lock, true);
 			DEADLOCK_PROBE(p_phonelck, DEADLOCK_THRESHOLD);
 			goto restart_phones;
