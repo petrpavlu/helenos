@@ -45,6 +45,7 @@
 #include <arch.h>
 #include <errno.h>
 #include <print.h>
+#include <stdbool.h>
 #include <str.h>
 #include <syscall/copy.h>
 #include <ipc/ipc.h>
@@ -156,20 +157,23 @@ static void _thread_op_end(thread_t *thread)
 /** Begin debugging the current task.
  *
  * Initiates a debugging session for the current task (and its threads).
- * When the debugging session has started a reply will be sent to the
+ * When the debugging session has started a reply should be sent to the
  * UDEBUG_BEGIN call. This may happen immediately in this function if
  * all the threads in this task are stoppable at the moment and in this
- * case the function returns 1.
+ * case the function sets @a *active to @c true.
  *
- * Otherwise the function returns 0 and the reply will be sent as soon as
- * all the threads become stoppable (i.e. they can be considered stopped).
+ * Otherwise the function sets @a *active to false and the resonse should
+ * be sent as soon as all the threads become stoppable (i.e. they can be
+ * considered stopped).
  *
  * @param call The BEGIN call we are servicing.
+ * @param active Place to store @c true iff we went directly to active state,
+ *               @c false if we only went to beginning state
  *
- * @return EOK or negative error code.
- *
+ * @return EOK on success, EBUSY if the task is already has an active
+ *         debugging session.
  */
-int udebug_begin(call_t *call)
+int udebug_begin(call_t *call, bool *active)
 {
 	LOG("Debugging task %" PRIu64, TASK->taskid);
 	
@@ -183,6 +187,13 @@ int udebug_begin(call_t *call)
 	TASK->udebug.dt_state = UDEBUG_TS_BEGINNING;
 	TASK->udebug.begin_call = call;
 	TASK->udebug.debugger = call->sender;
+	
+	if (TASK->udebug.not_stoppable_count == 0) {
+		TASK->udebug.dt_state = UDEBUG_TS_ACTIVE;
+		TASK->udebug.begin_call = NULL;
+		*active = true;  /* directly to active state */
+	} else
+		*active = false;  /* only in beginning state */
 	
 	/* Set udebug.active on all of the task's userspace threads. */
 	
