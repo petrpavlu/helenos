@@ -38,6 +38,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <str.h>
 #include <str_error.h>
 
 #define NAME "devctl"
@@ -69,13 +70,13 @@ static const char *drv_state_str(driver_state_t state)
 	return sstate;
 }
 
-static int fun_subtree_print(devman_handle_t funh, int lvl)
+static errno_t fun_subtree_print(devman_handle_t funh, int lvl)
 {
 	devman_handle_t devh;
 	devman_handle_t *cfuns;
 	size_t count, i;
 	unsigned int score;
-	int rc;
+	errno_t rc;
 	int j;
 
 	for (j = 0; j < lvl; j++)
@@ -135,10 +136,10 @@ static int fun_subtree_print(devman_handle_t funh, int lvl)
 	return EOK;
 }
 
-static int fun_tree_print(void)
+static errno_t fun_tree_print(void)
 {
 	devman_handle_t root_fun;
-	int rc;
+	errno_t rc;
 
 	rc = devman_fun_get_handle("/", &root_fun, 0);
 	if (rc != EOK) {
@@ -153,10 +154,10 @@ static int fun_tree_print(void)
 	return EOK;
 }
 
-static int fun_online(const char *path)
+static errno_t fun_online(const char *path)
 {
 	devman_handle_t funh;
-	int rc;
+	errno_t rc;
 
 	rc = devman_fun_get_handle(path, &funh, 0);
 	if (rc != EOK) {
@@ -174,10 +175,10 @@ static int fun_online(const char *path)
 	return EOK;
 }
 
-static int fun_offline(const char *path)
+static errno_t fun_offline(const char *path)
 {
 	devman_handle_t funh;
-	int rc;
+	errno_t rc;
 
 	rc = devman_fun_get_handle(path, &funh, 0);
 	if (rc != EOK) {
@@ -196,7 +197,7 @@ static int fun_offline(const char *path)
 	return EOK;
 }
 
-static int drv_list(void)
+static errno_t drv_list(void)
 {
 	devman_handle_t *devs;
 	devman_handle_t *drvs;
@@ -206,7 +207,7 @@ static int drv_list(void)
 	size_t ndevs;
 	size_t i;
 	table_t *table = NULL;
-	int rc;
+	errno_t rc;
 
 	rc = devman_get_drivers(&drvs, &ndrvs);
 	if (rc != EOK)
@@ -251,7 +252,7 @@ out:
 	return rc;
 }
 
-static int drv_show(char *drvname)
+static errno_t drv_show(char *drvname)
 {
 	devman_handle_t *devs;
 	devman_handle_t drvh;
@@ -261,7 +262,7 @@ static int drv_show(char *drvname)
 	unsigned int score;
 	size_t ndevs;
 	size_t i;
-	int rc;
+	errno_t rc;
 
 	rc = devman_driver_get_handle(drvname, &drvh);
 	if (rc != EOK)
@@ -316,9 +317,9 @@ error:
 	return EOK;
 }
 
-static int drv_load(const char *drvname)
+static errno_t drv_load(const char *drvname)
 {
-	int rc;
+	errno_t rc;
 	devman_handle_t drvh;
 
 	rc = devman_driver_get_handle(drvname, &drvh);
@@ -336,9 +337,9 @@ static int drv_load(const char *drvname)
 	return EOK;
 }
 
-static int drv_unload(const char *drvname)
+static errno_t drv_unload(const char *drvname)
 {
-	int rc;
+	errno_t rc;
 	devman_handle_t drvh;
 
 	rc = devman_driver_get_handle(drvname, &drvh);
@@ -370,7 +371,7 @@ static void print_syntax(void)
 
 int main(int argc, char *argv[])
 {
-	int rc;
+	errno_t rc;
 
 	if (argc == 1 || argv[1][0] == '-') {
 		if (argc > 1) {

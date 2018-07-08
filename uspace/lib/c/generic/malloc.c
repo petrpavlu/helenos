@@ -33,8 +33,6 @@
 /** @file
  */
 
-#define _HELENOS_SOURCE
-
 #include <malloc.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -397,7 +395,7 @@ static bool area_grow(heap_area_t *area, size_t size)
 		return false;
 	
 	/* Resize the address space area */
-	int ret = as_area_resize(area->start, asize, 0);
+	errno_t ret = as_area_resize(area->start, asize, 0);
 	if (ret != EOK)
 		return false;
 	
@@ -490,7 +488,7 @@ static void heap_shrink(heap_area_t *area)
 			void *end = (void *) ((uintptr_t) area->start + asize);
 			
 			/* Resize the address space area */
-			int ret = as_area_resize(area->start, asize, 0);
+			errno_t ret = as_area_resize(area->start, asize, 0);
 			if (ret != EOK)
 				abort();
 			

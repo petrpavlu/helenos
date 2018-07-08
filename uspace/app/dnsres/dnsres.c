@@ -37,6 +37,7 @@
 #include <inet/dnsr.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <str.h>
 
 #define NAME  "dnsres"
 
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
 	}
 	
 	dnsr_hostinfo_t *hinfo;
-	int rc = dnsr_name2host(hname, &hinfo, ver);
+	errno_t rc = dnsr_name2host(hname, &hinfo, ver);
 	if (rc != EOK) {
 		printf("%s: Error resolving '%s'.\n", NAME, hname);
 		return rc;

@@ -48,22 +48,23 @@
 #include <errno.h>
 #include <time.h>
 #include <dirent.h>
+#include <str.h>
 
 #define NAME	"bnchmark"
 #define BUFSIZE 8096
 #define MBYTE (1024*1024)
 
-typedef int(*measure_func_t)(void *);
+typedef errno_t(*measure_func_t)(void *);
 typedef unsigned long umseconds_t; /* milliseconds */
 
 static void syntax_print(void);
 
-static int measure(measure_func_t fn, void* data, umseconds_t *result)
+static errno_t measure(measure_func_t fn, void* data, umseconds_t *result)
 {
 	struct timeval start_time;
 	gettimeofday(&start_time, NULL);
 	
-	int rc = fn(data);
+	errno_t rc = fn(data);
 	if (rc != EOK) {
 		fprintf(stderr, "measured function failed\n");
 		return rc;
@@ -78,7 +79,7 @@ static int measure(measure_func_t fn, void* data, umseconds_t *result)
 	return EOK;
 }
 
-static int sequential_read_file(void *data)
+static errno_t sequential_read_file(void *data)
 {
 	char *path = (char *) data;
 	char *buf = malloc(BUFSIZE);
@@ -108,7 +109,7 @@ static int sequential_read_file(void *data)
 	return EOK;
 }
 
-static int sequential_read_dir(void *data)
+static errno_t sequential_read_dir(void *data)
 {
 	char *path = (char *) data;
 	
@@ -130,7 +131,7 @@ static int sequential_read_dir(void *data)
 
 int main(int argc, char **argv)
 {
-	int rc;
+	errno_t rc;
 	umseconds_t milliseconds_taken = 0;
 	char *path = NULL;
 	measure_func_t fn = NULL;

@@ -53,6 +53,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <str.h>
 #include <str_error.h>
 
 #include "input.h"
@@ -472,7 +473,7 @@ static int kbd_add_kbdev(service_id_t service_id, kbd_dev_t **kdevp)
 	kdev->port_ops = NULL;
 	kdev->ctl_ops = &kbdev_ctl;
 	
-	int rc = loc_service_get_name(service_id, &kdev->svc_name);
+	errno_t rc = loc_service_get_name(service_id, &kdev->svc_name);
 	if (rc != EOK) {
 		kdev->svc_name = NULL;
 		goto fail;
@@ -509,7 +510,7 @@ static int mouse_add_mousedev(service_id_t service_id, mouse_dev_t **mdevp)
 	mdev->port_ops = NULL;
 	mdev->proto_ops = &mousedev_proto;
 	
-	int rc = loc_service_get_name(service_id, &mdev->svc_name);
+	errno_t rc = loc_service_get_name(service_id, &mdev->svc_name);
 	if (rc != EOK) {
 		mdev->svc_name = NULL;
 		goto fail;
@@ -529,7 +530,7 @@ fail:
 	return -1;
 }
 
-static int serial_consumer(void *arg)
+static errno_t serial_consumer(void *arg)
 {
 	serial_dev_t *sdev = (serial_dev_t *) arg;
 
@@ -553,7 +554,7 @@ static int serial_consumer(void *arg)
 static int serial_add_srldev(service_id_t service_id, serial_dev_t **sdevp)
 {
 	bool match = false;
-	int rc;
+	errno_t rc;
 
 	serial_dev_t *sdev = serial_dev_new();
 	if (sdev == NULL)
@@ -632,13 +633,13 @@ static void kbd_add_legacy_devs(void)
 	(void) kbd_add_dev;
 }
 
-static int dev_check_new_kbdevs(void)
+static errno_t dev_check_new_kbdevs(void)
 {
 	category_id_t keyboard_cat;
 	service_id_t *svcs;
 	size_t count, i;
 	bool already_known;
-	int rc;
+	errno_t rc;
 	
 	rc = loc_category_get_id("keyboard", &keyboard_cat, IPC_FLAG_BLOCKING);
 	if (rc != EOK) {
@@ -683,13 +684,13 @@ static int dev_check_new_kbdevs(void)
 	return EOK;
 }
 
-static int dev_check_new_mousedevs(void)
+static errno_t dev_check_new_mousedevs(void)
 {
 	category_id_t mouse_cat;
 	service_id_t *svcs;
 	size_t count, i;
 	bool already_known;
-	int rc;
+	errno_t rc;
 	
 	rc = loc_category_get_id("mouse", &mouse_cat, IPC_FLAG_BLOCKING);
 	if (rc != EOK) {
@@ -734,13 +735,13 @@ static int dev_check_new_mousedevs(void)
 	return EOK;
 }
 
-static int dev_check_new_serialdevs(void)
+static errno_t dev_check_new_serialdevs(void)
 {
 	category_id_t serial_cat;
 	service_id_t *svcs;
 	size_t count, i;
 	bool already_known;
-	int rc;
+	errno_t rc;
 	
 	rc = loc_category_get_id("serial", &serial_cat, IPC_FLAG_BLOCKING);
 	if (rc != EOK) {
@@ -785,9 +786,9 @@ static int dev_check_new_serialdevs(void)
 	return EOK;
 }
 
-static int dev_check_new(void)
+static errno_t dev_check_new(void)
 {
-	int rc;
+	errno_t rc;
 	
 	fibril_mutex_lock(&discovery_lock);
 	
@@ -822,9 +823,9 @@ static void cat_change_cb(void)
 }
 
 /** Start listening for new devices. */
-static int input_start_dev_discovery(void)
+static errno_t input_start_dev_discovery(void)
 {
-	int rc = loc_register_cat_change_cb(cat_change_cb);
+	errno_t rc = loc_register_cat_change_cb(cat_change_cb);
 	if (rc != EOK) {
 		printf("%s: Failed registering callback for device discovery: "
 		    "%s\n", NAME, str_error(rc));
@@ -841,7 +842,7 @@ static void usage(char *name)
 
 int main(int argc, char **argv)
 {
-	int rc;
+	errno_t rc;
 
 	if (argc < 2) {
 		usage(argv[0]);

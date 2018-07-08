@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <task.h>
 #include <ipc/services.h>
+#include <str.h>
 #include "ext4/ops.h"
 #include "../../vfs/vfs.h"
 
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
 		return 2;
 	}
 	
-	int rc = ext4_global_init();
+	errno_t rc = ext4_global_init();
 	if (rc != EOK) {
 		printf("%s: Global initialization failed\n", NAME);
 		return rc;

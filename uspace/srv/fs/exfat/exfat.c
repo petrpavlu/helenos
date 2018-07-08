@@ -46,6 +46,7 @@
 #include <task.h>
 #include <stdio.h>
 #include <libfs.h>
+#include <str.h>
 #include "../../vfs/vfs.h"
 
 #define NAME	"exfat"
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	int rc = exfat_idx_init();
+	errno_t rc = exfat_idx_init();
 	if (rc != EOK)
 		goto err;
 

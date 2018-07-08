@@ -43,6 +43,7 @@
 #include <str_error.h>
 #include <stdio.h>
 #include <libfs.h>
+#include <str.h>
 #include "cdfs.h"
 #include "cdfs_ops.h"
 
@@ -80,7 +81,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	
-	int rc = fs_register(vfs_sess, &cdfs_vfs_info, &cdfs_ops,
+	errno_t rc = fs_register(vfs_sess, &cdfs_vfs_info, &cdfs_ops,
 	    &cdfs_libfs_ops);
 	if (rc != EOK) {
 		printf("%s: Failed to register file system: %s\n", NAME, str_error(rc));

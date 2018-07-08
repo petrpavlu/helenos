@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <errno.h>
+#include <str.h>
 #include "config.h"
 #include "util.h"
 #include "errors.h"
@@ -84,7 +85,7 @@ int cmd_batch(char **argv, cliuser_t *usr)
 			continue_despite_errors = true;
 	}
 
-	int rc = EOK;
+	errno_t rc = EOK;
 	FILE *batch = fopen(argv[1], "r");
 	if (batch == NULL) {
 		printf("%s - Cannot open file %s\n", cmdname, argv[1]);

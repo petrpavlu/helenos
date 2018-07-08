@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <task.h>
+#include <str.h>
 #include <str_error.h>
 
 #define NAME  "kill"
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 {
 	char *eptr;
 	task_id_t taskid;
-	int rc;
+	errno_t rc;
 
 	if (argc != 2) {
 		print_syntax();

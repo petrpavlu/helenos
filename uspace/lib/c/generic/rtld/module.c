@@ -40,6 +40,7 @@
 #include <loader/pcb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <str.h>
 
 #include <rtld/rtld.h>
 #include <rtld/rtld_debug.h>
@@ -53,7 +54,7 @@
  * @param rmodule Place to store pointer to new module or @c NULL
  * @return EOK on success, ENOMEM if out of memory
  */
-int module_create_static_exec(rtld_t *rtld, module_t **rmodule)
+errno_t module_create_static_exec(rtld_t *rtld, module_t **rmodule)
 {
 	module_t *module;
 

@@ -46,6 +46,7 @@
 #include <str_error.h>
 #include <task.h>
 #include <libfs.h>
+#include <str.h>
 #include "locfs.h"
 #include "locfs_ops.h"
 
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	
-	int rc = fs_register(vfs_sess, &locfs_vfs_info, &locfs_ops,
+	errno_t rc = fs_register(vfs_sess, &locfs_vfs_info, &locfs_ops,
 	    &locfs_libfs_ops);
 	if (rc != EOK) {
 		printf("%s: Failed to register file system: %s\n", NAME, str_error(rc));

@@ -43,6 +43,7 @@
 #include <surface.h>
 #include <codec/tga.h>
 #include <task.h>
+#include <str.h>
 
 #define NAME  "viewer"
 
@@ -109,7 +110,7 @@ static void on_keyboard_event(widget_t *widget, void *data)
 static bool img_load(const char *fname, surface_t **p_local_surface)
 {
 	int fd;
-	int rc = vfs_lookup_open(fname, WALK_REGULAR, MODE_READ, &fd);
+	errno_t rc = vfs_lookup_open(fname, WALK_REGULAR, MODE_READ, &fd);
 	if (rc != EOK)
 		return false;
 	

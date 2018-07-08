@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <io/console.h>
 #include <stdio.h>
+#include <str.h>
 
 #include "conn.h"
 #include "nterm.h"
@@ -60,7 +61,7 @@ static void send_char(wchar_t c)
 {
 	char cbuf[STR_BOUNDS(1)];
 	size_t offs;
-	int rc;
+	errno_t rc;
 
 	offs = 0;
 	chr_encode(c, cbuf, &offs, STR_BOUNDS(1));
@@ -109,7 +110,7 @@ static void print_syntax(void)
 int main(int argc, char *argv[])
 {
 	cons_event_t ev;
-	int rc;
+	errno_t rc;
 
 	if (argc != 2) {
 		print_syntax();

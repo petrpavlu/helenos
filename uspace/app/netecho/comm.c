@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <str.h>
 #include <str_error.h>
 
 #include "comm.h"
@@ -70,7 +71,7 @@ static void comm_udp_recv_msg(udp_assoc_t *assoc, udp_rmsg_t *rmsg)
 	size_t size;
 	size_t pos;
 	size_t now;
-	int rc;
+	errno_t rc;
 
 	size = udp_rmsg_size(rmsg);
 	pos = 0;
@@ -108,10 +109,10 @@ static void comm_udp_link_state(udp_assoc_t *assoc, udp_link_state_t lstate)
 	printf("Link state change: %s.\n", sstate);
 }
 
-int comm_open_listen(const char *port_s)
+errno_t comm_open_listen(const char *port_s)
 {
 	inet_ep2_t epp;
-	int rc;
+	errno_t rc;
 
 	char *endptr;
 	uint16_t port = strtol(port_s, &endptr, 10);
@@ -141,11 +142,11 @@ error:
 	return EIO;
 }
 
-int comm_open_talkto(const char *hostport)
+errno_t comm_open_talkto(const char *hostport)
 {
 	inet_ep2_t epp;
 	const char *errmsg;
-	int rc;
+	errno_t rc;
 
 	inet_ep2_init(&epp);
 	rc = inet_hostport_plookup_one(hostport, ip_any, &epp.remote, NULL,
@@ -181,9 +182,9 @@ void comm_close(void)
 		udp_destroy(udp);
 }
 
-int comm_send(void *data, size_t size)
+errno_t comm_send(void *data, size_t size)
 {
-	int rc = udp_assoc_send_msg(assoc, &remote, data, size);
+	errno_t rc = udp_assoc_send_msg(assoc, &remote, data, size);
 	if (rc != EOK)
 		return EIO;
 

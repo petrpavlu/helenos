@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <sysinfo.h>
 #include <stdlib.h>
+#include <str.h>
 
 static void dump_bytes_hex(char *data, size_t size)
 {
@@ -59,10 +60,10 @@ static void dump_bytes_text(char *data, size_t size)
 	}
 }
 
-static int print_item_val(char *ipath)
+static errno_t print_item_val(char *ipath)
 {
 	sysarg_t value;
-	int rc = sysinfo_get_value(ipath, &value);
+	errno_t rc = sysinfo_get_value(ipath, &value);
 	if (rc != EOK) {
 		printf("Error reading item '%s'.\n", ipath);
 		return rc;
