@@ -36,9 +36,7 @@
 #include <config.h>
 #include "port/ega.h"
 #include "port/kchar.h"
-#include "port/niagara.h"
 #include "port/pl011.h"
-#include "port/ski.h"
 #include "port/chardev.h"
 #include "output.h"
 
@@ -480,12 +478,10 @@ int main(int argc, char *argv[])
 	if (!config_key_exists("console")) {
 		ega_init();
 		kchar_init();
-		niagara_init();
 		pl011_init();
-		ski_init();
-	} else {
-		chardev_init();
 	}
+	
+	chardev_init();
 	
 	printf("%s: Accepting connections\n", NAME);
 	task_retval(0);
