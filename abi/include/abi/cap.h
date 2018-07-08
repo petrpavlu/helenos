@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Vojtech Horky
+ * Copyright (c) 2017 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/** @addtogroup generic
+ * @{
+ */
 /** @file
  */
 
-#include <assert.h>
-#include <errno.h>
-#include <mem.h>
-#include <ops/char_dev.h>
+#ifndef ABI_CAP_H_
+#define ABI_CAP_H_
 
-#include "test1.h"
+#define CAP_NIL		0
 
-static int impl_char_read(ddf_fun_t *fun, char *buf, size_t count) {
-	memset(buf, 0, count);
-	return count;
-}
+#endif
 
-static int imp_char_write(ddf_fun_t *fun, char *buf, size_t count) {
-	return count;
-}
-
-static char_dev_ops_t char_dev_ops = {
-	.read = &impl_char_read,
-	.write = &imp_char_write
-};
-
-ddf_dev_ops_t char_device_ops = {
-	.interfaces[CHAR_DEV_IFACE] = &char_dev_ops
-};
-
+/** @}
+ */

@@ -105,17 +105,21 @@ typedef struct {
 	task_id_t task_id;
 	/** Phone which made or last masqueraded this call. */
 	phone_t *phone;
+	/** Flags */
+	unsigned flags;
+	/** User-defined label */
+	sysarg_t label;
 } ipc_data_t;
 
 typedef struct {
+	kobject_t *kobject;
+
 	/**
 	 * Task link.
 	 * Valid only when the call is not forgotten.
 	 * Protected by the task's active_calls_lock.
 	 */
 	link_t ta_link;
-
-	atomic_t refcnt;
 
 	/** Answerbox link. */
 	link_t ab_link;
