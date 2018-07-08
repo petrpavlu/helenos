@@ -32,18 +32,18 @@
 
 /**
  * @file
- * @brief Miscellaneous functions.
+ * @brief Halt function.
  */
 
-#include <func.h>
+#include <halt.h>
 #include <log.h>
 #include <cpu.h>
 #include <arch/asm.h>
 #include <arch.h>
 #include <console/kconsole.h>
 
-atomic_t haltstate = {0}; /**< Halt flag */
-
+/** Halt flag */
+atomic_t haltstate = {0};
 
 /** Halt wrapper
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Lukas Mejdrech
+ * Copyright (c) 2001-2004 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,61 +26,20 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup tcp
- *  @{
+/** @addtogroup generic
+ * @{
  */
-
 /** @file
- *  TCP options definitions.
  */
 
-#ifndef __NET_TCP_CODES_H__
-#define __NET_TCP_CODES_H__
+#ifndef KERN_HALT_H_
+#define KERN_HALT_H_
 
-/** End of list TCP option.
- */
-#define TCPOPT_END_OF_LIST				0x0
+#include <atomic.h>
 
-/** No operation TCP option.
- */
-#define TCPOPT_NO_OPERATION				0x1
+extern atomic_t haltstate;
 
-/** Maximum segment size TCP option.
- */
-#define TCPOPT_MAX_SEGMENT_SIZE			0x2
-
-/** Maximum segment size TCP option length.
- */
-#define TCPOPT_MAX_SEGMENT_SIZE_LENGTH	4
-
-/** Window scale TCP option.
- */
-#define TCPOPT_WINDOW_SCALE				0x3
-
-/** Window scale TCP option length.
- */
-#define TCPOPT_WINDOW_SCALE_LENGTH		3
-
-/** Selective acknowledgement permitted TCP option.
- */
-#define TCPOPT_SACK_PERMITTED			0x4
-
-/** Selective acknowledgement permitted TCP option length.
- */
-#define TCPOPT_SACK_PERMITTED_LENGTH	2
-
-/** Selective acknowledgement TCP option.
- *  Has variable length.
- */
-#define TCPOPT_SACK						0x5
-
-/** Timestamp TCP option.
- */
-#define TCPOPT_TIMESTAMP				0x8
-
-/** Timestamp TCP option length.
- */
-#define TCPOPT_TIMESTAMP_LENGTH			10
+extern void halt(void) __attribute__((noreturn));
 
 #endif
 
