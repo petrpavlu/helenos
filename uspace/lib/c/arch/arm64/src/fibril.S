@@ -30,7 +30,7 @@
 
 .text
 
-FUNCTION_BEGIN(context_save)
+FUNCTION_BEGIN(__setjmp)
 	# Save callee-saved registers into context_t pointed by x0.
 	mov x1, sp
 	stp x1, x30, [x0], #16
@@ -43,25 +43,25 @@ FUNCTION_BEGIN(context_save)
 	mrs x1, tpidr_el0
 	stp x29, x1, [x0]
 
-	# Return 1.
-	mov x0, #1
+	# Return 0.
+	mov x0, #0
 	ret
-FUNCTION_END(context_save)
+FUNCTION_END(__setjmp)
 
-FUNCTION_BEGIN(context_restore)
+FUNCTION_BEGIN(__longjmp)
 	# Restore callee-saved registers from context_t pointed by x0.
-	ldp x1, x30, [x0], #16
-	mov sp, x1
+	ldp x2, x30, [x0], #16
+	mov sp, x2
 	ldp x19, x20, [x0], #16
 	ldp x21, x22, [x0], #16
 	ldp x23, x24, [x0], #16
 	ldp x25, x26, [x0], #16
 	ldp x27, x28, [x0], #16
 	# Restore the last register and TLS.
-	ldp x29, x1, [x0]
-	msr tpidr_el0, x1
+	ldp x29, x2, [x0]
+	msr tpidr_el0, x2
 
-	# Return 0.
-	mov x0, #0
+	# Return the second argument.
+	mov x0, x1
 	ret
-FUNCTION_END(context_restore)
+FUNCTION_END(__longjmp)
