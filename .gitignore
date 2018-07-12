@@ -18,6 +18,7 @@ deps.mk
 Makefile.ag.depend
 /Makefile.config
 /Makefile.common
+/QEMU_EFI.fd
 autotool/
 boot/distroot/
 boot/initrd.img
@@ -33,6 +34,7 @@ doxygen/latex/
 /uImage.bin
 /image.boot
 boot/arch/arm32/_link.ld
+boot/arch/arm64/_link.ld
 boot/arch/ia64/_link.ld
 boot/arch/mips32/_link.ld
 boot/arch/ppc32/_link.ld
@@ -53,6 +55,9 @@ kernel/arch/amd64/include/arch/kseg_struct.h
 kernel/arch/arm32/_link.ld
 kernel/arch/arm32/include/arch/context_struct.h
 kernel/arch/arm32/include/arch/istate_struct.h
+kernel/arch/arm64/_link.ld
+kernel/arch/arm64/include/arch/context_struct.h
+kernel/arch/arm64/include/arch/istate_struct.h
 kernel/arch/ia32/_link.ld
 kernel/arch/ia32/include/arch/boot/memmap_struct.h
 kernel/arch/ia32/include/arch/context_struct.h
@@ -325,6 +330,7 @@ uspace/drv/nic/ne2k/ne2k
 uspace/drv/nic/rtl8139/rtl8139
 uspace/drv/nic/rtl8169/rtl8169
 uspace/drv/platform/amdm37x/amdm37x
+uspace/drv/platform/arm64virt/arm64virt
 uspace/drv/platform/icp/icp
 uspace/drv/platform/mac/mac
 uspace/drv/platform/malta/malta
@@ -352,6 +358,12 @@ uspace/lib/c/arch/arm32/_link-shlib.ld
 uspace/lib/c/arch/arm32/_link.ld
 uspace/lib/c/arch/arm32/include/libarch/fibril_context.h
 uspace/lib/c/arch/arm32/include/libarch/istate_struct.h
+uspace/lib/c/arch/arm64/_link-dlexe.ld
+uspace/lib/c/arch/arm64/_link-loader.ld
+uspace/lib/c/arch/arm64/_link-shlib.ld
+uspace/lib/c/arch/arm64/_link.ld
+uspace/lib/c/arch/arm64/include/libarch/fibril_context.h
+uspace/lib/c/arch/arm64/include/libarch/istate_struct.h
 uspace/lib/c/arch/ia32/_link-dlexe.ld
 uspace/lib/c/arch/ia32/_link-loader.ld
 uspace/lib/c/arch/ia32/_link-shlib.ld
@@ -448,6 +460,7 @@ uspace/srv/taskmon/taskmon
 uspace/srv/test/chardev-test/chardev-test
 uspace/srv/vfs/vfs
 uspace/srv/volsrv/volsrv
+tools/aarch64-linux-gnu
 tools/amd64-unknown-elf
 tools/arm-linux-gnueabi
 tools/i686-pc-linux-gnu
