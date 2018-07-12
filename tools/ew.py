@@ -283,8 +283,10 @@ emulators = {
 			'image' : 'image.iso@arm64',
 			'hdd' : False,
 			'net' : False,
+			'audio' : False,
 			'usb' : False,
-			'audio' : False
+			'xhci' : False,
+			'tablet' : False
 		}
 	},
 	'ia32' : {
