@@ -78,13 +78,6 @@ static void virt_init(void)
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
 	gicv2_init(&virt.gicv2, distr, cpui);
 
-	/* Tell the userspace where GICv2 lives. */
-	sysinfo_set_item_val("gicv2", NULL, true);
-	sysinfo_set_item_val("gicv2.distr.address.physical", NULL,
-	    VIRT_GIC_DISTR_ADDRESS);
-	sysinfo_set_item_val("gicv2.cpui.address.physical", NULL,
-	    VIRT_GIC_CPUI_ADDRESS);
-
 	/* Initialize timer. */
 	/* REVISIT */
 }

@@ -242,6 +242,7 @@ uspace/dist/drv/atkbd/
 uspace/dist/drv/cmos-rtc/
 uspace/dist/drv/e1k/
 uspace/dist/drv/ehci/
+uspace/dist/drv/gicv2/
 uspace/dist/drv/hdaudio/
 uspace/dist/drv/i8042/
 uspace/dist/drv/i8259/
@@ -323,6 +324,7 @@ uspace/drv/hid/xtkbd/xtkbd
 uspace/drv/hid/ps2mouse/ps2mouse
 uspace/drv/hid/usbhid/usbhid
 uspace/drv/intctl/apic/apic
+uspace/drv/intctl/gicv2/gicv2
 uspace/drv/intctl/i8259/i8259
 uspace/drv/intctl/icp-ic/icp-ic
 uspace/drv/intctl/obio/obio

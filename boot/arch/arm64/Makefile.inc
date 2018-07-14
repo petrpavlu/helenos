@@ -55,9 +55,8 @@ ifeq ($(MACHINE), virt)
 	RD_DRVS_ESSENTIAL += \
 		char/pl011 \
 		char/sttykbd \
+		intctl/gicv2 \
 		platform/arm64virt
-	RD_SRVS_ESSENTIAL += \
-		$(USPACE_PATH)/srv/hw/irc/gicv2/gicv2
 endif
 
 SOURCES = \

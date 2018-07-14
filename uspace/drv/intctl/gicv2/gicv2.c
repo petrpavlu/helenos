@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Petr Pavlu
+ * Copyright (c) 2018 Petr Pavlu
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,21 @@
 /** @addtogroup gicv2
  * @{
  */
+
 /** @file
- * @brief ARM Generic Interrupt Controller, Architecture version 2.0.
- *
- * This IRQ controller is present on the QEMU virt platform for ARM.
  */
 
 #include <async.h>
 #include <bitops.h>
 #include <ddi.h>
+#include <ddf/log.h>
 #include <errno.h>
-#include <io/log.h>
-#include <ipc/irc.h>
-#include <ipc/services.h>
 #include <macros.h>
-#include <ns.h>
+#include <str_error.h>
+#include <ipc/irc.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <str.h>
-#include <sysinfo.h>
 
-#define NAME  "gicv2"
+#include "gicv2.h"
 
 /** GICv2 distributor register map. */
 typedef struct {
@@ -165,41 +159,38 @@ typedef struct {
 	ioport32_t dir;
 } gicv2_cpui_regs_t;
 
-/** GICv2 driver-specific device data. */
-typedef struct {
-	gicv2_distr_regs_t *distr;
-	gicv2_cpui_regs_t *cpui;
-	unsigned inum_total;
-} gicv2_t;
-
-static gicv2_t gicv2;
-
-/** Enable specific interrupt. */
-static int gicv2_enable_irq(sysarg_t irq)
+static errno_t gicv2_enable_irq(gicv2_t *gicv2, sysarg_t irq)
 {
-	if (irq > gicv2.inum_total)
+	if (irq > gicv2->max_irq)
 		return EINVAL;
 
-	log_msg(LOG_DEFAULT, LVL_NOTE, "Enable interrupt '%" PRIun "'.", irq);
+	ddf_msg(LVL_NOTE, "Enable interrupt '%" PRIun "'.", irq);
 
-	pio_write_32(&gicv2.distr->isenabler[irq / 32],
-	    BIT_V(uint32_t, irq % 32));
+	gicv2_distr_regs_t *distr_regs =
+	    (gicv2_distr_regs_t *) gicv2->distr_regs;
+	pio_write_32(
+	    &distr_regs->isenabler[irq / 32], BIT_V(uint32_t, irq % 32));
 	return EOK;
 }
 
-/** Handle one connection to GICv2.
+/** Client connection handler.
  *
  * @param iid   Hash of the request that opened the connection.
  * @param icall Call data of the request that opened the connection.
  * @param arg	Local argument.
  */
-static void icpic_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+static void gicv2_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
 {
 	ipc_callid_t callid;
 	ipc_call_t call;
+	gicv2_t *gicv2;
 
-	/* Answer the first IPC_M_CONNECT_ME_TO call. */
+	/*
+	 * Answer the first IPC_M_CONNECT_ME_TO call.
+	 */
 	async_answer_0(iid, EOK);
+
+	gicv2 = (gicv2_t *)ddf_dev_data_get(ddf_fun_get_dev((ddf_fun_t *)arg));
 
 	while (true) {
 		callid = async_get_call(&call);
@@ -213,10 +204,14 @@ static void icpic_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
 		switch (IPC_GET_IMETHOD(call)) {
 		case IRC_ENABLE_INTERRUPT:
 			async_answer_0(callid,
-			    gicv2_enable_irq(IPC_GET_ARG1(call)));
+			    gicv2_enable_irq(gicv2, IPC_GET_ARG1(call)));
+			break;
+		case IRC_DISABLE_INTERRUPT:
+			/* XXX TODO */
+			async_answer_0(callid, EOK);
 			break;
 		case IRC_CLEAR_INTERRUPT:
-			/* Noop. */
+			/* Noop */
 			async_answer_0(callid, EOK);
 			break;
 		default:
@@ -226,104 +221,73 @@ static void icpic_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
 	}
 }
 
-static int gicv2_init(void)
+/** Add a GICv2 device. */
+errno_t gicv2_add(gicv2_t *gicv2, gicv2_res_t *res)
 {
-	sysarg_t present;
-	int rc = sysinfo_get_value("gicv2", &present);
+	ddf_fun_t *fun_a = NULL;
+	errno_t rc;
+
+	rc = pio_enable((void *) res->distr_base, sizeof(gicv2_distr_regs_t),
+	    &gicv2->distr_regs);
+	if (rc != EOK) {
+		ddf_msg(
+		    LVL_ERROR, "Error enabling PIO for distributor registers.");
+		goto error;
+	}
+
+	rc = pio_enable((void *) res->cpui_base, sizeof(gicv2_cpui_regs_t),
+	    &gicv2->cpui_regs);
+	if (rc != EOK) {
+		ddf_msg(LVL_ERROR,
+		    "Error enabling PIO for CPU interface registers.");
+		goto error;
+	}
+
+	fun_a = ddf_fun_create(gicv2->dev, fun_exposed, "a");
+	if (fun_a == NULL) {
+		ddf_msg(LVL_ERROR, "Failed creating function 'a'.");
+		rc = ENOMEM;
+		goto error;
+	}
+
+	ddf_fun_set_conn_handler(fun_a, gicv2_connection);
+
+	rc = ddf_fun_bind(fun_a);
+	if (rc != EOK) {
+		ddf_msg(LVL_ERROR, "Failed binding function 'a': %s",
+		    str_error(rc));
+		goto error;
+	}
+
+	rc = ddf_fun_add_to_category(fun_a, "irc");
 	if (rc != EOK)
-		present = 0;
-
-	/* GICv2 not found. */
-	if (!present) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Device not present.");
-		return ENOENT;
-	}
-
-	/* Obtain addresses of distributor and CPU interface registers. */
-	sysarg_t distr;
-	rc = sysinfo_get_value("gicv2.distr.address.physical", &distr);
-	if (rc != EOK) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Error getting physical "
-		    "address of the distributor registers.");
-		return rc;
-	}
-
-	sysarg_t cpui;
-	rc = sysinfo_get_value("gicv2.cpui.address.physical", &cpui);
-	if (rc != EOK) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Error getting physical "
-		    "address of the CPU interface registers.");
-		return rc;
-	}
-
-	/* Enable physical IO to access the registers. */
-	void *distr_virt = NULL;
-	void *cpui_virt = NULL;
-	rc = pio_enable((void *) distr, sizeof(gicv2_distr_regs_t),
-	    &distr_virt);
-	if (rc != EOK) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Error enabling PIO for "
-		    "distributor registers.");
 		goto error;
-	}
-	rc = pio_enable((void *) cpui, sizeof(gicv2_cpui_regs_t), &cpui_virt);
-	if (rc != EOK) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Error enabling PIO for CPU "
-		    "interface registers.");
-		goto error;
-	}
-
-	gicv2.distr = distr_virt;
-	gicv2.cpui = cpui_virt;
 
 	/* Get maximum number of interrupts. */
-	uint32_t typer = pio_read_32(&gicv2.distr->typer);
-	gicv2.inum_total = (((typer & GICV2D_TYPER_IT_LINES_NUMBER_MASK) >>
+	gicv2_distr_regs_t *distr_regs =
+	    (gicv2_distr_regs_t *) gicv2->distr_regs;
+	uint32_t typer = pio_read_32(&distr_regs->typer);
+	gicv2->max_irq = (((typer & GICV2D_TYPER_IT_LINES_NUMBER_MASK) >>
 	    GICV2D_TYPER_IT_LINES_NUMBER_SHIFT) + 1) * 32;
 
-	async_set_fallback_port_handler(icpic_connection, NULL);
-
-	/* Register itself as an IRC service. */
-	rc = ENOENT; /*service_register(SERVICE_IRC); FIXME */
-	if (rc != EOK) {
-		log_msg(LOG_DEFAULT, LVL_ERROR, "Failed registering itself as "
-		    "an IRC service.");
-		goto error;
-	}
-
 	return EOK;
-
 error:
-	if (distr_virt != NULL)
-		pio_disable(distr_virt, sizeof(gicv2_distr_regs_t));
-	if (cpui_virt != NULL)
-		pio_disable(cpui_virt, sizeof(gicv2_cpui_regs_t));
+	if (fun_a != NULL)
+		ddf_fun_destroy(fun_a);
 	return rc;
 }
 
-int main(int argc, char **argv)
+/** Remove a GICv2 device. */
+errno_t gicv2_remove(gicv2_t *gicv2)
 {
-	int rc;
-
-	printf(NAME ": HelenOS GICv2 interrupt controller driver\n");
-
-	rc = log_init(NAME);
-	if (rc != EOK) {
-		printf(NAME ": Error connecting logging service.\n");
-		return 1;
-	}
-
-	if (gicv2_init() != EOK)
-		return -1;
-
-	log_msg(LOG_DEFAULT, LVL_NOTE, NAME ": Accepting connections.");
-	task_retval(0);
-	async_manager();
-
-	/* Not reached. */
-	return 0;
+	return ENOTSUP;
 }
 
-/**
- * @}
+/** A GICv2 device gone. */
+errno_t gicv2_gone(gicv2_t *gicv2)
+{
+	return ENOTSUP;
+}
+
+/** @}
  */

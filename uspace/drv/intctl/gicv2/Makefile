@@ -26,10 +26,12 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-USPACE_PREFIX = ../../../..
+USPACE_PREFIX = ../../..
+LIBS = drv
 BINARY = gicv2
 
 SOURCES = \
-	gicv2.c
+	gicv2.c \
+	main.c
 
 include $(USPACE_PREFIX)/Makefile.common

@@ -46,11 +46,17 @@
 #include <ops/hw_res.h>
 #include <ops/pio_window.h>
 
-#define NAME "arm64virt"
+#define NAME  "arm64virt"
 
-#define ARM64VIRT_UART_IRQ  33
-#define ARM64VIRT_UART_MEMBASE  0x09000000
-#define ARM64VIRT_UART_MEMSIZE  0x00001000
+enum {
+	arm64virt_ic_distr_membase = 0x08000000,
+	arm64virt_ic_distr_memsize = 0x00001000,
+	arm64virt_ic_cpui_membase = 0x08010000,
+	arm64virt_ic_cpui_memsize = 0x00001004,
+	arm64virt_uart_irq = 33,
+	arm64virt_uart_membase = 0x09000000,
+	arm64virt_uart_memsize = 0x00001000
+};
 
 typedef struct arm64virt_fun {
 	hw_resource_list_t hw_resources;
@@ -67,12 +73,33 @@ static driver_t arm64virt_driver = {
 	.driver_ops = &arm64virt_ops
 };
 
+static hw_resource_t arm64virt_ic_res[] = {
+	{
+		.type = MEM_RANGE,
+		.res.mem_range = {
+			.address = arm64virt_ic_distr_membase,
+			.size = arm64virt_ic_distr_memsize,
+			.relative = false,
+			.endianness = LITTLE_ENDIAN
+		}
+	},
+	{
+		.type = MEM_RANGE,
+		.res.mem_range = {
+			.address = arm64virt_ic_cpui_membase,
+			.size = arm64virt_ic_cpui_memsize,
+			.relative = false,
+			.endianness = LITTLE_ENDIAN
+		}
+	}
+};
+
 static hw_resource_t arm64virt_uart_res[] = {
 	{
 		.type = MEM_RANGE,
 		.res.mem_range = {
-			.address = ARM64VIRT_UART_MEMBASE,
-			.size = ARM64VIRT_UART_MEMSIZE,
+			.address = arm64virt_uart_membase,
+			.size = arm64virt_uart_memsize,
 			.relative = false,
 			.endianness = LITTLE_ENDIAN
 		}
@@ -80,7 +107,7 @@ static hw_resource_t arm64virt_uart_res[] = {
 	{
 		.type = INTERRUPT,
 		.res.interrupt = {
-			.irq = ARM64VIRT_UART_IRQ
+			.irq = arm64virt_uart_irq
 		}
 	}
 };
@@ -90,6 +117,13 @@ static pio_window_t arm64virt_pio_window = {
 		.base = 0,
 		.size = -1
 	}
+};
+
+static arm64virt_fun_t arm64virt_ic_fun_proto = {
+	.hw_resources = {
+		sizeof(arm64virt_ic_res) / sizeof(arm64virt_ic_res[0]),
+		arm64virt_ic_res
+	},
 };
 
 static arm64virt_fun_t arm64virt_uart_fun_proto = {
@@ -190,6 +224,11 @@ error:
 static int arm64virt_add_functions(ddf_dev_t *dev)
 {
 	int rc;
+
+	rc = arm64virt_add_fun(dev, "intctl", "arm/gicv2",
+	    &arm64virt_ic_fun_proto);
+	if (rc != EOK)
+		return rc;
 
 	rc = arm64virt_add_fun(dev, "uart", "arm/pl011",
 	    &arm64virt_uart_fun_proto);
