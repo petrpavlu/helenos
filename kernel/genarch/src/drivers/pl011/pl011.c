@@ -141,18 +141,6 @@ bool pl011_uart_init(pl011_uart_t *uart, inr_t interrupt, uintptr_t addr)
 	uart->parea.mapped = false;
 	ddi_parea_register(&uart->parea);
 
-	if (!fb_exported) {
-		/*
-		 * This is the necessary evil until the userspace driver is
-		 * entirely self-sufficient.
-		 */
-		sysinfo_set_item_val("fb", NULL, true);
-		sysinfo_set_item_val("fb.kind", NULL, 7);
-		sysinfo_set_item_val("fb.address.physical", NULL, addr);
-
-		fb_exported = true;
-	}
-
 	return true;
 }
 
