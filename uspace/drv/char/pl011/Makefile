@@ -31,6 +31,7 @@ LIBS = drv
 BINARY = pl011
 
 SOURCES = \
+	main.c \
 	pl011.c
 
 include $(USPACE_PREFIX)/Makefile.common

@@ -35,7 +35,6 @@
 #include <ipc/output.h>
 #include <config.h>
 #include "port/ega.h"
-#include "port/pl011.h"
 #include "port/chardev.h"
 #include "output.h"
 
@@ -482,7 +481,6 @@ int main(int argc, char *argv[])
 
 	if (!config_key_exists("console")) {
 		ega_init();
-		pl011_init();
 	}
 
 	chardev_init();

@@ -255,6 +255,7 @@ uspace/dist/drv/ns8250/
 uspace/dist/drv/ohci/
 uspace/dist/drv/pc/
 uspace/dist/drv/pciintel/
+uspace/dist/drv/pl011/
 uspace/dist/drv/pl050/
 uspace/dist/drv/ps2mouse/
 uspace/dist/drv/root/
@@ -308,6 +309,7 @@ uspace/drv/bus/usb/xhci/test-xhci
 uspace/drv/char/i8042/i8042
 uspace/drv/char/msim-con/msim-con
 uspace/drv/char/ns8250/ns8250
+uspace/drv/char/pl011/pl011
 uspace/drv/char/pl050/pl050
 uspace/drv/char/ps2mouse/ps2mouse
 uspace/drv/char/ski-con/ski-con
