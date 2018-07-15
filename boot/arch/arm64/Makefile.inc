@@ -54,7 +54,6 @@ EXTRA_CFLAGS = -fpic
 ifeq ($(MACHINE), virt)
 	RD_DRVS_ESSENTIAL += \
 		char/pl011 \
-		char/sttykbd \
 		intctl/gicv2 \
 		platform/arm64virt
 endif
