@@ -11,6 +11,7 @@
 *.ag.probe.s
 *.ag.probe.c
 *.pyc
+.*.swp
 tag
 tags
 common.h.new
