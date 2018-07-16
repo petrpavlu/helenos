@@ -183,6 +183,7 @@ DIRS = \
 	drv/nic/rtl8169 \
 	drv/nic/ar9271 \
 	drv/platform/amdm37x \
+	drv/platform/arm64virt \
 	drv/platform/icp \
 	drv/platform/mac \
 	drv/platform/malta \
@@ -199,11 +200,6 @@ DIRS = \
 ifeq ($(UARCH),sparc64)
 	DIRS += \
 		drv/platform/sun4u
-endif
-
-ifeq ($(UARCH),arm64)
-	DIRS += \
-		drv/platform/arm64virt
 endif
 
 ## Dynamic linking tests
