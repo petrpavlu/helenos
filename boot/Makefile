@@ -48,7 +48,6 @@ build_dist: clean_dist
 	for file in $(RD_SRVS) ; do \
 		cp "$$file" "$(DIST_PATH)/srv/" ; \
 	done
-	mkdir -p "$(DIST_PATH)/lib/"
 	for file in $(RD_LIBS) ; do \
 		cp "$$file" "$(DIST_PATH)/lib/" ; \
 	done
@@ -59,7 +58,6 @@ ifeq ($(CONFIG_DEVEL_FILES), y)
 	cp -r -L "$(USPACE_PATH)/lib/c/arch/$(UARCH)/include/." "$(DIST_PATH)/inc/c/"
 	cat "$(USPACE_PATH)/lib/c/arch/$(UARCH)/_link.ld" | sed 's/^STARTUP(.*)$$//g' > "$(DIST_PATH)/inc/_link.ld"
 endif
-	mkdir -p "$(DIST_PATH)/app/"
 	for file in $(RD_APPS) ; do \
 		cp "$$file" "$(DIST_PATH)/app/" ; \
 	done
@@ -67,7 +65,6 @@ endif
 		cp "$$file" "$(DIST_PATH)/" ; \
 	done
 ifeq ($(CONFIG_PCUT_TESTS),y)
-	mkdir -p "$(DIST_PATH)/test/"
 	echo "echo Running all tests..." >"$(DIST_PATH)/test/run_all"
 	echo "<html><head><title>HelenOS test results</title></head><body>" >"$(DIST_PATH)/test/test.html"
 	echo "<h1>HelenOS test results</h1><ul>" >>"$(DIST_PATH)/test/test.html"
@@ -85,7 +82,6 @@ ifeq ($(CONFIG_PCUT_TESTS),y)
 endif
 
 ifeq ($(CONFIG_PCUT_SELF_TESTS),y)
-	mkdir -p "$(DIST_PATH)/test/"
 	echo "echo Running all PCUT self-tests..." >"$(DIST_PATH)/test/run_pcut"
 	echo "<html><head><title>Results of PCUT self-tests on HelenOS</title></head><body>" >"$(DIST_PATH)/test/pcut.html"
 	echo "<h1>Results of PCUT self-tests on HelenOS</h1><ul>" >>"$(DIST_PATH)/test/pcut.html"
