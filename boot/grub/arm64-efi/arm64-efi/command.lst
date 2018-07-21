@@ -60,7 +60,7 @@ configfile: configfile
 continue: normal
 cutmem: mmap
 date: date
-devicetree: linux
+devicetree: fdt
 distrust: verify
 dump: minicmd
 eval: eval
@@ -126,6 +126,8 @@ videotest: videotest
 write_byte: memrw
 write_dword: memrw
 write_word: memrw
+xen_hypervisor: xen_boot
+xen_module: xen_boot
 xnu_uuid: xnu_uuid
 zfs-bootfs: zfsinfo
 zfsinfo: zfsinfo

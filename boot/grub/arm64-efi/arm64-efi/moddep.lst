@@ -28,17 +28,19 @@ gfxterm_menu: font functional_test procfs normal video_fb
 gcry_idea: crypto
 tr: extcmd
 shift_test: functional_test
-afs:
+afs: fshelp
 xzio: crypto
 syslinuxcfg: extcmd normal
 search_fs_file:
 test_blockarg: extcmd normal
+xen_boot: linux boot fdt
 true:
 affs: fshelp
 iso9660: fshelp
-exfat:
+exfat: fshelp
 setjmp_test: functional_test setjmp
 gfxterm: font video
+fdt:
 efinet: net
 disk:
 xfs: fshelp
@@ -63,13 +65,13 @@ gfxterm_background: video_colors bitmap_scale gfxterm extcmd video bitmap
 search_fs_uuid:
 gcry_dsa: verify mpi
 keystatus: extcmd
-linux: boot
+linux: boot fdt
 geli: cryptodisk crypto gcry_sha512 pbkdf2 gcry_sha256
 cmdline_cat_test: font functional_test procfs normal video_fb
 part_sun:
 pbkdf2_test: functional_test pbkdf2 gcry_sha1
 bufio:
-bfs:
+bfs: fshelp
 gcry_blowfish: crypto
 test:
 nilfs2: fshelp
@@ -115,7 +117,7 @@ regexp: extcmd normal
 parttool: normal
 cpio: archelp
 gcry_rmd160: crypto
-fat:
+fat: fshelp
 ufs1_be:
 archelp:
 raid6rec: diskfilter
@@ -130,8 +132,8 @@ bitmap_scale: bitmap
 probe: extcmd
 minix3:
 tar: archelp
-hfs:
-procfs:
+hfs: fshelp
+procfs: archelp
 boot:
 progress: normal
 kernel:
