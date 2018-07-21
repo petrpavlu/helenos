@@ -350,7 +350,7 @@ def random_choices(config, rules, start_index):
 
 	varname, vartype, name, choices, cond = rules[start_index]
 
-	# First check that this rule would make sense	
+	# First check that this rule would make sense
 	if cond and not cond.evaluate(config):
 		return random_choices(config, rules, start_index + 1)
 

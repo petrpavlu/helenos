@@ -38,7 +38,7 @@
 #ifndef KERN_arm64_ASID_H_
 #define KERN_arm64_ASID_H_
 
-#include <typedefs.h>
+#include <stdint.h>
 
 /* REVISIT */
 typedef uint16_t asid_t;

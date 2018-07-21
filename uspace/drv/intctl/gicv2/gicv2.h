@@ -47,9 +47,9 @@ typedef struct {
 /** GICv2 interrupt controller. */
 typedef struct {
 	ddf_dev_t *dev;
-	void *distr_regs;
-	void *cpui_regs;
-	uint32_t max_irq;
+	void *distr;
+	void *cpui;
+	unsigned max_irq;
 } gicv2_t;
 
 extern errno_t gicv2_add(gicv2_t *, gicv2_res_t *);

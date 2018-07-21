@@ -120,8 +120,8 @@ GENARCH_SOURCES += \
 endif
 
 ifeq ($(CONFIG_GICV2), y)
-	GENARCH_SOURCES += \
-		genarch/src/drivers/gicv2/gicv2.c
+GENARCH_SOURCES += \
+	genarch/src/drivers/gicv2/gicv2.c
 endif
 
 ifeq ($(CONFIG_VIA_CUDA),y)

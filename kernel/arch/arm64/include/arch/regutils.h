@@ -37,11 +37,8 @@
 #define KERN_arm64_REGUTILS_H_
 
 #ifndef __ASSEMBLER__
-#if defined(KERNEL) || defined(BOOT)
-#include <stddef.h>
-#else
+
 #include <stdint.h>
-#endif
 
 #define SPECIAL_REG_GEN_READ(name) \
 	static inline uintptr_t name##_read(void) \

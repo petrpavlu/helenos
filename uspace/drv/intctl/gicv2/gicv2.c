@@ -166,10 +166,8 @@ static errno_t gicv2_enable_irq(gicv2_t *gicv2, sysarg_t irq)
 
 	ddf_msg(LVL_NOTE, "Enable interrupt '%" PRIun "'.", irq);
 
-	gicv2_distr_regs_t *distr_regs =
-	    (gicv2_distr_regs_t *) gicv2->distr_regs;
-	pio_write_32(
-	    &distr_regs->isenabler[irq / 32], BIT_V(uint32_t, irq % 32));
+	gicv2_distr_regs_t *distr = (gicv2_distr_regs_t *) gicv2->distr;
+	pio_write_32(&distr->isenabler[irq / 32], BIT_V(uint32_t, irq % 32));
 	return EOK;
 }
 
@@ -228,15 +226,15 @@ errno_t gicv2_add(gicv2_t *gicv2, gicv2_res_t *res)
 	errno_t rc;
 
 	rc = pio_enable((void *) res->distr_base, sizeof(gicv2_distr_regs_t),
-	    &gicv2->distr_regs);
+	    &gicv2->distr);
 	if (rc != EOK) {
 		ddf_msg(
 		    LVL_ERROR, "Error enabling PIO for distributor registers.");
 		goto error;
 	}
 
-	rc = pio_enable((void *) res->cpui_base, sizeof(gicv2_cpui_regs_t),
-	    &gicv2->cpui_regs);
+	rc = pio_enable(
+	    (void *) res->cpui_base, sizeof(gicv2_cpui_regs_t), &gicv2->cpui);
 	if (rc != EOK) {
 		ddf_msg(LVL_ERROR,
 		    "Error enabling PIO for CPU interface registers.");
@@ -264,9 +262,8 @@ errno_t gicv2_add(gicv2_t *gicv2, gicv2_res_t *res)
 		goto error;
 
 	/* Get maximum number of interrupts. */
-	gicv2_distr_regs_t *distr_regs =
-	    (gicv2_distr_regs_t *) gicv2->distr_regs;
-	uint32_t typer = pio_read_32(&distr_regs->typer);
+	gicv2_distr_regs_t *distr = (gicv2_distr_regs_t *) gicv2->distr;
+	uint32_t typer = pio_read_32(&distr->typer);
 	gicv2->max_irq = (((typer & GICV2D_TYPER_IT_LINES_NUMBER_MASK) >>
 	    GICV2D_TYPER_IT_LINES_NUMBER_SHIFT) + 1) * 32;
 

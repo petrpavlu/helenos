@@ -62,7 +62,7 @@ typedef struct arm64virt_fun {
 	hw_resource_list_t hw_resources;
 } arm64virt_fun_t;
 
-static int arm64virt_dev_add(ddf_dev_t *);
+static errno_t arm64virt_dev_add(ddf_dev_t *);
 
 static driver_ops_t arm64virt_ops = {
 	.dev_add = &arm64virt_dev_add
@@ -147,7 +147,7 @@ static hw_resource_list_t *arm64virt_get_resources(ddf_fun_t *fnode)
 	return &fun->hw_resources;
 }
 
-static int arm64virt_enable_interrupt(ddf_fun_t *fun, int irq)
+static errno_t arm64virt_enable_interrupt(ddf_fun_t *fun, int irq)
 {
 	/* TODO */
 	return false;
@@ -174,13 +174,13 @@ static ddf_dev_ops_t arm64virt_fun_ops = {
 	}
 };
 
-static int arm64virt_add_fun(ddf_dev_t *dev, const char *name,
+static errno_t arm64virt_add_fun(ddf_dev_t *dev, const char *name,
     const char *str_match_id, arm64virt_fun_t *fun_proto)
 {
 	ddf_msg(LVL_NOTE, "Adding function '%s'.", name);
 
 	ddf_fun_t *fnode = NULL;
-	int rc;
+	errno_t rc;
 
 	/* Create new device. */
 	fnode = ddf_fun_create(dev, fun_inner, name);
@@ -221,9 +221,9 @@ error:
 	return rc;
 }
 
-static int arm64virt_add_functions(ddf_dev_t *dev)
+static errno_t arm64virt_add_functions(ddf_dev_t *dev)
 {
-	int rc;
+	errno_t rc;
 
 	rc = arm64virt_add_fun(dev, "intctl", "arm/gicv2",
 	    &arm64virt_ic_fun_proto);
@@ -239,7 +239,7 @@ static int arm64virt_add_functions(ddf_dev_t *dev)
 }
 
 /** Add device. */
-static int arm64virt_dev_add(ddf_dev_t *dev)
+static errno_t arm64virt_dev_add(ddf_dev_t *dev)
 {
 	ddf_msg(LVL_NOTE, "arm64virt_dev_add(), device=%s.",
 	    ddf_dev_get_name(dev));
@@ -254,7 +254,7 @@ static int arm64virt_dev_add(ddf_dev_t *dev)
 
 int main(int argc, char *argv[])
 {
-	int rc;
+	errno_t rc;
 
 	printf(NAME ": HelenOS ARM64 QEMU virt platform driver\n");
 

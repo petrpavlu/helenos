@@ -42,10 +42,6 @@ SECTIONS {
 		*(.data.rel*);
 	} :data
 
-	.got.plt : {
-		*(.got.plt);
-	} :data
-
 	.tdata : {
 		_tdata_start = .;
 		*(.tdata);

@@ -49,12 +49,10 @@ typedef struct {
 
 #include <genarch/mm/as_pt.h>
 
-#define as_constructor_arch(as, flags)  (as != as)
-#define as_destructor_arch(as)          (as != as)
-#define as_create_arch(as, flags)       (as != as)
+#define as_constructor_arch(as, flags)  ((void)as, (void)flags, EOK)
+#define as_destructor_arch(as)          ((void)as, 0)
+#define as_create_arch(as, flags)       ((void)as, (void)flags, EOK)
 #define as_deinstall_arch(as)
-#define as_invalidate_translation_cache(as, page, cnt)
-
 #define as_invalidate_translation_cache(as, page, cnt)
 
 extern void as_arch_init(void);
