@@ -121,6 +121,8 @@
 #include "../private/libc.h"
 #include "../private/fibril.h"
 
+#define DPRINTF(...)  ((void) 0)
+
 /** Async framework global futex */
 futex_t async_futex = FUTEX_INITIALIZER;
 
@@ -131,7 +133,6 @@ static atomic_t threads_in_ipc_wait = { 0 };
 typedef struct {
 	link_t link;
 
-	cap_call_handle_t chandle;
 	ipc_call_t call;
 } msg_t;
 
@@ -163,9 +164,6 @@ typedef struct {
 	/** Messages that should be delivered to this fibril. */
 	list_t msg_queue;
 
-	/** Identification of the opening call. */
-	cap_call_handle_t chandle;
-
 	/** Call data of the opening call. */
 	ipc_call_t call;
 
@@ -178,6 +176,12 @@ typedef struct {
 	/** Client data */
 	void *data;
 } connection_t;
+
+/* Member of notification_t::msg_list. */
+typedef struct {
+	link_t link;
+	ipc_call_t calldata;
+} notification_msg_t;
 
 /* Notification data */
 typedef struct {
@@ -196,19 +200,8 @@ typedef struct {
 	/** Notification handler argument */
 	void *arg;
 
-	/** Data of the most recent notification. */
-	ipc_call_t calldata;
-
-	/**
-	 * How many notifications with this `imethod` arrived since it was last
-	 * handled. If `count` > 1, `calldata` only holds the data for the most
-	 * recent such notification, all the older data being lost.
-	 *
-	 * `async_spawn_notification_handler()` can be used to increase the
-	 * number of notifications that can be processed simultaneously,
-	 * reducing the likelihood of losing them when the handler blocks.
-	 */
-	long count;
+	/** List of arrived notifications. */
+	list_t msg_list;
 } notification_t;
 
 /** Identifier of the incoming connection handled by the current fibril. */
@@ -248,6 +241,10 @@ static futex_t notification_futex = FUTEX_INITIALIZER;
 static hash_table_t notification_hash_table;
 static LIST_INITIALIZE(notification_queue);
 static FIBRIL_SEMAPHORE_INITIALIZE(notification_semaphore, 0);
+
+static LIST_INITIALIZE(notification_freelist);
+static long notification_freelist_total = 0;
+static long notification_freelist_used = 0;
 
 static sysarg_t notification_avail = 0;
 
@@ -411,7 +408,7 @@ static errno_t connection_fibril(void *arg)
 
 	client_t *client = async_client_get(fibril_connection->in_task_id, true);
 	if (!client) {
-		ipc_answer_0(fibril_connection->chandle, ENOMEM);
+		ipc_answer_0(fibril_connection->call.cap_handle, ENOMEM);
 		return 0;
 	}
 
@@ -420,7 +417,7 @@ static errno_t connection_fibril(void *arg)
 	/*
 	 * Call the connection handler function.
 	 */
-	fibril_connection->handler(fibril_connection->chandle,
+	fibril_connection->handler(fibril_connection->call.cap_handle,
 	    &fibril_connection->call, fibril_connection->data);
 
 	/*
@@ -447,7 +444,7 @@ static errno_t connection_fibril(void *arg)
 		    msg_t, link);
 
 		list_remove(&msg->link);
-		ipc_answer_0(msg->chandle, EHANGUP);
+		ipc_answer_0(msg->call.cap_handle, EHANGUP);
 		free(msg);
 	}
 
@@ -470,11 +467,10 @@ static errno_t connection_fibril(void *arg)
  *
  * @param in_task_id     Identification of the incoming connection.
  * @param in_phone_hash  Identification of the incoming connection.
- * @param chandle        Handle of the opening IPC_M_CONNECT_ME_TO call.
- *                       If chandle is CAP_NIL, the connection was opened by
- *                       accepting the IPC_M_CONNECT_TO_ME call and this
- *                       function is called directly by the server.
- * @param call           Call data of the opening call.
+ * @param call           Call data of the opening call. If call is NULL,
+ *                       the connection was opened by accepting the
+ *                       IPC_M_CONNECT_TO_ME call and this function is
+ *                       called directly by the server.
  * @param handler        Connection handler.
  * @param data           Client argument to pass to the connection handler.
  *
@@ -482,13 +478,12 @@ static errno_t connection_fibril(void *arg)
  *
  */
 static fid_t async_new_connection(task_id_t in_task_id, sysarg_t in_phone_hash,
-    cap_call_handle_t chandle, ipc_call_t *call, async_port_handler_t handler,
-    void *data)
+    ipc_call_t *call, async_port_handler_t handler, void *data)
 {
 	connection_t *conn = malloc(sizeof(*conn));
 	if (!conn) {
-		if (chandle != CAP_NIL)
-			ipc_answer_0(chandle, ENOMEM);
+		if (call)
+			ipc_answer_0(call->cap_handle, ENOMEM);
 
 		return (uintptr_t) NULL;
 	}
@@ -496,13 +491,14 @@ static fid_t async_new_connection(task_id_t in_task_id, sysarg_t in_phone_hash,
 	conn->in_task_id = in_task_id;
 	conn->in_phone_hash = in_phone_hash;
 	list_initialize(&conn->msg_queue);
-	conn->chandle = chandle;
 	conn->close_chandle = CAP_NIL;
 	conn->handler = handler;
 	conn->data = data;
 
 	if (call)
 		conn->call = *call;
+	else
+		conn->call.cap_handle = CAP_NIL;
 
 	/* We will activate the fibril ASAP */
 	conn->wdata.active = true;
@@ -511,8 +507,8 @@ static fid_t async_new_connection(task_id_t in_task_id, sysarg_t in_phone_hash,
 	if (conn->wdata.fid == 0) {
 		free(conn);
 
-		if (chandle != CAP_NIL)
-			ipc_answer_0(chandle, ENOMEM);
+		if (call)
+			ipc_answer_0(call->cap_handle, ENOMEM);
 
 		return (uintptr_t) NULL;
 	}
@@ -567,7 +563,7 @@ errno_t async_create_callback_port(async_exch_t *exch, iface_t iface, sysarg_t a
 
 	sysarg_t phone_hash = IPC_GET_ARG5(answer);
 	fid_t fid = async_new_connection(answer.in_task_id, phone_hash,
-	    CAP_NIL, NULL, handler, data);
+	    NULL, handler, data);
 	if (fid == (uintptr_t) NULL)
 		return ENOMEM;
 
@@ -636,14 +632,13 @@ void async_insert_timeout(awaiter_t *wd)
  * its message queue. If the fibril was not active, it is activated and all
  * timeouts are unregistered.
  *
- * @param chandle  Handle of the incoming call.
- * @param call     Data of the incoming call.
+ * @param call Data of the incoming call.
  *
  * @return False if the call doesn't match any connection.
  * @return True if the call was passed to the respective connection fibril.
  *
  */
-static bool route_call(cap_call_handle_t chandle, ipc_call_t *call)
+static bool route_call(ipc_call_t *call)
 {
 	assert(call);
 
@@ -666,12 +661,11 @@ static bool route_call(cap_call_handle_t chandle, ipc_call_t *call)
 		return false;
 	}
 
-	msg->chandle = chandle;
 	msg->call = *call;
 	list_append(&msg->link, &conn->msg_queue);
 
 	if (IPC_GET_IMETHOD(*call) == IPC_M_PHONE_HUNGUP)
-		conn->close_chandle = chandle;
+		conn->close_chandle = call->cap_handle;
 
 	/* If the connection fibril is waiting for an event, activate it */
 	if (!conn->wdata.active) {
@@ -708,22 +702,36 @@ static errno_t notification_fibril_func(void *arg)
 
 		notification_t *notification = list_get_instance(
 		    list_first(&notification_queue), notification_t, qlink);
-		list_remove(&notification->qlink);
 
 		async_notification_handler_t handler = notification->handler;
 		void *arg = notification->arg;
-		ipc_call_t calldata = notification->calldata;
-		long count = notification->count;
 
-		notification->count = 0;
+		notification_msg_t *m = list_pop(&notification->msg_list,
+		    notification_msg_t, link);
+		assert(m);
+		ipc_call_t calldata = m->calldata;
+
+		notification_freelist_used--;
+
+		if (notification_freelist_total > 64 &&
+		    notification_freelist_total > 2 * notification_freelist_used) {
+			/* Going to free the structure if we have too much. */
+			notification_freelist_total--;
+		} else {
+			/* Otherwise add to freelist. */
+			list_append(&m->link, &notification_freelist);
+			m = NULL;
+		}
+
+		if (list_empty(&notification->msg_list))
+			list_remove(&notification->qlink);
 
 		futex_unlock(&notification_futex);
 
-		// FIXME: Pass count to the handler. It might be important.
-		(void) count;
-
 		if (handler)
 			handler(&calldata, arg);
+
+		free(m);
 	}
 
 	/* Not reached. */
@@ -759,28 +767,42 @@ static void queue_notification(ipc_call_t *call)
 
 	futex_lock(&notification_futex);
 
+	notification_msg_t *m = list_pop(&notification_freelist,
+	    notification_msg_t, link);
+
+	if (!m) {
+		futex_unlock(&notification_futex);
+		m = malloc(sizeof(notification_msg_t));
+		if (!m) {
+			DPRINTF("Out of memory.\n");
+			abort();
+		}
+
+		futex_lock(&notification_futex);
+		notification_freelist_total++;
+	}
+
 	ht_link_t *link = hash_table_find(&notification_hash_table,
 	    &IPC_GET_IMETHOD(*call));
 	if (!link) {
 		/* Invalid notification. */
 		// TODO: Make sure this can't happen and turn it into assert.
+		notification_freelist_total--;
 		futex_unlock(&notification_futex);
+		free(m);
 		return;
 	}
 
 	notification_t *notification =
 	    hash_table_get_inst(link, notification_t, htlink);
 
-	notification->count++;
-	notification->calldata = *call;
+	notification_freelist_used++;
+	m->calldata = *call;
+	list_append(&m->link, &notification->msg_list);
 
-	if (link_in_use(&notification->qlink)) {
-		/* Notification already queued. */
-		futex_unlock(&notification_futex);
-		return;
-	}
+	if (!link_in_use(&notification->qlink))
+		list_append(&notification->qlink, &notification_queue);
 
-	list_append(&notification->qlink, &notification_queue);
 	futex_unlock(&notification_futex);
 
 	fibril_semaphore_up(&notification_semaphore);
@@ -801,6 +823,8 @@ static notification_t *notification_create(async_notification_handler_t handler,
 
 	notification->handler = handler;
 	notification->arg = arg;
+
+	list_initialize(&notification->msg_list);
 
 	fid_t fib = 0;
 
@@ -1010,7 +1034,7 @@ cap_call_handle_t async_get_call_timeout(ipc_call_t *call, suseconds_t usecs)
 	    msg_t, link);
 	list_remove(&msg->link);
 
-	cap_call_handle_t chandle = msg->chandle;
+	cap_call_handle_t chandle = msg->call.cap_handle;
 	*call = msg->call;
 	free(msg);
 
@@ -1057,18 +1081,17 @@ void async_put_client_data_by_id(task_id_t client_id)
  * If the call has the IPC_M_CONNECT_ME_TO method, a new connection is created.
  * Otherwise the call is routed to its connection fibril.
  *
- * @param chandle  Handle of the incoming call.
- * @param call     Data of the incoming call.
+ * @param call Data of the incoming call.
  *
  */
-static void handle_call(cap_call_handle_t chandle, ipc_call_t *call)
+static void handle_call(ipc_call_t *call)
 {
 	assert(call);
 
 	if (call->flags & IPC_CALL_ANSWERED)
 		return;
 
-	if (chandle == CAP_NIL) {
+	if (call->cap_handle == CAP_NIL) {
 		if (call->flags & IPC_CALL_NOTIF) {
 			/* Kernel notification */
 			queue_notification(call);
@@ -1086,17 +1109,17 @@ static void handle_call(cap_call_handle_t chandle, ipc_call_t *call)
 		async_port_handler_t handler =
 		    async_get_port_handler(iface, 0, &data);
 
-		async_new_connection(call->in_task_id, in_phone_hash, chandle,
-		    call, handler, data);
+		async_new_connection(call->in_task_id, in_phone_hash, call,
+		    handler, data);
 		return;
 	}
 
 	/* Try to route the call through the connection hash table */
-	if (route_call(chandle, call))
+	if (route_call(call))
 		return;
 
 	/* Unknown call from unknown phone - hang it up */
-	ipc_answer_0(chandle, EHANGUP);
+	ipc_answer_0(call->cap_handle, EHANGUP);
 }
 
 /** Fire all timeouts that expired. */
@@ -1177,7 +1200,7 @@ static errno_t async_manager_worker(void)
 		atomic_dec(&threads_in_ipc_wait);
 
 		assert(rc == EOK);
-		handle_call(call.cap_handle, &call);
+		handle_call(&call);
 	}
 
 	return 0;
@@ -1846,7 +1869,7 @@ errno_t async_state_change_finalize(cap_call_handle_t chandle,
 	return ipc_answer_1(chandle, EOK, CAP_HANDLE_RAW(other_exch->phone));
 }
 
-_Noreturn void async_manager(void)
+__noreturn void async_manager(void)
 {
 	futex_lock(&async_futex);
 	fibril_switch(FIBRIL_FROM_DEAD);

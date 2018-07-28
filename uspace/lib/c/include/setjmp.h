@@ -34,14 +34,15 @@
 #define LIBC_SETJMP_H_
 
 #include <libarch/fibril_context.h>
+#include <_bits/__noreturn.h>
 
 typedef context_t jmp_buf[1];
 
 extern int __setjmp(jmp_buf) __attribute__((returns_twice));
-extern _Noreturn void __longjmp(jmp_buf, int);
+extern __noreturn void __longjmp(jmp_buf, int);
 
 #define setjmp __setjmp
-extern _Noreturn void longjmp(jmp_buf, int);
+extern __noreturn void longjmp(jmp_buf, int);
 
 #endif
 
