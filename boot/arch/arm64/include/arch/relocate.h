@@ -44,7 +44,7 @@ do { \
 		"adr x1, 1f\n" \
 		"adrp x2, " #symbol "\n" \
 		"add x2, x2, #:lo12:" #symbol "\n" \
-		"stp x1, x2, [x0], #16\n" \
+		"stp x1, x2, [x0]\n" \
 		"b 2f\n" \
 		"1:\n" \
 		".asciz " #name "\n" \
