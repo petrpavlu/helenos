@@ -188,6 +188,11 @@ static errno_t hda_corb_init(hda_t *hda)
 	rc = dmamem_map_anonymous(hda->ctl->corb_entries * sizeof(uint32_t),
 	    hda->ctl->ok64bit ? 0 : DMAMEM_4GiB, AS_AREA_READ | AS_AREA_WRITE, 0,
 	    &hda->ctl->corb_phys, &hda->ctl->corb_virt);
+	if (rc != EOK) {
+		hda->ctl->corb_virt = NULL;
+		ddf_msg(LVL_NOTE, "Failed allocating DMA memory for CORB");
+		goto error;
+	}
 
 	ddf_msg(LVL_NOTE, "Set CORB base registers");
 
@@ -217,8 +222,10 @@ static errno_t hda_corb_init(hda_t *hda)
 	ddf_msg(LVL_NOTE, "CORB initialized");
 	return EOK;
 error:
-	if (hda->ctl->corb_virt != NULL)
-		dmamem_unmap_anonymous(&hda->ctl->corb_virt);
+	if (hda->ctl->corb_virt != NULL) {
+		dmamem_unmap_anonymous(hda->ctl->corb_virt);
+		hda->ctl->corb_virt = NULL;
+	}
 	return EIO;
 }
 
@@ -232,7 +239,7 @@ static void hda_corb_fini(hda_t *hda)
 	hda_reg8_write(&hda->regs->corbctl, ctl & ~BIT_V(uint8_t, corbctl_run));
 
 	if (hda->ctl->corb_virt != NULL)
-		dmamem_unmap_anonymous(&hda->ctl->corb_virt);
+		dmamem_unmap_anonymous(hda->ctl->corb_virt);
 }
 
 /** Initialize the RIRB */
@@ -278,6 +285,11 @@ static errno_t hda_rirb_init(hda_t *hda)
 	rc = dmamem_map_anonymous(hda->ctl->rirb_entries * sizeof(uint64_t),
 	    hda->ctl->ok64bit ? 0 : DMAMEM_4GiB, AS_AREA_READ | AS_AREA_WRITE, 0,
 	    &hda->ctl->rirb_phys, &hda->ctl->rirb_virt);
+	if (rc != EOK) {
+		hda->ctl->rirb_virt = NULL;
+		ddf_msg(LVL_NOTE, "Failed allocating DMA memory for RIRB");
+		goto error;
+	}
 
 	ddf_msg(LVL_NOTE, "Set RIRB base registers");
 
@@ -305,8 +317,10 @@ static errno_t hda_rirb_init(hda_t *hda)
 	ddf_msg(LVL_NOTE, "RIRB initialized");
 	return EOK;
 error:
-	if (hda->ctl->rirb_virt != NULL)
-		dmamem_unmap_anonymous(&hda->ctl->rirb_virt);
+	if (hda->ctl->rirb_virt != NULL) {
+		dmamem_unmap_anonymous(hda->ctl->rirb_virt);
+		hda->ctl->rirb_virt = NULL;
+	}
 	return EIO;
 }
 
@@ -321,7 +335,7 @@ static void hda_rirb_fini(hda_t *hda)
 	    ~(BIT_V(uint8_t, rirbctl_run) | BIT_V(uint8_t, rirbctl_int)));
 
 	if (hda->ctl->rirb_virt != NULL)
-		dmamem_unmap_anonymous(&hda->ctl->rirb_virt);
+		dmamem_unmap_anonymous(hda->ctl->rirb_virt);
 }
 
 static size_t hda_get_corbrp(hda_t *hda)
