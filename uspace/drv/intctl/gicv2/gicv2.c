@@ -173,48 +173,45 @@ static errno_t gicv2_enable_irq(gicv2_t *gicv2, sysarg_t irq)
 
 /** Client connection handler.
  *
- * @param icall_handle Hash of the request that opened the connection.
- * @param icall        Call data of the request that opened the connection.
- * @param arg	       Local argument.
+ * @param icall Call data of the request that opened the connection.
+ * @param arg   Local argument.
  */
-static void gicv2_connection(
-    cap_call_handle_t icall_handle, ipc_call_t *icall, void *arg)
+static void gicv2_connection(ipc_call_t *icall, void *arg)
 {
-	cap_call_handle_t callid;
 	ipc_call_t call;
 	gicv2_t *gicv2;
 
 	/*
 	 * Answer the first IPC_M_CONNECT_ME_TO call.
 	 */
-	async_answer_0(icall_handle, EOK);
+	async_answer_0(icall, EOK);
 
 	gicv2 = (gicv2_t *)ddf_dev_data_get(ddf_fun_get_dev((ddf_fun_t *)arg));
 
 	while (true) {
-		callid = async_get_call(&call);
+		async_get_call(&call);
 
 		if (!IPC_GET_IMETHOD(call)) {
 			/* The other side has hung up. */
-			async_answer_0(callid, EOK);
+			async_answer_0(&call, EOK);
 			return;
 		}
 
 		switch (IPC_GET_IMETHOD(call)) {
 		case IRC_ENABLE_INTERRUPT:
-			async_answer_0(callid,
+			async_answer_0(&call,
 			    gicv2_enable_irq(gicv2, IPC_GET_ARG1(call)));
 			break;
 		case IRC_DISABLE_INTERRUPT:
 			/* XXX TODO */
-			async_answer_0(callid, EOK);
+			async_answer_0(&call, EOK);
 			break;
 		case IRC_CLEAR_INTERRUPT:
 			/* Noop */
-			async_answer_0(callid, EOK);
+			async_answer_0(&call, EOK);
 			break;
 		default:
-			async_answer_0(callid, EINVAL);
+			async_answer_0(&call, EINVAL);
 			break;
 		}
 	}
