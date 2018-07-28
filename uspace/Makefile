@@ -216,7 +216,8 @@ endif
 BASE_LIBS = \
 	lib/c \
 	lib/softint \
-	lib/softfloat
+	lib/softfloat \
+	lib/untar
 
 LIBS = \
 	lib/fs \
