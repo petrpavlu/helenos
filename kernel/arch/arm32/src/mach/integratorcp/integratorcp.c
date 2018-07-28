@@ -41,6 +41,7 @@
 #include <genarch/kbrd/kbrd.h>
 #include <genarch/srln/srln.h>
 #include <console/console.h>
+#include <stdbool.h>
 #include <sysinfo/sysinfo.h>
 #include <mm/page.h>
 #include <mm/frame.h>
@@ -82,10 +83,10 @@ uint32_t sdram[8] = {
 	67108864,	/* 64mb */
 	134217728,	/* 128mb */
 	268435456,	/* 256mb */
-	0,		/* Reserverd */
-	0,		/* Reserverd */
-	0		/* Reserverd */
-	};
+	0,		/* Reserved */
+	0,		/* Reserved */
+	0		/* Reserved */
+};
 
 void icp_vga_init(void);
 
@@ -243,7 +244,8 @@ void icp_get_memory_extents(uintptr_t *start, size_t *size)
 /** Stops icp. */
 void icp_cpu_halt(void)
 {
-	while (1);
+	while (true)
+		;
 }
 
 /** interrupt exception handler.
@@ -343,13 +345,13 @@ void icp_input_init(void)
 	sysinfo_set_item_val("kbd.address.physical", NULL, ICP_KBD);
 
 #ifdef CONFIG_PL011_UART
-        srln_instance_t *srln_instance = srln_init();
-        if (srln_instance) {
-                indev_t *sink = stdin_wire();
-                indev_t *srln = srln_wire(srln_instance, sink);
-                pl011_uart_input_wire(&icp.uart, srln);
-                icp_irqc_unmask(ICP_UART0_IRQ);
-        }
+	srln_instance_t *srln_instance = srln_init();
+	if (srln_instance) {
+		indev_t *sink = stdin_wire();
+		indev_t *srln = srln_wire(srln_instance, sink);
+		pl011_uart_input_wire(&icp.uart, srln);
+		icp_irqc_unmask(ICP_UART0_IRQ);
+	}
 #endif
 }
 

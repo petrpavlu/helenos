@@ -185,7 +185,7 @@ void avltree_insert(avltree_t *t, avltree_node_t *newnode)
 			top = par;
 		}
 		gpa = par;
-		dpc = par->key > key ? &par->lft: &par->rgt;
+		dpc = par->key > key ? &par->lft : &par->rgt;
 	}
 
 	/*
@@ -403,7 +403,7 @@ void avltree_delete(avltree_t *t, avltree_node_t *node)
 			 */
 			gpa = node->par;
 			cur = NULL;
-			dir = (gpa->lft == node) ? LEFT: RIGHT;
+			dir = (gpa->lft == node) ? LEFT : RIGHT;
 		}
 	} else {
 		/*

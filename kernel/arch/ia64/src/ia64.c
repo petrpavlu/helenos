@@ -39,6 +39,7 @@
 #include <interrupt.h>
 #include <arch/interrupt.h>
 #include <macros.h>
+#include <stdbool.h>
 #include <str.h>
 #include <userspace.h>
 #include <console/console.h>
@@ -179,8 +180,8 @@ void ia64_post_smp_init(void)
 #endif
 
 #ifdef CONFIG_NS16550
-	ns16550_instance_t *ns16550_instance
-	    = ns16550_init(NS16550_BASE, 0, NS16550_IRQ, NULL, NULL,
+	ns16550_instance_t *ns16550_instance =
+	    ns16550_init(NS16550_BASE, 0, NS16550_IRQ, NULL, NULL,
 	    NULL);
 	if (ns16550_instance) {
 		srln_instance_t *srln_instance = srln_init();
@@ -251,13 +252,15 @@ void userspace(uspace_arg_t *kernel_uarg)
 	    kernel_uarg->uspace_stack_size / 2,
 	    (uintptr_t) kernel_uarg->uspace_uarg, psr.value, rsc.value);
 
-	while (1);
+	while (true)
+		;
 }
 
 void arch_reboot(void)
 {
 	pio_write_8((ioport8_t *)0x64, 0xfe);
-	while (1);
+	while (true)
+		;
 }
 
 /** Construct function pointer

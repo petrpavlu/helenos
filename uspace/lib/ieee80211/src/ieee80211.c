@@ -216,7 +216,7 @@ static inline bool ieee80211_is_encrypted_frame(uint16_t frame_ctrl)
  *
  */
 static inline bool
-    ieee80211_is_eapol_key_frame(ieee80211_eapol_key_frame_t *key_frame)
+ieee80211_is_eapol_key_frame(ieee80211_eapol_key_frame_t *key_frame)
 {
 	return (key_frame->packet_type == IEEE80211_EAPOL_KEY);
 }
@@ -280,7 +280,7 @@ ddf_dev_t *ieee80211_get_ddf_dev(ieee80211_dev_t *ieee80211_dev)
  *
  */
 ieee80211_operating_mode_t
-    ieee80211_query_current_op_mode(ieee80211_dev_t *ieee80211_dev)
+ieee80211_query_current_op_mode(ieee80211_dev_t *ieee80211_dev)
 {
 	fibril_mutex_lock(&ieee80211_dev->gen_mutex);
 	ieee80211_operating_mode_t op_mode = ieee80211_dev->current_op_mode;
@@ -1556,9 +1556,9 @@ static errno_t ieee80211_process_4way_handshake(ieee80211_dev_t *ieee80211_dev,
 		    min_sequence(dest_addr, src_addr, ETH_ADDR), ETH_ADDR);
 		memcpy(crypt_data + ETH_ADDR,
 		    max_sequence(dest_addr, src_addr, ETH_ADDR), ETH_ADDR);
-		memcpy(crypt_data + 2*ETH_ADDR,
+		memcpy(crypt_data + 2 * ETH_ADDR,
 		    min_sequence(anonce, snonce, 32), 32);
-		memcpy(crypt_data + 2*ETH_ADDR + 32,
+		memcpy(crypt_data + 2 * ETH_ADDR + 32,
 		    max_sequence(anonce, snonce, 32), 32);
 		ieee80211_prf(pmk, crypt_data, ptk, ptk_key_length);
 	}
@@ -1663,7 +1663,7 @@ static errno_t ieee80211_process_data(ieee80211_dev_t *ieee80211_dev,
 		    buffer_size - strip_length + sizeof(eth_header_t) - 2;
 		nic_frame_t *frame = nic_alloc_frame(nic, frame_size);
 
-		if(frame == NULL)
+		if (frame == NULL)
 			return ENOMEM;
 
 		uint8_t *src_addr =

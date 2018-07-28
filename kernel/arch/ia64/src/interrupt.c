@@ -74,10 +74,10 @@ static const char *vector_names_64_bundle[VECTORS_64_BUNDLE] = {
 	"Data Key Miss vector",
 	"Dirty-Bit vector",
 	"Instruction Access-Bit vector",
-	"Data Access-Bit vector"
+	"Data Access-Bit vector",
 	"Break Instruction vector",
-	"External Interrupt vector"
-	"Reserved",
+	"External Interrupt vector",
+	"Virtual External Interrupt vector",
 	"Reserved",
 	"Reserved",
 	"Reserved",
@@ -228,7 +228,7 @@ void universal_handler(unsigned int n, istate_t *istate)
 static void end_of_local_irq(void)
 {
 	asm volatile (
-		"mov cr.eoi = r0 ;;"
+	    "mov cr.eoi = r0 ;;"
 	);
 }
 
@@ -244,7 +244,7 @@ void external_interrupt(unsigned int n, istate_t *istate)
 	switch (ivr.vector) {
 	case INTERRUPT_SPURIOUS:
 #ifdef CONFIG_DEBUG
- 		printf("cpu%d: spurious interrupt\n", CPU->id);
+		printf("cpu%d: spurious interrupt\n", CPU->id);
 #endif
 		break;
 
