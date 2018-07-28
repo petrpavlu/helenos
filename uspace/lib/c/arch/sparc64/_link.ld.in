@@ -27,7 +27,6 @@ SECTIONS {
 	. = . + 0x4000;
 
 	.got : {
-		 _gp = .;
 		 *(.got*);
 	} :data
 
@@ -53,6 +52,8 @@ SECTIONS {
 		*(COMMON);
 		*(.bss);
 	} :data
+
+	_end = .;
 
 #ifdef CONFIG_LINE_DEBUG
 	.comment 0 : { *(.comment); } :debug
