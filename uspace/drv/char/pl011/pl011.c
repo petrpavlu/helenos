@@ -53,14 +53,14 @@ typedef struct {
 		ioport32_t error_clear;
 	};
 	/** Reserved. */
-	PADD32[4];
+	PADD32(4);
 	/** Flag register. */
 	const ioport32_t flag;
 	/** Transmit FIFO full. */
 #define PL011_UART_FLAG_TXFF_FLAG  (1 << 5)
 
 	/** Reserved. */
-	PADD32;
+	PADD32(1);
 	/** IrDA low-power counter register. */
 	ioport32_t irda_low_power;
 	/** Integer baud rate register. */
@@ -114,13 +114,13 @@ typedef struct {
 	/** DMA control register. */
 	ioport32_t dma_control;
 	/** Reserved. */
-	PADD32[13];
+	PADD32(13);
 	/** Reserved for test purposes. */
-	PADD32[4];
+	PADD32(4);
 	/** Reserved. */
-	PADD32[976];
+	PADD32(976);
 	/** Reserved for future ID expansion. */
-	PADD32[4];
+	PADD32(4);
 	/** UARTPeriphID0 register. */
 	const ioport32_t periph_id0;
 	/** UARTPeriphID1 register. */

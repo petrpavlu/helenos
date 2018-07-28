@@ -60,11 +60,11 @@ typedef struct {
 	/** Distributor implementer identification register. */
 	const ioport32_t iidr;
 	/** Reserved. */
-	PADD32[5];
+	PADD32(5);
 	/** Implementation defined registers. */
 	ioport32_t impl[8];
 	/** Reserved. */
-	PADD32[16];
+	PADD32(16);
 	/** Interrupt group registers. */
 	ioport32_t igroupr[32];
 	/** Interrupt set-enable registers. */
@@ -82,12 +82,12 @@ typedef struct {
 	/** Interrupt priority registers. */
 	ioport32_t ipriorityr[255];
 	/** Reserved. */
-	PADD32;
+	PADD32(1);
 	/** Interrupt processor target registers. First 8 words are read-only.
 	 */
 	ioport32_t itargetsr[255];
 	/** Reserved. */
-	PADD32;
+	PADD32(1);
 	/** Interrupt configuration registers. */
 	ioport32_t icfgr[64];
 	/** Implementation defined registers. */
@@ -97,13 +97,13 @@ typedef struct {
 	/** Software generated interrupt register. */
 	ioport32_t sgir;
 	/** Reserved. */
-	PADD32[3];
+	PADD32(3);
 	/** SGI clear-pending registers. */
 	ioport32_t cpendsgir[4];
 	/** SGI set-pending registers. */
 	ioport32_t spendsgir[4];
 	/** Reserved. */
-	PADD32[40];
+	PADD32(40);
 	/** Implementation defined identification registers. */
 	const ioport32_t impl3[12];
 } gicv2_distr_regs_t;
@@ -142,7 +142,7 @@ typedef struct {
 	/** Aliased highest priority pending interrupt register. */
 	const ioport32_t ahppir;
 	/** Reserved. */
-	PADD32[5];
+	PADD32(5);
 	/** Implementation defined registers. */
 	ioport32_t impl[36];
 	/** Active priorities registers. */
@@ -150,11 +150,11 @@ typedef struct {
 	/** Non-secure active priorities registers. */
 	ioport32_t nsapr[4];
 	/** Reserved. */
-	PADD32[3];
+	PADD32(3);
 	/** CPU interface identification register. */
 	const ioport32_t iidr;
 	/** Unallocated. */
-	PADD32[960];
+	PADD32(960);
 	/** Deactivate interrupt register. */
 	ioport32_t dir;
 } gicv2_cpui_regs_t;
