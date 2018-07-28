@@ -69,118 +69,6 @@ static driver_t virtio_net_driver = {
 	.driver_ops = &virtio_net_driver_ops
 };
 
-/** Allocate DMA buffers
- *
- * @param buffers[in]  Number of buffers to allocate.
- * @param size[in]     Size of each buffer.
- * @param write[in]    True if the buffers are writable by the driver, false
- *                     otherwise.
- * @param buf[out]     Output array holding virtual addresses of the allocated
- *                     buffers.
- * @param buf_p[out]   Output array holding physical addresses of the allocated
- *                     buffers.
- *
- * The buffers can be deallocated by virtio_net_teardown_bufs().
- *
- * @return  EOK on success or error code.
- */
-static errno_t virtio_net_setup_bufs(unsigned int buffers, size_t size,
-    bool write, void *buf[], uintptr_t buf_p[])
-{
-	/*
-	 * Allocate all buffers at once in one large chunk.
-	 */
-	void *virt = AS_AREA_ANY;
-	uintptr_t phys;
-	errno_t rc = dmamem_map_anonymous(buffers * size, 0,
-	    write ? AS_AREA_WRITE : AS_AREA_READ, 0, &phys, &virt);
-	if (rc != EOK)
-		return rc;
-
-	ddf_msg(LVL_NOTE, "DMA buffers: %p-%p", virt, virt + buffers * size);
-
-	/*
-	 * Calculate addresses of the individual buffers for easy access.
-	 */
-	for (unsigned i = 0; i < buffers; i++) {
-		buf[i] = virt + i * size;
-		buf_p[i] = phys + i * size;
-	}
-
-	return EOK;
-}
-
-/** Deallocate DMA buffers
- *
- * @param buf[in]  Array holding the virtual addresses of the DMA buffers
- *                 previously allocated by virtio_net_setup_bufs().
- */
-static void virtio_net_teardown_bufs(void *buf[])
-{
-	if (buf[0]) {
-		dmamem_unmap_anonymous(buf[0]);
-		buf[0] = NULL;
-	}
-}
-
-/** Create free descriptor list from the unused VIRTIO descriptors
- *
- * @param vdev[in]   VIRTIO device for which the free list will be created.
- * @param num[in]    Index of the virtqueue for which the free list will be
- *                   created.
- * @param size[in]   Number of descriptors on the free list. The free list will
- *                   contain descriptors starting from 0 to \a size - 1.
- * @param head[out]  Variable that will hold the VIRTIO descriptor at the head
- *                   of the free list.
- */
-static void virtio_net_create_desc_free_list(virtio_dev_t *vdev, uint16_t num,
-    uint16_t size, uint16_t *head)
-{
-	for (unsigned i = 0; i < size; i++) {
-		virtio_virtq_desc_set(vdev, num, i, 0, 0,
-		    VIRTQ_DESC_F_NEXT, (i + 1 == size) ? -1U : i + 1);
-	}
-	*head = 0;
-}
-
-/** Allocate a descriptor from the free list
- *
- * @param vdev[in]      VIRTIO device with the free list.
- * @param num[in]       Index of the virtqueue with free list.
- * @param head[in,out]  Head of the free list.
- *
- * @return  Allocated descriptor or 0xFFFF if the list is empty.
- */
-static uint16_t virtio_net_alloc_desc(virtio_dev_t *vdev, uint16_t num,
-    uint16_t *head)
-{
-	virtq_t *q = &vdev->queues[num];
-	fibril_mutex_lock(&q->lock);
-	uint16_t descno = *head;
-	if (descno != (uint16_t) -1U)
-		*head = virtio_virtq_desc_get_next(vdev, num, descno);
-	fibril_mutex_unlock(&q->lock);
-	return descno;
-}
-
-/** Free a descriptor into the free list
- *
- * @param vdev[in]      VIRTIO device with the free list.
- * @param num[in]       Index of the virtqueue with free list.
- * @param head[in,out]  Head of the free list.
- * @param descno[in]    The freed descriptor.
- */
-static void virtio_net_free_desc(virtio_dev_t *vdev, uint16_t num,
-    uint16_t *head, uint16_t descno)
-{
-	virtq_t *q = &vdev->queues[num];
-	fibril_mutex_lock(&q->lock);
-	virtio_virtq_desc_set(vdev, num, descno, 0, 0, VIRTQ_DESC_F_NEXT,
-	    *head);
-	*head = descno;
-	fibril_mutex_unlock(&q->lock);
-}
-
 static void virtio_net_irq_handler(ipc_call_t *icall, ddf_dev_t *dev)
 {
 	nic_t *nic = ddf_dev_data_get(dev);
@@ -213,12 +101,12 @@ static void virtio_net_irq_handler(ipc_call_t *icall, ddf_dev_t *dev)
 	}
 
 	while (virtio_virtq_consume_used(vdev, TX_QUEUE_1, &descno, &len)) {
-		virtio_net_free_desc(vdev, TX_QUEUE_1,
-		    &virtio_net->tx_free_head, descno);
+		virtio_free_desc(vdev, TX_QUEUE_1, &virtio_net->tx_free_head,
+		    descno);
 	}
 	while (virtio_virtq_consume_used(vdev, CT_QUEUE_1, &descno, &len)) {
-		virtio_net_free_desc(vdev, CT_QUEUE_1,
-		    &virtio_net->ct_free_head, descno);
+		virtio_free_desc(vdev, CT_QUEUE_1, &virtio_net->ct_free_head,
+		    descno);
 	}
 }
 
@@ -344,15 +232,15 @@ static errno_t virtio_net_initialize(ddf_dev_t *dev)
 	/*
 	 * Setup DMA buffers
 	 */
-	rc = virtio_net_setup_bufs(RX_BUFFERS, RX_BUF_SIZE, false,
+	rc = virtio_setup_dma_bufs(RX_BUFFERS, RX_BUF_SIZE, false,
 	    virtio_net->rx_buf, virtio_net->rx_buf_p);
 	if (rc != EOK)
 		goto fail;
-	rc = virtio_net_setup_bufs(TX_BUFFERS, TX_BUF_SIZE, true,
+	rc = virtio_setup_dma_bufs(TX_BUFFERS, TX_BUF_SIZE, true,
 	    virtio_net->tx_buf, virtio_net->tx_buf_p);
 	if (rc != EOK)
 		goto fail;
-	rc = virtio_net_setup_bufs(CT_BUFFERS, CT_BUF_SIZE, true,
+	rc = virtio_setup_dma_bufs(CT_BUFFERS, CT_BUF_SIZE, true,
 	    virtio_net->ct_buf, virtio_net->ct_buf_p);
 	if (rc != EOK)
 		goto fail;
@@ -378,9 +266,9 @@ static errno_t virtio_net_initialize(ddf_dev_t *dev)
 	/*
 	 * Put all TX and CT buffers on a free list
 	 */
-	virtio_net_create_desc_free_list(vdev, TX_QUEUE_1, TX_BUFFERS,
+	virtio_create_desc_free_list(vdev, TX_QUEUE_1, TX_BUFFERS,
 	    &virtio_net->tx_free_head);
-	virtio_net_create_desc_free_list(vdev, CT_QUEUE_1, CT_BUFFERS,
+	virtio_create_desc_free_list(vdev, CT_QUEUE_1, CT_BUFFERS,
 	    &virtio_net->ct_free_head);
 
 	/*
@@ -413,9 +301,9 @@ static errno_t virtio_net_initialize(ddf_dev_t *dev)
 	return EOK;
 
 fail:
-	virtio_net_teardown_bufs(virtio_net->rx_buf);
-	virtio_net_teardown_bufs(virtio_net->tx_buf);
-	virtio_net_teardown_bufs(virtio_net->ct_buf);
+	virtio_teardown_dma_bufs(virtio_net->rx_buf);
+	virtio_teardown_dma_bufs(virtio_net->tx_buf);
+	virtio_teardown_dma_bufs(virtio_net->ct_buf);
 
 	virtio_device_setup_fail(vdev);
 	virtio_pci_dev_cleanup(vdev);
@@ -427,9 +315,9 @@ static void virtio_net_uninitialize(ddf_dev_t *dev)
 	nic_t *nic = ddf_dev_data_get(dev);
 	virtio_net_t *virtio_net = (virtio_net_t *) nic_get_specific(nic);
 
-	virtio_net_teardown_bufs(virtio_net->rx_buf);
-	virtio_net_teardown_bufs(virtio_net->tx_buf);
-	virtio_net_teardown_bufs(virtio_net->ct_buf);
+	virtio_teardown_dma_bufs(virtio_net->rx_buf);
+	virtio_teardown_dma_bufs(virtio_net->tx_buf);
+	virtio_teardown_dma_bufs(virtio_net->ct_buf);
 
 	virtio_device_setup_fail(&virtio_net->virtio_dev);
 	virtio_pci_dev_cleanup(&virtio_net->virtio_dev);
@@ -445,7 +333,7 @@ static void virtio_net_send(nic_t *nic, void *data, size_t size)
 		return;
 	}
 
-	uint16_t descno = virtio_net_alloc_desc(vdev, TX_QUEUE_1,
+	uint16_t descno = virtio_alloc_desc(vdev, TX_QUEUE_1,
 	    &virtio_net->tx_free_head);
 	if (descno == (uint16_t) -1U) {
 		ddf_msg(LVL_WARN, "No TX buffers available, frame dropped");
