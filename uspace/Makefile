@@ -39,6 +39,7 @@ DIRS = \
 	app/blkdump \
 	app/bnchmark \
 	app/corecfg \
+	app/cpptest \
 	app/devctl \
 	app/dnscfg \
 	app/dnsres \
@@ -217,6 +218,7 @@ endif
 
 BASE_LIBS = \
 	lib/c \
+	lib/cpp \
 	lib/softint \
 	lib/softfloat \
 	lib/untar

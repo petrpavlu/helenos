@@ -197,6 +197,9 @@ static unsigned int elf_load_module(elf_ld_t *elf)
 	elf_segment_header_t phdr[phdr_cap];
 	size_t phdr_len = header->e_phnum * header->e_phentsize;
 
+	elf->info->interp = NULL;
+	elf->info->dynamic = NULL;
+
 	if (phdr_len > sizeof(phdr)) {
 		DPRINTF("more than %d program headers\n", phdr_cap);
 		return EE_UNSUPPORTED;

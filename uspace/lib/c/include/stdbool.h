@@ -35,12 +35,22 @@
 #ifndef LIBC_BOOL_H_
 #define LIBC_BOOL_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <abi/bool.h>
 
+#ifdef __cplusplus
+}
+#endif
+
+#ifndef __cplusplus
 #define false  0
 #define true   1
 
 #define __bool_true_false_are_defined  1
+#endif
 
 #endif
 

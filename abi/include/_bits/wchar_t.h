@@ -42,7 +42,9 @@
 
 #include <_bits/macros.h>
 
+#ifndef __cplusplus
 typedef __WCHAR_TYPE__ wchar_t;
+#endif
 
 #endif
 

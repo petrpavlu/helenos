@@ -1,0 +1,145 @@
+/*
+ * Copyright (c) 2018 Jaroslav Jindrak
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * - The name of the author may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef LIBCPP_CSTDIO
+#define LIBCPP_CSTDIO
+
+#include <__bits/common.hpp>
+
+namespace std::hel
+{
+    extern "C" {
+        #include <stdio.h>
+    }
+}
+
+namespace std
+{
+    using std::hel::FILE;
+    using std::hel::stdin;
+    using std::hel::stdout;
+    using std::hel::stderr;
+    /* using std::hel::fpos_t */
+    using std::hel::size_t;
+
+    using std::hel::clearerr;
+    using std::hel::fclose;
+    using std::hel::feof;
+    using std::hel::ferror;
+    using std::hel::fflush;
+    using std::hel::fgetc;
+    /* using std::hel::fgetpos; */
+    using std::hel::fgets;
+    using std::hel::fopen;
+    using std::hel::fprintf;
+    using std::hel::fputc;
+    using std::hel::fputs;
+    using std::hel::fread;
+    using std::hel::freopen;
+    /* using std::hel::fscanf; */
+    using std::hel::fseek;
+    /* using std::hel::fsetpos; */
+    using std::hel::ftell;
+    using std::hel::fwrite;
+    /* using std::hel::getc; */
+    using std::hel::getchar;
+    /* using std::hel::perror; */
+    using std::hel::printf;
+    /* using std::hel::putc; */
+    using std::hel::putchar;
+    using std::hel::puts;
+    using std::hel::remove;
+    using std::hel::rename;
+    using std::hel::rewind;
+    /* using std::hel::scanf; */
+    using std::hel::setbuf;
+    using std::hel::setvbuf;
+    using std::hel::snprintf;
+    /* using std::hel::sprintf; */
+    /* using std::hel::sscanf; */
+    /* using std::hel::tmpfile; */
+    /* using std::hel::tmpnam; */
+    using std::hel::ungetc;
+    using std::hel::vfprintf;
+    using std::hel::vprintf;
+    /* using std::hel::vscanf; */
+    using std::hel::vsnprintf;
+    /* using std::hel::vsprintf; */
+    /* using std::hel::vsscanf; */
+}
+
+using std::hel::FILE;
+/* using std::hel::fpos_t */
+using std::hel::size_t;
+
+using std::hel::clearerr;
+using std::hel::fclose;
+using std::hel::feof;
+using std::hel::ferror;
+using std::hel::fflush;
+using std::hel::fgetc;
+/* using std::hel::fgetpos; */
+using std::hel::fgets;
+using std::hel::fopen;
+using std::hel::fprintf;
+using std::hel::fputc;
+using std::hel::fputs;
+using std::hel::fread;
+using std::hel::freopen;
+/* using std::hel::fscanf; */
+using std::hel::fseek;
+/* using std::hel::fsetpos; */
+using std::hel::ftell;
+using std::hel::fwrite;
+/* using std::hel::getc; */
+using std::hel::getchar;
+/* using std::hel::perror; */
+using std::hel::printf;
+/* using std::hel::putc; */
+using std::hel::putchar;
+using std::hel::puts;
+using std::hel::remove;
+using std::hel::rename;
+using std::hel::rewind;
+/* using std::hel::scanf; */
+using std::hel::setbuf;
+using std::hel::setvbuf;
+using std::hel::snprintf;
+/* using std::hel::sprintf; */
+/* using std::hel::sscanf; */
+/* using std::hel::tmpfile; */
+/* using std::hel::tmpnam; */
+using std::hel::ungetc;
+using std::hel::vfprintf;
+using std::hel::vprintf;
+/* using std::hel::vscanf; */
+using std::hel::vsnprintf;
+/* using std::hel::vsprintf; */
+/* using std::hel::vsscanf; */
+
+#endif

@@ -327,9 +327,11 @@ def check_gcc(path, prefix, common, details):
 	"Check for GCC"
 
 	common['GCC'] = "%sgcc" % prefix
+	common['GXX'] = "%sg++" % prefix
 
 	if (not path is None):
 		common['GCC'] = "%s/%s" % (path, common['GCC'])
+		common['GXX'] = "%s/%s" % (path, common['GXX'])
 
 	check_app([common['GCC'], "--version"], "GNU GCC", details)
 
@@ -617,6 +619,9 @@ def main():
 			check_common(common, "GCC")
 			common['CC'] = " ".join([common['GCC']] + cc_args)
 			common['CC_AUTOGEN'] = common['CC']
+
+			check_common(common, "GXX")
+			common['CXX'] = common['GXX']
 
 		if (config['COMPILER'] == "gcc_native"):
 			check_gcc(None, "", common, PACKAGE_GCC)

@@ -102,6 +102,10 @@ LIBC_INCLUDES_FLAGS = \
 	-I$(LIBC_PREFIX)/include \
 	-I$(LIBC_PREFIX)/arch/$(UARCH)/include \
 	-I$(ROOT_PATH)/abi/include
+
+LIBCPP_PREFIX = $(LIB_PREFIX)/cpp
+LIBCPP_INCLUDES_FLAGS = -I$(LIBCPP_PREFIX)/include
+
 LIBSOFTFLOAT_PREFIX = $(LIB_PREFIX)/softfloat
 LIBSOFTINT_PREFIX = $(LIB_PREFIX)/softint
 
@@ -231,6 +235,31 @@ HELENOS_CFLAGS = \
 # CFLAGS variable is traditionally used for overridable flags.
 CFLAGS = $(COMMON_CPPFLAGS) $(COMMON_CFLAGS) $(HELENOS_CFLAGS) $(DEFAULT_CFLAGS)
 
+# Flags for the compilation of C++ code.
+CXX_BASE_LIBS = $(LIBCPP_PREFIX)/libcpp.a $(BASE_LIBS)
+DEFAULT_CXXFLAGS = \
+	-O$(OPTIMIZATION) \
+	-ffunction-sections \
+	-pipe \
+	-Wall \
+	-Wextra \
+	-Wno-unused-parameter \
+	-Wwrite-strings \
+	-Werror-implicit-function-declaration
+
+COMMON_CXXFLAGS = $(COMMON_CFLAGS)
+HELENOS_CXXFLAGS = \
+	-std=c++17 -frtti \
+	$(LIBCPP_INCLUDES_FLAGS) $(INCLUDES_FLAGS) \
+	-imacros $(CONFIG_HEADER) \
+	-D_HELENOS_SOURCE \
+	-fexec-charset=UTF-8 \
+	-finput-charset=UTF-8 \
+	-fno-common \
+	-fdebug-prefix-map=$(realpath $(ROOT_PATH))=.
+
+CXXFLAGS = $(COMMON_CPPFLAGS) $(COMMON_CXXFLAGS) $(HELENOS_CXXFLAGS) $(DEFAULT_CXXFLAGS)
+
 ## Setup platform configuration
 #
 
@@ -243,8 +272,10 @@ ifeq ($(PRECHECK),y)
 	JOBFILE = $(LIBC_PREFIX)/../../../tools/jobfile.py
 	# XXX: Do not change the order of arguments.
 	CC_JOB = $(JOBFILE) $(JOB) $(CC) $< -o $@
+	CXX_JOB = $(JOBFILE) $(JOB) $(CXX) $< -o $@
 else
 	CC_JOB = $(CC) $< -o $@
+	CXX_JOB = $(CXX) $< -o $@
 endif
 
 ifeq ($(CONFIG_STRIP_BINARIES),y)
@@ -304,8 +335,15 @@ else
 endif
 
 ifneq ($(BINARY),)
+
+ifneq ($(filter %.cpp %.cc %.cxx, $(SOURCES)),)
+$(BINARY): $(LINKER_SCRIPT) $(OBJECTS) $(LIBTAGS) $(CXX_BASE_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -T $(LINKER_SCRIPT) -Wl,-Map,$@.map -o $@ $(OBJECTS) $(LIBARGS) $(CXX_BASE_LIBS)
+else
 $(BINARY): $(LINKER_SCRIPT) $(OBJECTS) $(LIBTAGS) $(BASE_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) -T $(LINKER_SCRIPT) -Wl,-Map,$@.map -o $@ $(OBJECTS) $(LIBARGS) $(BASE_LIBS)
+endif
+
 endif
 
 ifneq ($(TEST_BINARY),)
@@ -342,6 +380,15 @@ endif
 %.o: %.c | depend
 	$(CC_JOB) -c -MD -MP $(DEFS) $(CFLAGS) $(EXTRA_CFLAGS)
 
+%.o: %.cpp | depend
+	$(CXX_JOB) -c -MD -MP $(DEFS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+
+%.o: %.cxx | depend
+	$(CXX_JOB) -c -MD -MP $(DEFS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+
+%.o: %.cc | depend
+	$(CXX_JOB) -c -MD -MP $(DEFS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+
 %.test.o: %.c | depend
 	$(CC_JOB) -c -MD -MP $(DEFS) $(CFLAGS) $(EXTRA_CFLAGS) $(TEST_CFLAGS)
 
@@ -353,6 +400,15 @@ endif
 
 %.lo: %.c | depend
 	$(CC_JOB) -c -MD -MP $(DEFS) $(LIB_CFLAGS) $(EXTRA_CFLAGS)
+
+%.lo: %.cpp | depend
+	$(CXX_JOB) -c -MD -MP $(DEFS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+
+%.lo: %.cxx | depend
+	$(CXX_JOB) -c -MD -MP $(DEFS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+
+%.lo: %.cc | depend
+	$(CXX_JOB) -c -MD -MP $(DEFS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
 
 -include $(DEPENDS)
 

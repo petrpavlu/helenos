@@ -36,6 +36,10 @@
 #ifndef LIBC_STR_H_
 #define LIBC_STR_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <errno.h>
 #include <mem.h>
 #include <stddef.h>
@@ -125,6 +129,8 @@ extern errno_t str_uint64_t(const char *, const char **, unsigned int, bool,
     uint64_t *);
 extern errno_t str_size_t(const char *, const char **, unsigned int, bool,
     size_t *);
+extern int str_int64_t(const char *, const char **, unsigned int, bool,
+    int64_t *);
 
 extern void order_suffix(const uint64_t, uint64_t *, char *);
 extern void bin_order_suffix(const uint64_t, uint64_t *, const char **, bool);
@@ -135,6 +141,10 @@ extern void bin_order_suffix(const uint64_t, uint64_t *, const char **, bool);
 
 extern long int strtol(const char *, char **, int);
 extern unsigned long strtoul(const char *, char **, int);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
