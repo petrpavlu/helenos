@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2012 Sean Bartell
- * Copyright (c) 2012 Vojtech Horky
+ * Copyright (c) 2011 Jiri Zarevucky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,25 +26,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BITHENGE_OS_H_
-#define BITHENGE_OS_H_
+/** @addtogroup libc
+ * @{
+ */
+/** @file Alternative spellings.
+ */
 
+#ifndef LIBC_ISO646_H_
+#define LIBC_ISO646_H_
 
-#ifdef __HELENOS__
-#include <stdint.h>
-typedef int64_t bithenge_int_t;
-#define BITHENGE_PRId PRId64
+#define and &&
+#define and_eq &=
+#define bitand &
+#define bitor |
+#define compl ˜
+#define not !
+#define not_eq !=
+#define or ||
+#define or_eq |=
+#define xor ^
+#define xor_eq ^=
 
-#else
-/* Assuming GNU/Linux system. */
+#endif /* LIBC_ISO646_H_ */
 
-#include <inttypes.h>
-#include <stdbool.h>
-#define BITHENGE_PRId PRIdMAX
-typedef intmax_t bithenge_int_t;
-typedef uint64_t aoff64_t;
-#define EOK 0
-
-#endif
-
-#endif
+/** @}
+ */

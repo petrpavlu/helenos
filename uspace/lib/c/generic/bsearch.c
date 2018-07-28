@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2012 Sean Bartell
- * Copyright (c) 2012 Vojtech Horky
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,25 +26,53 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BITHENGE_OS_H_
-#define BITHENGE_OS_H_
+/** @addtogroup libc
+ * @{
+ */
 
+/**
+ * @file
+ * @brief Binary search.
+ */
 
-#ifdef __HELENOS__
-#include <stdint.h>
-typedef int64_t bithenge_int_t;
-#define BITHENGE_PRId PRId64
+#include <bsearch.h>
+#include <stddef.h>
 
-#else
-/* Assuming GNU/Linux system. */
+/** Binary search.
+ *
+ * @param key Key to search for
+ * @param base Array of objects
+ * @param nmemb Number of objects in array
+ * @param size Size of each object
+ * @param compar Comparison function
+ */
+void *bsearch(const void *key, const void *base, size_t nmemb, size_t size,
+    int (*compar)(const void *, const void *))
+{
+	size_t pividx;
+	const void *pivot;
+	int r;
 
-#include <inttypes.h>
-#include <stdbool.h>
-#define BITHENGE_PRId PRIdMAX
-typedef intmax_t bithenge_int_t;
-typedef uint64_t aoff64_t;
-#define EOK 0
+	while (nmemb != 0) {
+		pividx = nmemb / 2;
+		pivot = base + size * pividx;
 
-#endif
+		r = compar(key, pivot);
+		if (r == 0)
+			return (void *)pivot;
 
-#endif
+		if (r < 0) {
+			/* Now only look at members preceding pivot */
+			nmemb = pividx;
+		} else {
+			/* Now only look at members following pivot */
+			nmemb = nmemb - pividx - 1;
+			base += size * (pividx + 1);
+		}
+	}
+
+	return NULL;
+}
+
+/** @}
+ */

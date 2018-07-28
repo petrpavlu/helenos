@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2012 Sean Bartell
- * Copyright (c) 2012 Vojtech Horky
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,25 +26,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BITHENGE_OS_H_
-#define BITHENGE_OS_H_
+/** @addtogroup libc
+ * @{
+ */
+/** @file
+ */
 
+#ifndef LIBC_PRIVATE_STDLIB_H_
+#define LIBC_PRIVATE_STDLIB_H_
 
-#ifdef __HELENOS__
-#include <stdint.h>
-typedef int64_t bithenge_int_t;
-#define BITHENGE_PRId PRId64
+#include <adt/list.h>
 
-#else
-/* Assuming GNU/Linux system. */
-
-#include <inttypes.h>
-#include <stdbool.h>
-#define BITHENGE_PRId PRIdMAX
-typedef intmax_t bithenge_int_t;
-typedef uint64_t aoff64_t;
-#define EOK 0
-
-#endif
+/** Exit handler list entry */
+typedef struct {
+	/** Link to exit handler list */
+	link_t llist;
+	/** Exit handler function */
+	void (*func)(void);
+} __exit_handler_t;
 
 #endif
+
+/** @}
+ */

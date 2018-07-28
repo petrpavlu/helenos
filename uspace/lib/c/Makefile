@@ -162,8 +162,10 @@ GENERIC_SOURCES = \
 	generic/arg_parse.c \
 	generic/stats.c \
 	generic/assert.c \
+	generic/bsearch.c \
 	generic/pio_trace.c \
 	generic/qsort.c \
+	generic/ubsan.c \
 	generic/uuid.c \
 	generic/vbd.c \
 	generic/vol.c
@@ -191,6 +193,7 @@ TEST_SOURCES = \
 	test/odict.c \
 	test/qsort.c \
 	test/sprintf.c \
+	test/stdlib.c \
 	test/str.c
 
 include $(USPACE_PREFIX)/Makefile.common

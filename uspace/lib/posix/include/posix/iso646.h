@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Jiri Zarevucky
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,25 +29,16 @@
 /** @addtogroup libposix
  * @{
  */
-/** @file Alternative spellings.
- */
 
 #ifndef POSIX_ISO646_H_
 #define POSIX_ISO646_H_
 
-#define and &&
-#define and_eq &=
-#define bitand &
-#define bitor |
-#define compl ˜
-#define not !
-#define not_eq !=
-#define or ||
-#define or_eq |=
-#define xor ^
-#define xor_eq ^=
+/*
+ * Just a pass-through to libc iso646.
+ */
+#include "libc/iso646.h"
 
-#endif /* POSIX_ISO646_H_ */
+#endif
 
 /** @}
  */
