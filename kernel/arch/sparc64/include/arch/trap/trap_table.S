@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Vojtech Horky
+ * Copyright (c) 2005 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pcut/pcut.h>
-#include "tested.h"
+/** @addtogroup sparc64interrupt
+ * @{
+ */
+/** @file
+ */
 
-#include <pcut/pcut.h>
-#include "tested.h"
+.macro SAVE_GLOBALS
+	mov %g1, %l1
+	mov %g2, %l2
+	mov %g3, %l3
+	mov %g4, %l4
+	mov %g5, %l5
+	mov %g6, %l6
+	mov %g7, %l7
+.endm
 
-PCUT_INIT
+.macro RESTORE_GLOBALS
+	mov %l1, %g1
+	mov %l2, %g2
+	mov %l3, %g3
+	mov %l4, %g4
+	mov %l5, %g5
+	mov %l6, %g6
+	mov %l7, %g7
+.endm
 
-PCUT_TEST(zero_exponent) {
-	PCUT_ASSERT_INT_EQUALS(1, intpow(2, 0));
-}
+.macro PREEMPTIBLE_HANDLER f
+	sethi %hi(\f), %g1
+	ba %xcc, preemptible_handler
+	or %g1, %lo(\f), %g1
+.endm
 
-PCUT_TEST(one_exponent) {
-	PCUT_ASSERT_INT_EQUALS(2, intpow(2, 1));
-	PCUT_ASSERT_INT_EQUALS(39, intpow(39, 1));
-}
-
-PCUT_TEST(same_strings) {
-	const char *p = "xyz";
-	PCUT_ASSERT_STR_EQUALS("xyz", p);
-	PCUT_ASSERT_STR_EQUALS("abc", "XXXabd" + 3);
-}
-
-PCUT_CUSTOM_MAIN(
-	PCUT_MAIN_SET_XML_REPORT
-);
+/** @}
+ */

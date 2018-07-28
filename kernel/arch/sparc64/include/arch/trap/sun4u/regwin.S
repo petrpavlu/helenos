@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Vojtech Horky
+ * Copyright (c) 2005 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pcut/pcut.h>
-#include "tested.h"
+/** @addtogroup sparc64interrupt
+ * @{
+ */
 
-#include <pcut/pcut.h>
-#include "tested.h"
+/*
+ * Macro used to spill userspace window to userspace window buffer.
+ * It can be either triggered from preemptible_handler doing SAVE
+ * at (TL=1) or from normal kernel code doing SAVE when OTHERWIN>0
+ * at (TL=0).
+ */
+.macro SPILL_TO_USPACE_WINDOW_BUFFER
+	stx %l0, [%g7 + L0_OFFSET]
+	stx %l1, [%g7 + L1_OFFSET]
+	stx %l2, [%g7 + L2_OFFSET]
+	stx %l3, [%g7 + L3_OFFSET]
+	stx %l4, [%g7 + L4_OFFSET]
+	stx %l5, [%g7 + L5_OFFSET]
+	stx %l6, [%g7 + L6_OFFSET]
+	stx %l7, [%g7 + L7_OFFSET]
+	stx %i0, [%g7 + I0_OFFSET]
+	stx %i1, [%g7 + I1_OFFSET]
+	stx %i2, [%g7 + I2_OFFSET]
+	stx %i3, [%g7 + I3_OFFSET]
+	stx %i4, [%g7 + I4_OFFSET]
+	stx %i5, [%g7 + I5_OFFSET]
+	stx %i6, [%g7 + I6_OFFSET]
+	stx %i7, [%g7 + I7_OFFSET]
+	add %g7, STACK_WINDOW_SAVE_AREA_SIZE, %g7
+	saved
+	retry
+.endm
 
-PCUT_INIT
-
-PCUT_TEST(zero_exponent) {
-	PCUT_ASSERT_INT_EQUALS(1, intpow(2, 0));
-}
-
-PCUT_TEST(one_exponent) {
-	PCUT_ASSERT_INT_EQUALS(2, intpow(2, 1));
-	PCUT_ASSERT_INT_EQUALS(39, intpow(39, 1));
-}
-
-PCUT_TEST(same_strings) {
-	const char *p = "xyz";
-	PCUT_ASSERT_STR_EQUALS("xyz", p);
-	PCUT_ASSERT_STR_EQUALS("abc", "XXXabd" + 3);
-}
-
-PCUT_CUSTOM_MAIN(
-	PCUT_MAIN_SET_XML_REPORT
-);
+/** @}
+ */
