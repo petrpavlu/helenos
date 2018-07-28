@@ -39,6 +39,7 @@
 #define KERN_arm64_MACHINE_FUNC_H_
 
 #include <arch/istate.h>
+#include <typedefs.h>
 
 struct arm_machine_ops {
 	void (*machine_init)(void);

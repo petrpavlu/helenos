@@ -69,55 +69,55 @@ handler_\i:
 	 */
 
 	/* Static checks for the following code. */
-#if ISTATE_OFFSET_X0 + ISTATE_SIZE_X0 != ISTATE_OFFSET_X1
+#if ISTATE_OFFSET_X0 + 8 != ISTATE_OFFSET_X1
 #error x0 and x1 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X2 + ISTATE_SIZE_X2 != ISTATE_OFFSET_X3
+#if ISTATE_OFFSET_X2 + 8 != ISTATE_OFFSET_X3
 #error x2 and x3 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X4 + ISTATE_SIZE_X4 != ISTATE_OFFSET_X5
+#if ISTATE_OFFSET_X4 + 8 != ISTATE_OFFSET_X5
 #error x4 and x5 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X6 + ISTATE_SIZE_X6 != ISTATE_OFFSET_X7
+#if ISTATE_OFFSET_X6 + 8 != ISTATE_OFFSET_X7
 #error x6 and x7 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X8 + ISTATE_SIZE_X8 != ISTATE_OFFSET_X9
+#if ISTATE_OFFSET_X8 + 8 != ISTATE_OFFSET_X9
 #error x8 and x9 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X10 + ISTATE_SIZE_X10 != ISTATE_OFFSET_X11
+#if ISTATE_OFFSET_X10 + 8 != ISTATE_OFFSET_X11
 #error x10 and x11 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X12 + ISTATE_SIZE_X12 != ISTATE_OFFSET_X13
+#if ISTATE_OFFSET_X12 + 8 != ISTATE_OFFSET_X13
 #error x12 and x13 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X14 + ISTATE_SIZE_X14 != ISTATE_OFFSET_X15
+#if ISTATE_OFFSET_X14 + 8 != ISTATE_OFFSET_X15
 #error x14 and x15 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X16 + ISTATE_SIZE_X16 != ISTATE_OFFSET_X17
+#if ISTATE_OFFSET_X16 + 8 != ISTATE_OFFSET_X17
 #error x16 and x17 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X18 + ISTATE_SIZE_X18 != ISTATE_OFFSET_X19
+#if ISTATE_OFFSET_X18 + 8 != ISTATE_OFFSET_X19
 #error x18 and x19 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X20 + ISTATE_SIZE_X20 != ISTATE_OFFSET_X21
+#if ISTATE_OFFSET_X20 + 8 != ISTATE_OFFSET_X21
 #error x20 and x21 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X22 + ISTATE_SIZE_X22 != ISTATE_OFFSET_X23
+#if ISTATE_OFFSET_X22 + 8 != ISTATE_OFFSET_X23
 #error x22 and x23 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X24 + ISTATE_SIZE_X24 != ISTATE_OFFSET_X25
+#if ISTATE_OFFSET_X24 + 8 != ISTATE_OFFSET_X25
 #error x24 and x25 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X26 + ISTATE_SIZE_X26 != ISTATE_OFFSET_X27
+#if ISTATE_OFFSET_X26 + 8 != ISTATE_OFFSET_X27
 #error x26 and x27 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_X28 + ISTATE_SIZE_X28 != ISTATE_OFFSET_X29
+#if ISTATE_OFFSET_X28 + 8 != ISTATE_OFFSET_X29
 #error x28 and x29 are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_SPSR + ISTATE_SIZE_SPSR != ISTATE_OFFSET_SP
+#if ISTATE_OFFSET_SPSR + 8 != ISTATE_OFFSET_SP
 #error spsr and sp are not successive in istate_t
 #endif
-#if ISTATE_OFFSET_PC + ISTATE_SIZE_PC != ISTATE_OFFSET_TPIDR
+#if ISTATE_OFFSET_PC + 8 != ISTATE_OFFSET_TPIDR
 #error pc and tpidr are not successive in istate_t
 #endif
 

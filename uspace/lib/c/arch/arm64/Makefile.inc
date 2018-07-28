@@ -35,8 +35,7 @@ ARCH_SOURCES = \
 	arch/$(UARCH)/src/tls.c \
 	arch/$(UARCH)/src/thread_entry.S
 
-ARCH_AUTOGENS_AG = \
-	arch/$(UARCH)/include/libarch/fibril_context.ag \
-	arch/$(UARCH)/include/libarch/istate_struct.ag
+ARCH_AUTOCHECK_HEADERS = \
+	arch/$(UARCH)/include/libarch/fibril_context.h
 
 EXTRA_OUTPUT += arch/$(UARCH)/src/entry.o

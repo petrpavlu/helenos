@@ -61,7 +61,7 @@ ifeq ($(MACHINE),virt)
 	ARCH_SOURCES += arch/$(KARCH)/src/mach/virt/virt.c
 endif
 
-ARCH_AUTOGENS_AG = \
-	arch/$(KARCH)/include/arch/istate_struct.ag \
-	arch/$(KARCH)/include/arch/context_struct.ag
+ARCH_AUTOCHECK_HEADERS = \
+	arch/$(KARCH)/include/arch/istate_struct.h \
+	arch/$(KARCH)/include/arch/context_struct.h
 
