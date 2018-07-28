@@ -44,5 +44,5 @@ SYMBOL(__entry)
 	stp x29, x30, [sp, #-16]!
 	mov x29, sp
 
-	# Pass pcb_ptr to __main as the first argument (in x0)
-	bl __main
+	# Pass pcb_ptr to __libc_main as the first argument (in x0)
+	bl __libc_main
