@@ -29,14 +29,13 @@
 
 USPACE_PREFIX = ../..
 
-LINKER_SCRIPT = $(LIBC_PREFIX)/arch/$(UARCH)/_link-loader.ld
+EXTRA_LFLAGS = -Ttext-segment=0x70000000
 
 BINARY = loader
 STATIC_ONLY = y
 
 GENERIC_SOURCES = \
-	main.c \
-	interp.S
+	main.c
 
 SOURCES = \
 	$(GENERIC_SOURCES) \
