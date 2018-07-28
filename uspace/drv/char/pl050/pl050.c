@@ -53,7 +53,7 @@ enum {
 static errno_t pl050_dev_add(ddf_dev_t *);
 static errno_t pl050_fun_online(ddf_fun_t *);
 static errno_t pl050_fun_offline(ddf_fun_t *);
-static void pl050_char_conn(ipc_callid_t, ipc_call_t *, void *);
+static void pl050_char_conn(cap_call_handle_t, ipc_call_t *, void *);
 static errno_t pl050_read(chardev_srv_t *, void *, size_t, size_t *);
 static errno_t pl050_write(chardev_srv_t *, const void *, size_t, size_t *);
 
@@ -212,9 +212,9 @@ static errno_t pl050_init(pl050_t *pl050)
 
 	pl050->regs = regs;
 
-	int irq_cap;
+	cap_irq_handle_t ihandle;
 	rc = register_interrupt_handler(pl050->dev,
-	    res.irqs.irqs[0], pl050_interrupt, &pl050_irq_code, &irq_cap);
+	    res.irqs.irqs[0], pl050_interrupt, &pl050_irq_code, &ihandle);
 	if (rc != EOK) {
 		ddf_msg(LVL_ERROR, "Failed registering interrupt handler. (%s)",
 		    str_error_name(rc));
@@ -285,11 +285,11 @@ static errno_t pl050_write(chardev_srv_t *srv, const void *data, size_t size,
 	return EOK;
 }
 
-void pl050_char_conn(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+void pl050_char_conn(cap_call_handle_t icall_handle, ipc_call_t *icall, void *arg)
 {
 	pl050_t *pl050 = pl050_from_fun((ddf_fun_t *)arg);
 
-	chardev_conn(iid, icall, &pl050->cds);
+	chardev_conn(icall_handle, icall, &pl050->cds);
 }
 
 /** Add device. */

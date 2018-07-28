@@ -173,20 +173,21 @@ static errno_t gicv2_enable_irq(gicv2_t *gicv2, sysarg_t irq)
 
 /** Client connection handler.
  *
- * @param iid   Hash of the request that opened the connection.
- * @param icall Call data of the request that opened the connection.
- * @param arg	Local argument.
+ * @param icall_handle Hash of the request that opened the connection.
+ * @param icall        Call data of the request that opened the connection.
+ * @param arg	       Local argument.
  */
-static void gicv2_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+static void gicv2_connection(
+    cap_call_handle_t icall_handle, ipc_call_t *icall, void *arg)
 {
-	ipc_callid_t callid;
+	cap_call_handle_t callid;
 	ipc_call_t call;
 	gicv2_t *gicv2;
 
 	/*
 	 * Answer the first IPC_M_CONNECT_ME_TO call.
 	 */
-	async_answer_0(iid, EOK);
+	async_answer_0(icall_handle, EOK);
 
 	gicv2 = (gicv2_t *)ddf_dev_data_get(ddf_fun_get_dev((ddf_fun_t *)arg));
 

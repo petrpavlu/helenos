@@ -61,7 +61,7 @@ static errno_t ddisk_dev_gone(ddf_dev_t *);
 static errno_t ddisk_fun_online(ddf_fun_t *);
 static errno_t ddisk_fun_offline(ddf_fun_t *);
 
-static void ddisk_bd_connection(ipc_callid_t, ipc_call_t *, void *);
+static void ddisk_bd_connection(cap_call_handle_t, ipc_call_t *, void *);
 
 static void ddisk_irq_handler(ipc_call_t *, ddf_dev_t *);
 
@@ -111,7 +111,7 @@ typedef struct {
 	ddisk_res_t ddisk_res;
 	ddisk_regs_t *ddisk_regs;
 
-	int irq_cap;
+	cap_irq_handle_t irq_cap;
 
 	bd_srvs_t bds;
 } ddisk_t;
@@ -448,7 +448,7 @@ static errno_t ddisk_dev_add(ddf_dev_t *dev)
 	ddisk->bds.ops = &ddisk_bd_ops;
 	ddisk->bds.sarg = ddisk;
 
-	ddisk->irq_cap = -1;
+	ddisk->irq_cap = CAP_NIL;
 
 	/*
 	 * Enable access to ddisk's PIO registers.
@@ -586,13 +586,13 @@ static errno_t ddisk_fun_offline(ddf_fun_t *fun)
 }
 
 /** Block device connection handler */
-static void ddisk_bd_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+static void ddisk_bd_connection(cap_call_handle_t icall_handle, ipc_call_t *icall, void *arg)
 {
 	ddisk_t *ddisk;
 	ddf_fun_t *fun = (ddf_fun_t *) arg;
 
 	ddisk = (ddisk_t *) ddf_dev_data_get(ddf_fun_get_dev(fun));
-	bd_conn(iid, icall, &ddisk->bds);
+	bd_conn(icall_handle, icall, &ddisk->bds);
 }
 
 int main(int argc, char *argv[])

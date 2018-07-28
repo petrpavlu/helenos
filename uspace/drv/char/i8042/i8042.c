@@ -66,7 +66,7 @@
 #define i8042_AUX_DISABLE    0x20
 #define i8042_KBD_TRANSLATE  0x40  /* Use this to switch to XT scancodes */
 
-static void i8042_char_conn(ipc_callid_t, ipc_call_t *, void *);
+static void i8042_char_conn(cap_call_handle_t, ipc_call_t *, void *);
 static errno_t i8042_read(chardev_srv_t *, void *, size_t, size_t *);
 static errno_t i8042_write(chardev_srv_t *, const void *, size_t, size_t *);
 
@@ -280,18 +280,18 @@ errno_t i8042_init(i8042_t *dev, addr_range_t *regs, int irq_kbd,
 		.cmds = cmds
 	};
 
-	int irq_kbd_cap;
+	cap_irq_handle_t kbd_ihandle;
 	rc = register_interrupt_handler(ddf_dev, irq_kbd,
-	    i8042_irq_handler, &irq_code, &irq_kbd_cap);
+	    i8042_irq_handler, &irq_code, &kbd_ihandle);
 	if (rc != EOK) {
 		ddf_msg(LVL_ERROR, "Failed set handler for kbd: %s.",
 		    ddf_dev_get_name(ddf_dev));
 		goto error;
 	}
 
-	int irq_mouse_cap;
+	cap_irq_handle_t mouse_ihandle;
 	rc = register_interrupt_handler(ddf_dev, irq_mouse,
-	    i8042_irq_handler, &irq_code, &irq_mouse_cap);
+	    i8042_irq_handler, &irq_code, &mouse_ihandle);
 	if (rc != EOK) {
 		ddf_msg(LVL_ERROR, "Failed set handler for mouse: %s.",
 		    ddf_dev_get_name(ddf_dev));
@@ -413,15 +413,15 @@ static errno_t i8042_read(chardev_srv_t *srv, void *dest, size_t size,
 
 /** Handle data requests.
  *
- * @param id   callid
+ * @param id   chandle
  * @param call IPC request.
  * @param arg  ddf_fun_t function.
  */
-void i8042_char_conn(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+void i8042_char_conn(cap_call_handle_t icall_handle, ipc_call_t *icall, void *arg)
 {
 	i8042_port_t *port = ddf_fun_data_get((ddf_fun_t *)arg);
 
-	chardev_conn(iid, icall, &port->cds);
+	chardev_conn(icall_handle, icall, &port->cds);
 }
 
 /**

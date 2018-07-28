@@ -330,37 +330,39 @@ static errno_t udp_assoc_send_msg_impl(udp_client_t *client, sysarg_t assoc_id,
  *
  * Handle client request to create callback session.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle 
+ * @param icall         Async request data
  */
-static void udp_callback_create_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_callback_create_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_callback_create_srv()");
 
 	async_sess_t *sess = async_callback_receive(EXCHANGE_SERIALIZE);
 	if (sess == NULL) {
-		async_answer_0(iid, ENOMEM);
+		async_answer_0(icall_handle, ENOMEM);
 		return;
 	}
 
 	client->sess = sess;
-	async_answer_0(iid, EOK);
+	async_answer_0(icall_handle, EOK);
 }
 
 /** Create association.
  *
  * Handle client request to create association.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle
+ * @param icall         Async request data
  */
-static void udp_assoc_create_srv(udp_client_t *client, ipc_callid_t iid,
+static
+void udp_assoc_create_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
-	ipc_callid_t callid;
+	cap_call_handle_t chandle;
 	size_t size;
 	inet_ep2_t epp;
 	sysarg_t assoc_id;
@@ -368,43 +370,44 @@ static void udp_assoc_create_srv(udp_client_t *client, ipc_callid_t iid,
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_assoc_create_srv()");
 
-	if (!async_data_write_receive(&callid, &size)) {
-		async_answer_0(callid, EREFUSED);
-		async_answer_0(iid, EREFUSED);
+	if (!async_data_write_receive(&chandle, &size)) {
+		async_answer_0(chandle, EREFUSED);
+		async_answer_0(icall_handle, EREFUSED);
 		return;
 	}
 
 	if (size != sizeof(inet_ep2_t)) {
-		async_answer_0(callid, EINVAL);
-		async_answer_0(iid, EINVAL);
+		async_answer_0(chandle, EINVAL);
+		async_answer_0(icall_handle, EINVAL);
 		return;
 	}
 
-	rc = async_data_write_finalize(callid, &epp, size);
+	rc = async_data_write_finalize(chandle, &epp, size);
 	if (rc != EOK) {
-		async_answer_0(callid, rc);
-		async_answer_0(iid, rc);
+		async_answer_0(chandle, rc);
+		async_answer_0(icall_handle, rc);
 		return;
 	}
 
 	rc = udp_assoc_create_impl(client, &epp, &assoc_id);
 	if (rc != EOK) {
-		async_answer_0(iid, rc);
+		async_answer_0(icall_handle, rc);
 		return;
 	}
 
-	async_answer_1(iid, EOK, assoc_id);
+	async_answer_1(icall_handle, EOK, assoc_id);
 }
 
 /** Destroy association.
  *
  * Handle client request to destroy association.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle
+ * @param icall         Async request data
  */
-static void udp_assoc_destroy_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_assoc_destroy_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
 	sysarg_t assoc_id;
@@ -414,18 +417,19 @@ static void udp_assoc_destroy_srv(udp_client_t *client, ipc_callid_t iid,
 
 	assoc_id = IPC_GET_ARG1(*icall);
 	rc = udp_assoc_destroy_impl(client, assoc_id);
-	async_answer_0(iid, rc);
+	async_answer_0(icall_handle, rc);
 }
 
 /** Set association with no local address.
  *
  * Handle client request to set no local address flag.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle
+ * @param icall         Async request data
  */
-static void udp_assoc_set_nolocal_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_assoc_set_nolocal_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
 	sysarg_t assoc_id;
@@ -435,21 +439,22 @@ static void udp_assoc_set_nolocal_srv(udp_client_t *client, ipc_callid_t iid,
 
 	assoc_id = IPC_GET_ARG1(*icall);
 	rc = udp_assoc_set_nolocal_impl(client, assoc_id);
-	async_answer_0(iid, rc);
+	async_answer_0(icall_handle, rc);
 }
 
 /** Send message via association.
  *
  * Handle client request to send message.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle 
+ * @param icall         Async request data
  */
-static void udp_assoc_send_msg_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_assoc_send_msg_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
-	ipc_callid_t callid;
+	cap_call_handle_t chandle;
 	size_t size;
 	inet_ep_t dest;
 	sysarg_t assoc_id;
@@ -460,49 +465,49 @@ static void udp_assoc_send_msg_srv(udp_client_t *client, ipc_callid_t iid,
 
 	/* Receive dest */
 
-	if (!async_data_write_receive(&callid, &size)) {
-		async_answer_0(callid, EREFUSED);
-		async_answer_0(iid, EREFUSED);
+	if (!async_data_write_receive(&chandle, &size)) {
+		async_answer_0(chandle, EREFUSED);
+		async_answer_0(icall_handle, EREFUSED);
 		return;
 	}
 
 	if (size != sizeof(inet_ep_t)) {
-		async_answer_0(callid, EINVAL);
-		async_answer_0(iid, EINVAL);
+		async_answer_0(chandle, EINVAL);
+		async_answer_0(icall_handle, EINVAL);
 		return;
 	}
 
-	rc = async_data_write_finalize(callid, &dest, size);
+	rc = async_data_write_finalize(chandle, &dest, size);
 	if (rc != EOK) {
-		async_answer_0(callid, rc);
-		async_answer_0(iid, rc);
+		async_answer_0(chandle, rc);
+		async_answer_0(icall_handle, rc);
 		return;
 	}
 
 	/* Receive message data */
 
-	if (!async_data_write_receive(&callid, &size)) {
-		async_answer_0(callid, EREFUSED);
-		async_answer_0(iid, EREFUSED);
+	if (!async_data_write_receive(&chandle, &size)) {
+		async_answer_0(chandle, EREFUSED);
+		async_answer_0(icall_handle, EREFUSED);
 		return;
 	}
 
 	if (size > MAX_MSG_SIZE) {
-		async_answer_0(callid, EINVAL);
-		async_answer_0(iid, EINVAL);
+		async_answer_0(chandle, EINVAL);
+		async_answer_0(icall_handle, EINVAL);
 		return;
 	}
 
 	data = malloc(size);
 	if (data == NULL) {
-		async_answer_0(callid, ENOMEM);
-		async_answer_0(iid, ENOMEM);
+		async_answer_0(chandle, ENOMEM);
+		async_answer_0(icall_handle, ENOMEM);
 	}
 
-	rc = async_data_write_finalize(callid, data, size);
+	rc = async_data_write_finalize(chandle, data, size);
 	if (rc != EOK) {
-		async_answer_0(callid, rc);
-		async_answer_0(iid, rc);
+		async_answer_0(chandle, rc);
+		async_answer_0(icall_handle, rc);
 		free(data);
 		return;
 	}
@@ -511,12 +516,12 @@ static void udp_assoc_send_msg_srv(udp_client_t *client, ipc_callid_t iid,
 
 	rc = udp_assoc_send_msg_impl(client, assoc_id, &dest, data, size);
 	if (rc != EOK) {
-		async_answer_0(iid, rc);
+		async_answer_0(icall_handle, rc);
 		free(data);
 		return;
 	}
 
-	async_answer_0(iid, EOK);
+	async_answer_0(icall_handle, EOK);
 	free(data);
 }
 
@@ -540,14 +545,15 @@ static udp_crcv_queue_entry_t *udp_rmsg_get_next(udp_client_t *client)
  *
  * Handle client request to get information on received message.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle
+ * @param icall         Async request data
  */
-static void udp_rmsg_info_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_rmsg_info_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
-	ipc_callid_t callid;
+	cap_call_handle_t chandle;
 	size_t size;
 	udp_crcv_queue_entry_t *enext;
 	sysarg_t assoc_id;
@@ -556,22 +562,22 @@ static void udp_rmsg_info_srv(udp_client_t *client, ipc_callid_t iid,
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_rmsg_info_srv()");
 	enext = udp_rmsg_get_next(client);
 
-	if (!async_data_read_receive(&callid, &size)) {
-		async_answer_0(callid, EREFUSED);
-		async_answer_0(iid, EREFUSED);
+	if (!async_data_read_receive(&chandle, &size)) {
+		async_answer_0(chandle, EREFUSED);
+		async_answer_0(icall_handle, EREFUSED);
 		return;
 	}
 
 	if (enext == NULL) {
-		async_answer_0(callid, ENOENT);
-		async_answer_0(iid, ENOENT);
+		async_answer_0(chandle, ENOENT);
+		async_answer_0(icall_handle, ENOENT);
 		return;
 	}
 
-	rc = async_data_read_finalize(callid, &enext->epp.remote,
+	rc = async_data_read_finalize(chandle, &enext->epp.remote,
 	    max(size, (size_t)sizeof(inet_ep_t)));
 	if (rc != EOK) {
-		async_answer_0(iid, rc);
+		async_answer_0(icall_handle, rc);
 		return;
 	}
 
@@ -580,21 +586,22 @@ static void udp_rmsg_info_srv(udp_client_t *client, ipc_callid_t iid,
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_rmsg_info_srv(): assoc_id=%zu, "
 	    "size=%zu", assoc_id, size);
-	async_answer_2(iid, EOK, assoc_id, size);
+	async_answer_2(icall_handle, EOK, assoc_id, size);
 }
 
 /** Read data from first received message.
  *
  * Handle client request to read data from first received message.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle
+ * @param icall         Async request data
  */
-static void udp_rmsg_read_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_rmsg_read_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
-	ipc_callid_t callid;
+	cap_call_handle_t chandle;
 	size_t msg_size;
 	udp_crcv_queue_entry_t *enext;
 	void *data;
@@ -607,15 +614,15 @@ static void udp_rmsg_read_srv(udp_client_t *client, ipc_callid_t iid,
 
 	enext = udp_rmsg_get_next(client);
 
-	if (!async_data_read_receive(&callid, &size)) {
-		async_answer_0(callid, EREFUSED);
-		async_answer_0(iid, EREFUSED);
+	if (!async_data_read_receive(&chandle, &size)) {
+		async_answer_0(chandle, EREFUSED);
+		async_answer_0(icall_handle, EREFUSED);
 		return;
 	}
 
 	if (enext == NULL) {
-		async_answer_0(callid, ENOENT);
-		async_answer_0(iid, ENOENT);
+		async_answer_0(chandle, ENOENT);
+		async_answer_0(icall_handle, ENOENT);
 		return;
 	}
 
@@ -623,18 +630,18 @@ static void udp_rmsg_read_srv(udp_client_t *client, ipc_callid_t iid,
 	msg_size = enext->msg->data_size;
 
 	if (off > msg_size) {
-		async_answer_0(callid, EINVAL);
-		async_answer_0(iid, EINVAL);
+		async_answer_0(chandle, EINVAL);
+		async_answer_0(icall_handle, EINVAL);
 		return;
 	}
 
-	rc = async_data_read_finalize(callid, data, min(msg_size - off, size));
+	rc = async_data_read_finalize(chandle, data, min(msg_size - off, size));
 	if (rc != EOK) {
-		async_answer_0(iid, rc);
+		async_answer_0(icall_handle, rc);
 		return;
 	}
 
-	async_answer_0(iid, EOK);
+	async_answer_0(icall_handle, EOK);
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_rmsg_read_srv(): OK");
 }
 
@@ -643,11 +650,12 @@ static void udp_rmsg_read_srv(udp_client_t *client, ipc_callid_t iid,
  * Handle client request to discard first received message, advancing
  * to the next one.
  *
- * @param client   UDP client
- * @param iid      Async request ID
- * @param icall    Async request data
+ * @param client        UDP client
+ * @param icall_handle  Async request call handle
+ * @param icall         Async request data
  */
-static void udp_rmsg_discard_srv(udp_client_t *client, ipc_callid_t iid,
+static void
+udp_rmsg_discard_srv(udp_client_t *client, cap_call_handle_t icall_handle,
     ipc_call_t *icall)
 {
 	udp_crcv_queue_entry_t *enext;
@@ -657,29 +665,30 @@ static void udp_rmsg_discard_srv(udp_client_t *client, ipc_callid_t iid,
 	enext = udp_rmsg_get_next(client);
 	if (enext == NULL) {
 		log_msg(LOG_DEFAULT, LVL_DEBUG, "usg_rmsg_discard_srv: enext==NULL");
-		async_answer_0(iid, ENOENT);
+		async_answer_0(icall_handle, ENOENT);
 		return;
 	}
 
 	list_remove(&enext->link);
 	udp_msg_delete(enext->msg);
 	free(enext);
-	async_answer_0(iid, EOK);
+	async_answer_0(icall_handle, EOK);
 }
 
 /** Handle UDP client connection.
  *
- * @param iid   Connect call ID
- * @param icall Connect call data
- * @param arg   Connection argument
+ * @param icall_handle  Connect call handle 
+ * @param icall         Connect call data
+ * @param arg           Connection argument
  */
-static void udp_client_conn(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+static void udp_client_conn(cap_call_handle_t icall_handle, ipc_call_t *icall,
+    void *arg)
 {
 	udp_client_t client;
 	unsigned long n;
 
 	/* Accept the connection */
-	async_answer_0(iid, EOK);
+	async_answer_0(icall_handle, EOK);
 
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_client_conn()");
 
@@ -690,44 +699,44 @@ static void udp_client_conn(ipc_callid_t iid, ipc_call_t *icall, void *arg)
 	while (true) {
 		log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_client_conn: wait req");
 		ipc_call_t call;
-		ipc_callid_t callid = async_get_call(&call);
+		cap_call_handle_t chandle = async_get_call(&call);
 		sysarg_t method = IPC_GET_IMETHOD(call);
 
 		log_msg(LOG_DEFAULT, LVL_DEBUG, "udp_client_conn: method=%d",
 		    (int)method);
 		if (!method) {
 			/* The other side has hung up */
-			async_answer_0(callid, EOK);
+			async_answer_0(chandle, EOK);
 			break;
 		}
 
 		switch (method) {
 		case UDP_CALLBACK_CREATE:
-			udp_callback_create_srv(&client, callid, &call);
+			udp_callback_create_srv(&client, chandle, &call);
 			break;
 		case UDP_ASSOC_CREATE:
-			udp_assoc_create_srv(&client, callid, &call);
+			udp_assoc_create_srv(&client, chandle, &call);
 			break;
 		case UDP_ASSOC_DESTROY:
-			udp_assoc_destroy_srv(&client, callid, &call);
+			udp_assoc_destroy_srv(&client, chandle, &call);
 			break;
 		case UDP_ASSOC_SET_NOLOCAL:
-			udp_assoc_set_nolocal_srv(&client, callid, &call);
+			udp_assoc_set_nolocal_srv(&client, chandle, &call);
 			break;
 		case UDP_ASSOC_SEND_MSG:
-			udp_assoc_send_msg_srv(&client, callid, &call);
+			udp_assoc_send_msg_srv(&client, chandle, &call);
 			break;
 		case UDP_RMSG_INFO:
-			udp_rmsg_info_srv(&client, callid, &call);
+			udp_rmsg_info_srv(&client, chandle, &call);
 			break;
 		case UDP_RMSG_READ:
-			udp_rmsg_read_srv(&client, callid, &call);
+			udp_rmsg_read_srv(&client, chandle, &call);
 			break;
 		case UDP_RMSG_DISCARD:
-			udp_rmsg_discard_srv(&client, callid, &call);
+			udp_rmsg_discard_srv(&client, chandle, &call);
 			break;
 		default:
-			async_answer_0(callid, ENOTSUP);
+			async_answer_0(chandle, ENOTSUP);
 			break;
 		}
 	}

@@ -139,7 +139,7 @@ typedef struct {
 	const ioport32_t cell_id3;
 } pl011_uart_regs_t;
 
-static void pl011_connection(ipc_callid_t, ipc_call_t *, void *);
+static void pl011_connection(cap_call_handle_t, ipc_call_t *, void *);
 
 static errno_t pl011_read(chardev_srv_t *, void *, size_t, size_t *);
 static errno_t pl011_write(chardev_srv_t *, const void *, size_t, size_t *);
@@ -216,7 +216,6 @@ static void pl011_irq_handler(ipc_call_t *call, void *arg)
 errno_t pl011_add(pl011_t *pl011, pl011_res_t *res)
 {
 	ddf_fun_t *fun = NULL;
-	bool subscribed = false;
 	irq_pio_range_t *pl011_ranges = NULL;
 	irq_cmd_t *pl011_cmds = NULL;
 	errno_t rc;
@@ -224,6 +223,8 @@ errno_t pl011_add(pl011_t *pl011, pl011_res_t *res)
 	circ_buf_init(&pl011->cbuf, pl011->buf, pl011_buf_size, 1);
 	fibril_mutex_initialize(&pl011->buf_lock);
 	fibril_condvar_initialize(&pl011->buf_cv);
+
+	pl011->irq_handle = CAP_NIL;
 
 	pl011_ranges = malloc(sizeof(pl011_ranges_proto));
 	if (pl011_ranges == NULL) {
@@ -265,9 +266,12 @@ errno_t pl011_add(pl011_t *pl011, pl011_res_t *res)
 	pl011->irq_code.cmdcount = sizeof(pl011_cmds_proto) / sizeof(irq_cmd_t);
 	pl011->irq_code.cmds = pl011_cmds;
 
-	async_irq_subscribe(
-	    res->irq, pl011_irq_handler, pl011, &pl011->irq_code, NULL);
-	subscribed = true;
+	rc = async_irq_subscribe(res->irq, pl011_irq_handler, pl011,
+	    &pl011->irq_code, &pl011->irq_handle);
+	if (rc != EOK) {
+		ddf_msg(LVL_ERROR, "Error registering IRQ code.");
+		goto error;
+	}
 
 	chardev_srvs_init(&pl011->cds);
 	pl011->cds.ops = &pl011_chardev_ops;
@@ -283,8 +287,8 @@ errno_t pl011_add(pl011_t *pl011, pl011_res_t *res)
 
 	return EOK;
 error:
-	if (subscribed)
-		async_irq_unsubscribe(res->irq);
+	if (CAP_HANDLE_VALID(pl011->irq_handle))
+		async_irq_unsubscribe(pl011->irq_handle);
 	if (fun != NULL)
 		ddf_fun_destroy(fun);
 	free(pl011_ranges);
@@ -364,12 +368,13 @@ static errno_t pl011_write(chardev_srv_t *srv, const void *data, size_t size,
 }
 
 /** Character device connection handler. */
-static void pl011_connection(ipc_callid_t iid, ipc_call_t *icall, void *arg)
+static void pl011_connection(
+    cap_call_handle_t icall_handle, ipc_call_t *icall, void *arg)
 {
 	pl011_t *pl011 = (pl011_t *) ddf_dev_data_get(
 	    ddf_fun_get_dev((ddf_fun_t *) arg));
 
-	chardev_conn(iid, icall, &pl011->cds);
+	chardev_conn(icall_handle, icall, &pl011->cds);
 }
 
 /** @}

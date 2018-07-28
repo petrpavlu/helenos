@@ -65,6 +65,7 @@ typedef struct {
 	fibril_mutex_t buf_lock;
 	fibril_condvar_t buf_cv;
 	void *regs;
+	cap_irq_handle_t irq_handle;
 } pl011_t;
 
 extern errno_t pl011_add(pl011_t *, pl011_res_t *);
