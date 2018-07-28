@@ -46,7 +46,7 @@ env:
     - H_ARCH=arm32/gta02
     - H_ARCH=arm32/integratorcp
     - H_ARCH=arm32/raspberrypi
-    - H_ARCH=ia32 H_HARBOURS=true
+    - H_ARCH=ia32 H_HARBOURS=true H_HARBOUR_LIST="fdlibm zlib binutils"
     - H_ARCH=ia64/i460GX
     - H_ARCH=ia64/ski
     - H_ARCH=mips32/malta-be
@@ -56,8 +56,17 @@ env:
     - H_ARCH=sparc64/niagara
     - H_ARCH=sparc64/ultra
 before_install:
- - ./tools/travis.sh install
+  - ./tools/travis.sh install
 script:
- - ./tools/travis.sh run
+  - ./tools/travis.sh run
 os:
- - linux
+  - linux
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#helenos"
+    use_notice: true
+    skip_join: true
+    template:
+      - "%{repository_name} (%{commit_message}): %{message}"
+      - "Build details : %{build_url}"
