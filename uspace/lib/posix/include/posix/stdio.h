@@ -47,6 +47,8 @@
 extern FILE *fdopen(int, const char *);
 extern int fileno(FILE *);
 
+#define P_tmpdir "/tmp"
+
 /* Identifying the Terminal */
 #undef L_ctermid
 #define L_ctermid PATH_MAX
@@ -58,16 +60,6 @@ extern ssize_t getdelim(char **__restrict__ lineptr, size_t *__restrict__ n,
 extern ssize_t getline(char **__restrict__ lineptr, size_t *__restrict__ n,
     FILE *__restrict__ stream);
 
-/* Error Messages */
-extern void perror(const char *s);
-
-/* File Positioning */
-typedef struct {
-	off64_t offset;
-} fpos_t;
-
-extern int fsetpos(FILE *stream, const fpos_t *pos);
-extern int fgetpos(FILE *__restrict__ stream, fpos_t *__restrict__ pos);
 extern int fseeko(FILE *stream, off_t offset, int whence);
 extern off_t ftello(FILE *stream);
 
@@ -75,9 +67,6 @@ extern off_t ftello(FILE *stream);
 extern int dprintf(int fildes, const char *__restrict__ format, ...)
     _HELENOS_PRINTF_ATTRIBUTE(2, 3);
 extern int vdprintf(int fildes, const char *__restrict__ format, va_list ap);
-extern int sprintf(char *__restrict__ s, const char *__restrict__ format, ...)
-    _HELENOS_PRINTF_ATTRIBUTE(2, 3);
-extern int vsprintf(char *__restrict__ s, const char *__restrict__ format, va_list ap);
 
 /* File Locking */
 extern void flockfile(FILE *file);
@@ -89,11 +78,7 @@ extern int putc_unlocked(int c, FILE *stream);
 extern int putchar_unlocked(int c);
 
 /* Temporary Files */
-#undef L_tmpnam
-#define L_tmpnam PATH_MAX
-extern char *tmpnam(char *s);
 extern char *tempnam(const char *dir, const char *pfx);
-extern FILE *tmpfile(void);
 
 #endif /* POSIX_STDIO_H_ */
 

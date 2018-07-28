@@ -65,7 +65,7 @@ static inline bool failed(int rc)
 	return false;
 }
 
-extern aoff64_t posix_pos[MAX_OPEN_FILES];
+extern aoff64_t posix_pos[VFS_MAX_OPEN_FILES];
 
 #endif /* LIBPOSIX_COMMON_H_ */
 

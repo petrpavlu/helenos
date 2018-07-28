@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Jakub Jermar
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,53 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LIBC_ARCH_FIBRIL_CONTEXT_H_
-#define LIBC_ARCH_FIBRIL_CONTEXT_H_
+#include <stdio.h>
+#include <pcut/pcut.h>
+#include "posix/fcntl.h"
+#include "posix/stdlib.h"
+#include "posix/unistd.h"
 
-#include <stdint.h>
+PCUT_INIT;
 
-/*
- * Only registers preserved accross function calls are included. r9 is
- * used to store a TLS address. -ffixed-r9 gcc forces gcc not to use this
- * register. -mtp=soft forces gcc to use #__aeabi_read_tp to obtain
- * TLS address.
- */
+PCUT_TEST_SUITE(unistd);
 
-// XXX: This struct must match the assembly code in src/fibril.S
+#define MKSTEMP_TEMPL "/tmp/tmp.XXXXXX"
+#define MKTEMP_BAD_TEMPL "/tmp/tmp.XXXXX"
+#define MKTEMP_SHORT_TEMPL "XXXXX"
 
-typedef struct context {
-	uintptr_t sp;
-	uintptr_t pc;
-	uint32_t r4;
-	uint32_t r5;
-	uint32_t r6;
-	uint32_t r7;
-	uint32_t r8;
-	/* r9 */
-	uint32_t tls;
-	uint32_t r10;
-	/* r11 */
-	uint32_t fp;
-} context_t;
+/** access function with nonexisting entry */
+PCUT_TEST(access_nonexist)
+{
+	char name[L_tmpnam];
+	char *p;
+	int rc;
 
-#endif
+	p = tmpnam(name);
+	PCUT_ASSERT_NOT_NULL(p);
+
+	rc = access(name, F_OK);
+	PCUT_ASSERT_INT_EQUALS(-1, rc);
+}
+
+/** access function with file */
+PCUT_TEST(access_file)
+{
+	char name[L_tmpnam];
+	char *p;
+	int file;
+	int rc;
+
+	p = tmpnam(name);
+	PCUT_ASSERT_NOT_NULL(p);
+
+	file = open(name, O_CREAT | O_EXCL | O_RDWR, 0600);
+	PCUT_ASSERT_TRUE(file >= 0);
+
+	rc = access(name, F_OK);
+	PCUT_ASSERT_INT_EQUALS(0, rc);
+
+	(void) unlink(name);
+	close(file);
+}
+
+PCUT_EXPORT(unistd);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Jakub Jermar
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,31 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LIBC_ARCH_FIBRIL_CONTEXT_H_
-#define LIBC_ARCH_FIBRIL_CONTEXT_H_
-
-#include <stdint.h>
-
-/*
- * Only registers preserved accross function calls are included. r9 is
- * used to store a TLS address. -ffixed-r9 gcc forces gcc not to use this
- * register. -mtp=soft forces gcc to use #__aeabi_read_tp to obtain
- * TLS address.
+/** @addtogroup libc
+ * @{
+ */
+/** @file
  */
 
-// XXX: This struct must match the assembly code in src/fibril.S
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
 
-typedef struct context {
-	uintptr_t sp;
-	uintptr_t pc;
-	uint32_t r4;
-	uint32_t r5;
-	uint32_t r6;
-	uint32_t r7;
-	uint32_t r8;
-	/* r9 */
-	uint32_t tls;
-	uint32_t r10;
-	/* r11 */
-	uint32_t fp;
-} context_t;
+/** Print formatted to string with arguments passed as va_list.
+ *
+ * This function is unsafe, thus it is marked as deprecated. It should never
+ * be used in native HelenOS code.
+ *
+ * @param str Buffer to write to
+ * @param fmt Format string
+ * @param ap Arguments
+ *
+ * @return Number of characters printed on success, negative value on failure
+ */
+int vsprintf(char *s, const char *fmt, va_list ap)
+{
+	return vsnprintf(s, SIZE_MAX, fmt, ap);
+}
 
-#endif
+/** @}
+ */

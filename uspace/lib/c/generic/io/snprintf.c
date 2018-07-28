@@ -34,7 +34,6 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <io/printf_core.h>
 
 /** Print formatted to the given buffer with limited size.
  *
