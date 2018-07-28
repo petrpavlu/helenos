@@ -28,7 +28,7 @@
 
 #include <abi/asmtool.h>
 
-.section .init, "ax"
+.text
 
 .org 0
 
@@ -44,5 +44,5 @@ SYMBOL(_start)
 	stp x29, x30, [sp, #-16]!
 	mov x29, sp
 
-	# Pass pcb_ptr to __libc_main as the first argument (in x0)
-	bl __libc_main
+	# Pass pcb_ptr to __c_start as the first argument (in x0)
+	bl __c_start

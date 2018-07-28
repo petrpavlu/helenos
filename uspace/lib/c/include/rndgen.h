@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Martin Decky
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @file
+/** @addtogroup libc
+ * @{
+ */
+/** @file Random number generator
  */
 
-#include <stddef.h>
+#ifndef LIBC_RNDGEN_H_
+#define LIBC_RNDGEN_H_
 
-extern void _start(void);
-extern void __c_start(void *);
+#include <errno.h>
+#include <stdint.h>
+#include <stdio.h>
 
-/* Normally, the entry point is defined in assembly for the architecture. */
+typedef struct {
+	unsigned int seed;
+} rndgen_t;
 
-void _start(void)
-{
-	__c_start(NULL);
-}
+extern errno_t rndgen_create(rndgen_t **);
+extern void rndgen_destroy(rndgen_t *);
+extern errno_t rndgen_uint8(rndgen_t *, uint8_t *);
+extern errno_t rndgen_uint32(rndgen_t *, uint32_t *);
+
+#endif
 
 /** @}
  */

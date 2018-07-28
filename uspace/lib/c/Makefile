@@ -38,7 +38,7 @@ LINKER_SCRIPTS = \
 	$(LIBC_PREFIX)/arch/$(UARCH)/_link-dlexe.ld
 
 PRE_DEPEND =
-EXTRA_OUTPUT = $(LINKER_SCRIPTS)
+EXTRA_OUTPUT = $(LINKER_SCRIPTS) $(START_FILES)
 EXTRA_CLEAN = $(LINKER_SCRIPTS)
 EXTRA_TEST_CFLAGS = -Wno-deprecated-declarations
 LIBRARY = libc
@@ -132,6 +132,7 @@ GENERIC_SOURCES = \
 	generic/power_of_ten.c \
 	generic/double_to_str.c \
 	generic/malloc.c \
+	generic/rndgen.c \
 	generic/stdio/scanf.c \
 	generic/stdio/sprintf.c \
 	generic/stdio/sscanf.c \
@@ -204,6 +205,12 @@ TEST_SOURCES = \
 	test/str.c
 
 include $(USPACE_PREFIX)/Makefile.common
+
+$(LIBC_PREFIX)/crt0.o: $(LIBC_PREFIX)/arch/$(UARCH)/src/entry.o
+	cp $< $@
+
+$(LIBC_PREFIX)/crt1.o: $(LIBC_PREFIX)/generic/crt/entry.o
+	cp $< $@
 
 $(LIBC_PREFIX)/arch/$(UARCH)/_link.ld: $(LIBC_PREFIX)/arch/$(UARCH)/_link.ld.in
 	$(CC) $(DEFS) $(CFLAGS) -DLIBC_PATH=$(CURDIR) -E -x c $< | grep -v "^\#" > $@

@@ -95,7 +95,7 @@ struct async_sess {
 	cap_phone_handle_t phone;
 
 	/** First clone connection argument */
-	sysarg_t arg1;
+	iface_t arg1;
 
 	/** Second clone connection argument */
 	sysarg_t arg2;
@@ -141,6 +141,8 @@ extern void async_insert_timeout(awaiter_t *);
 extern errno_t async_create_port_internal(iface_t, async_port_handler_t,
     void *, port_id_t *);
 extern async_port_handler_t async_get_port_handler(iface_t, port_id_t, void **);
+
+extern void async_reply_received(ipc_call_t *);
 
 #endif
 
