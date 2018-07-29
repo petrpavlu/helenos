@@ -211,22 +211,6 @@ static uint16_t dist_symbol[MAX_DIST] = {
 	16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
 };
 
-/** Huffman code for lengths
- *
- */
-static huffman_t len_code = {
-	.count = len_count,
-	.symbol = len_symbol
-};
-
-/** Huffman code for distances
- *
- */
-static huffman_t dist_code = {
-	.count = dist_count,
-	.symbol = dist_symbol
-};
-
 /** Get bits from the bit buffer
  *
  * @param state Inflate state.
@@ -641,6 +625,15 @@ int inflate(void *src, size_t srclen, void *dest, size_t destlen)
 	state.bitlen = 0;
 
 	state.overrun = false;
+
+	/*
+	 * Huffman code for lengths and distances. These two variables are
+	 * intentionally not made static so their initialization does not
+	 * require dynamic relocations in case the code is compiled with
+	 * --fpic.
+	 */
+	huffman_t len_code = { .count = len_count, .symbol = len_symbol };
+	huffman_t dist_code = { .count = dist_count, .symbol = dist_symbol };
 
 	uint16_t last;
 	int ret = 0;

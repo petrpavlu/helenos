@@ -29,7 +29,6 @@
 BOOT_OUTPUT = image.boot
 POST_OUTPUT = $(ROOT_PATH)/image.iso
 POSTBUILD = Makefile.grub
-COMPS_MKARRAY_FLAGS = --pic
 GRUB_LOADER = chainloader
 
 BFD_NAME = elf64-littleaarch64
@@ -40,6 +39,7 @@ BFD_ARCH = aarch64
 
 BITS = 64
 ENDIANESS = LE
+
 # UEFI binaries should be relocatable, the EFI boot service LoadImage() will
 # rebase the boot file using the .reloc information in the image if it cannot
 # load the binary at its preferred address. The ARM64 port does not provide this
@@ -50,6 +50,8 @@ ENDIANESS = LE
 # processor is in the execution mode that has unaligned access enabled. The
 # -mstrict-align option is therefore not needed.
 EXTRA_CFLAGS = -fpic
+COMPS_MKARRAY_FLAGS = --pic
+RAW_OBJECTS_CHECK = arch/$(BARCH)/check-pic.sh $(OBJDUMP)
 
 ifeq ($(MACHINE), virt)
 	RD_DRVS_ESSENTIAL += \

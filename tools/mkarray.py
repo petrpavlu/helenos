@@ -47,8 +47,7 @@ def arg_check():
 
 def deflate(data):
 	"Compress using deflate algorithm (without any headers)"
-	# FIXME Re-enable the best compression.
-	return zlib.compress(data, 0)[2:-4]
+	return zlib.compress(data, 9)[2:-4]
 
 def chunks(string, length):
 	"Produce string chunks"

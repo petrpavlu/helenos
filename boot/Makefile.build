@@ -81,6 +81,9 @@ $(BOOT_OUTPUT): $(RAW)
 	$(OBJCOPY) -O $(BFD_OUTPUT) $< $@
 
 $(RAW): $(OBJECTS) $(LINK)
+ifdef RAW_OBJECTS_CHECK
+	$(RAW_OBJECTS_CHECK) $(OBJECTS)
+endif
 	$(CC) $(CFLAGS) -Wl,-n $(LDFLAGS) -T $(LINK) -Wl,-M,-Map,$(MAP) -o $@ $(OBJECTS)
 
 $(LINK): | depend
