@@ -49,8 +49,9 @@
 
 #include <typedefs.h>
 
-/* Thread context containing registers that must be preserved across
- * function calls.
+/*
+ * Thread context containing registers that must be preserved across function
+ * calls.
  */
 typedef struct context {
 	uint64_t sp;

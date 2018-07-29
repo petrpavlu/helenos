@@ -56,28 +56,36 @@
 /** Current Exception level with SP_ELx, x > 0, SError or vSError. */
 #define EXC_CURRENT_EL_SP_SELX_SERROR   7
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch64, Synchronous. */
+ * the target level is using AArch64, Synchronous.
+ */
 #define EXC_LOWER_EL_AARCH64_SYNCH      8
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch64, IRQ or vIRQ. */
+ * the target level is using AArch64, IRQ or vIRQ.
+ */
 #define EXC_LOWER_EL_AARCH64_IRQ        9
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch64, FIQ or vFIQ. */
+ * the target level is using AArch64, FIQ or vFIQ.
+ */
 #define EXC_LOWER_EL_AARCH64_FIQ       10
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch64, SError or vSError. */
+ * the target level is using AArch64, SError or vSError.
+ */
 #define EXC_LOWER_EL_AARCH64_SERROR    11
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch32, Synchronous. */
+ * the target level is using AArch32, Synchronous.
+ */
 #define EXC_LOWER_EL_AARCH32_SYNCH     12
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch32, IRQ or vIRQ. */
+ * the target level is using AArch32, IRQ or vIRQ.
+ */
 #define EXC_LOWER_EL_AARCH32_IRQ       13
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch32, FIQ or vFIQ. */
+ * the target level is using AArch32, FIQ or vFIQ.
+ */
 #define EXC_LOWER_EL_AARCH32_FIQ       14
 /** Lower Exception level, where the implemented level immediately lower than
- * the target level is using AArch32, SError or vSError. */
+ * the target level is using AArch32, SError or vSError.
+ */
 #define EXC_LOWER_EL_AARCH32_SERROR    15
 
 #ifndef __ASSEMBLER__

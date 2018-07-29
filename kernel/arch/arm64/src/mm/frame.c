@@ -51,15 +51,15 @@ void physmem_print(void)
 	for (i = 0; i < memmap.cnt; i++) {
 		const char *type;
 		switch (memmap.zones[i].type) {
-			case MEMTYPE_AVAILABLE:
-				type = "available";
-				break;
-			case MEMTYPE_ACPI_RECLAIM:
-				type = "ACPI reclaim";
-				break;
-			default:
-				type = "unusable";
-				break;
+		case MEMTYPE_AVAILABLE:
+			type = "available";
+			break;
+		case MEMTYPE_ACPI_RECLAIM:
+			type = "ACPI reclaim";
+			break;
+		default:
+			type = "unusable";
+			break;
 		}
 
 		printf("%p %#018zx %s\n", memmap.zones[i].start,

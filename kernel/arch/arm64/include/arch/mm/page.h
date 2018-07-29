@@ -101,9 +101,11 @@ extern uintptr_t physmem_base;
 #define GET_FRAME_ADDRESS_ARCH(ptl3, i) \
 	(((uintptr_t) ((pte_t *) (ptl3))[(i)].output_address) << 12)
 
-/* Set PTE address accessors for each level. */
-/* Setting of the level 0 table is ignored because it must be done only by
- * calling as_install_arch() which also changes ASID. */
+/*
+ * Set PTE address accessors for each level. Setting of the level 0 table is
+ * ignored because it must be done only by calling as_install_arch() which also
+ * changes ASID.
+ */
 #define SET_PTL0_ADDRESS_ARCH(ptl0)
 #define SET_PTL1_ADDRESS_ARCH(ptl0, i, a) \
 	(((pte_t *) (ptl0))[(i)].output_address = (a) >> 12)
@@ -162,16 +164,14 @@ extern uintptr_t physmem_base;
  */
 #define PTE_AP_USER_NO_KERNEL_FULL  0
 
-/** Data access permission. User mode: read/write, privileged mode:
- * read/write. */
+/** Data access permission. User mode: read/write, privileged mode: read/write.
+ */
 #define PTE_AP_USER_FULL_KERNEL_FULL  1
 
-/** Data access permission. User mode: no access, privileged mode: read only.
- */
+/** Data access permission. User mode: no access, privileged mode: read only. */
 #define PTE_AP_USER_NO_KERNEL_LIMITED  2
 
-/** Data access permission. User mode: read only, privileged mode: read only.
- */
+/** Data access permission. User mode: read only, privileged mode: read only. */
 #define PTE_AP_USER_LIMITED_KERNEL_LIMITED  3
 
 /*
@@ -180,13 +180,15 @@ extern uintptr_t physmem_base;
  */
 
 /** Write-Back Cacheable Normal memory, Inner shareable, Read-write cache
- * allocation. Defined in MAIR_EL1 index 1. */
+ * allocation. Defined in MAIR_EL1 index 1.
+ */
 #define MAIR_EL1_NORMAL_MEMORY_ATTR  0xff
 #define MAIR_EL1_NORMAL_MEMORY_INDEX  1
 
 /** Device-nGnRE memory (Device non-Gathering, non-Reordering, Early Write
- * Acknowledgement). Equivalent to the Device memory type in earlier versions
- * of the architecture. Defined in MAIR_EL1 index 2. */
+ * Acknowledgement). Equivalent to the Device memory type in earlier versions of
+ * the architecture. Defined in MAIR_EL1 index 2.
+ */
 #define MAIR_EL1_DEVICE_MEMORY_ATTR  0x04
 #define MAIR_EL1_DEVICE_MEMORY_INDEX  2
 
@@ -208,7 +210,8 @@ extern uintptr_t physmem_base;
 
 /** HelenOS descriptor type. Table for level 0, 1, 2 page translation tables,
  * page for level 3 tables. Block descriptors are not used by HelenOS during
- * normal processing. */
+ * normal processing.
+ */
 #define PTE_L0123_TYPE_HELENOS  1
 
 /* Page table entry access macros. */
@@ -281,7 +284,7 @@ typedef struct {
 	unsigned unprivileged_execute_never_table : 1;
 	unsigned access_permission_table : 2;
 	unsigned non_secure_table : 1;
-} __attribute__ ((packed)) pte_t;
+} __attribute__((packed)) pte_t;
 
 /** Returns level 0, 1, 2 page table entry flags.
  *
@@ -361,8 +364,7 @@ NO_TRACE static inline void set_pt_level3_flags(pte_t *pt, size_t i,
 		else
 			p->access_permission =
 			    PTE_AP_USER_LIMITED_KERNEL_LIMITED;
-	}
-	else {
+	} else {
 		if (flags & PAGE_WRITE)
 			p->access_permission = PTE_AP_USER_NO_KERNEL_FULL;
 		else

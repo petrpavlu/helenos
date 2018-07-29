@@ -99,7 +99,7 @@ static errno_t gicv2_dev_add(ddf_dev_t *dev)
 	gicv2_res_t gicv2_res;
 	errno_t rc;
 
-        ddf_msg(LVL_DEBUG, "gicv2_dev_add(%p)", dev);
+	ddf_msg(LVL_DEBUG, "gicv2_dev_add(%p)", dev);
 	gicv2 = ddf_dev_data_alloc(dev, sizeof(gicv2_t));
 	if (gicv2 == NULL) {
 		ddf_msg(LVL_ERROR, "Failed allocating soft state.");
@@ -119,32 +119,32 @@ static errno_t gicv2_dev_add(ddf_dev_t *dev)
 
 static errno_t gicv2_dev_remove(ddf_dev_t *dev)
 {
-        gicv2_t *gicv2 = (gicv2_t *)ddf_dev_data_get(dev);
+	gicv2_t *gicv2 = (gicv2_t *)ddf_dev_data_get(dev);
 
-        ddf_msg(LVL_DEBUG, "gicv2_dev_remove(%p)", dev);
+	ddf_msg(LVL_DEBUG, "gicv2_dev_remove(%p)", dev);
 
-        return gicv2_remove(gicv2);
+	return gicv2_remove(gicv2);
 }
 
 static errno_t gicv2_dev_gone(ddf_dev_t *dev)
 {
-        gicv2_t *gicv2 = (gicv2_t *)ddf_dev_data_get(dev);
+	gicv2_t *gicv2 = (gicv2_t *)ddf_dev_data_get(dev);
 
-        ddf_msg(LVL_DEBUG, "gicv2_dev_gone(%p)", dev);
+	ddf_msg(LVL_DEBUG, "gicv2_dev_gone(%p)", dev);
 
-        return gicv2_gone(gicv2);
+	return gicv2_gone(gicv2);
 }
 
 static errno_t gicv2_fun_online(ddf_fun_t *fun)
 {
-        ddf_msg(LVL_DEBUG, "gicv2_fun_online()");
-        return ddf_fun_online(fun);
+	ddf_msg(LVL_DEBUG, "gicv2_fun_online()");
+	return ddf_fun_online(fun);
 }
 
 static errno_t gicv2_fun_offline(ddf_fun_t *fun)
 {
-        ddf_msg(LVL_DEBUG, "gicv2_fun_offline()");
-        return ddf_fun_offline(fun);
+	ddf_msg(LVL_DEBUG, "gicv2_fun_offline()");
+	return ddf_fun_offline(fun);
 }
 
 int main(int argc, char *argv[])

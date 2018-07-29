@@ -53,14 +53,13 @@ NO_TRACE static inline atomic_count_t atomic_add(atomic_t *val,
 	uint32_t stxr_res;
 
 	asm volatile (
-		"1:\n"
-		"	ldxr %[ret], [%[count_ptr]]\n"
-		"	add %[ret], %[ret], %[i]\n"
-		"	stxr %w[stxr_res], %[ret], [%[count_ptr]]\n"
-		"	cbnz %w[stxr_res], 1b\n"
-		: [ret] "=&r" (ret), [stxr_res] "=&r" (stxr_res),
-		  "+m" (val->count)
-		: [count_ptr] "r" (&val->count), [i] "r" (i)
+	    "1:\n"
+	    "	ldxr %[ret], [%[count_ptr]]\n"
+	    "	add %[ret], %[ret], %[i]\n"
+	    "	stxr %w[stxr_res], %[ret], [%[count_ptr]]\n"
+	    "	cbnz %w[stxr_res], 1b\n"
+	    : [ret] "=&r" (ret), [stxr_res] "=&r" (stxr_res), "+m" (val->count)
+	    : [count_ptr] "r" (&val->count), [i] "r" (i)
 	);
 
 	return ret;
@@ -136,13 +135,12 @@ NO_TRACE static inline atomic_count_t test_and_set(atomic_t *val)
 	uint32_t stxr_res;
 
 	asm volatile (
-		"1:\n"
-		"	ldxr %[ret], [%[count_ptr]]\n"
-		"	stxr %w[stxr_res], %[one], [%[count_ptr]]\n"
-		"	cbnz %w[stxr_res], 1b\n"
-		: [ret] "=&r" (ret), [stxr_res] "=&r" (stxr_res),
-		  "+m" (val->count)
-		: [count_ptr] "r" (&val->count), [one] "r" (one)
+	    "1:\n"
+	    "	ldxr %[ret], [%[count_ptr]]\n"
+	    "	stxr %w[stxr_res], %[one], [%[count_ptr]]\n"
+	    "	cbnz %w[stxr_res], 1b\n"
+	    : [ret] "=&r" (ret), [stxr_res] "=&r" (stxr_res), "+m" (val->count)
+	    : [count_ptr] "r" (&val->count), [one] "r" (one)
 	);
 
 	return ret;

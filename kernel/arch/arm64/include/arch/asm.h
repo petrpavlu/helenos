@@ -44,7 +44,7 @@ extern char exc_vector;
 /** CPU specific way to sleep cpu. */
 NO_TRACE static inline void cpu_sleep(void)
 {
-	asm volatile ( "wfe" );
+	asm volatile ("wfe");
 }
 
 /** Return base address of current stack.
@@ -58,10 +58,10 @@ NO_TRACE static inline uintptr_t get_stack_base(void)
 	uintptr_t v;
 
 	asm volatile (
-		"mov %[v], sp\n"
-		"and %[v], %[v], %[size]\n"
-		: [v] "=&r" (v)
-		: [size] "r" (~((uint64_t) STACK_SIZE - 1))
+	    "mov %[v], sp\n"
+	    "and %[v], %[v], %[size]\n"
+	    : [v] "=&r" (v)
+	    : [size] "r" (~((uint64_t) STACK_SIZE - 1))
 	);
 
 	return v;

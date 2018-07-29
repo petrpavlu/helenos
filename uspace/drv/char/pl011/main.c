@@ -102,7 +102,7 @@ static errno_t pl011_dev_add(ddf_dev_t *dev)
 	pl011_res_t res;
 	errno_t rc;
 
-        ddf_msg(LVL_DEBUG, "pl011_dev_add(%p)", dev);
+	ddf_msg(LVL_DEBUG, "pl011_dev_add(%p)", dev);
 
 	pl011 = ddf_dev_data_alloc(dev, sizeof(pl011_t));
 	if (pl011 == NULL) {
@@ -123,32 +123,32 @@ static errno_t pl011_dev_add(ddf_dev_t *dev)
 
 static errno_t pl011_dev_remove(ddf_dev_t *dev)
 {
-        pl011_t *pl011 = (pl011_t *)ddf_dev_data_get(dev);
+	pl011_t *pl011 = (pl011_t *)ddf_dev_data_get(dev);
 
-        ddf_msg(LVL_DEBUG, "pl011_dev_remove(%p)", dev);
+	ddf_msg(LVL_DEBUG, "pl011_dev_remove(%p)", dev);
 
-        return pl011_remove(pl011);
+	return pl011_remove(pl011);
 }
 
 static errno_t pl011_dev_gone(ddf_dev_t *dev)
 {
-        pl011_t *pl011 = (pl011_t *)ddf_dev_data_get(dev);
+	pl011_t *pl011 = (pl011_t *)ddf_dev_data_get(dev);
 
-        ddf_msg(LVL_DEBUG, "pl011_dev_gone(%p)", dev);
+	ddf_msg(LVL_DEBUG, "pl011_dev_gone(%p)", dev);
 
-        return pl011_gone(pl011);
+	return pl011_gone(pl011);
 }
 
 static errno_t pl011_fun_online(ddf_fun_t *fun)
 {
-        ddf_msg(LVL_DEBUG, "pl011_fun_online()");
-        return ddf_fun_online(fun);
+	ddf_msg(LVL_DEBUG, "pl011_fun_online()");
+	return ddf_fun_online(fun);
 }
 
 static errno_t pl011_fun_offline(ddf_fun_t *fun)
 {
-        ddf_msg(LVL_DEBUG, "pl011_fun_offline()");
-        return ddf_fun_offline(fun);
+	ddf_msg(LVL_DEBUG, "pl011_fun_offline()");
+	return ddf_fun_offline(fun);
 }
 
 int main(int argc, char *argv[])

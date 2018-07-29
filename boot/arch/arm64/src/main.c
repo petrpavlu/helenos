@@ -62,19 +62,23 @@ static void ensure_visibility(void *addr, size_t size)
 	for (uintptr_t a = (uintptr_t) addr; a < (uintptr_t) addr + size;
 	    a += 4)
 		asm volatile (
-			/* Clean to Point of Unification to make the new
-			 * instruction visible to the instruction cache. */
-			"dc cvau, %[a]\n"
-			/* Ensure completion on all PEs. */
-			"dsb ish\n"
-			/* Ensure instruction cache/branch predictor discards
-			 * stale data. */
-			"ic ivau, %[a]\n"
-			/* Ensure completion on all PEs. */
-			"dsb ish\n"
-			/* Synchronize context on this PE. */
-			"isb\n"
-			: : [a] "r" (a) : "memory"
+		    /*
+		     * Clean to Point of Unification to make the new instruction
+		     * visible to the instruction cache.
+		     */
+		    "dc cvau, %[a]\n"
+		    /* Ensure completion on all PEs. */
+		    "dsb ish\n"
+		    /*
+		     * Ensure instruction cache/branch predictor discards stale
+		     * data.
+		     */
+		    "ic ivau, %[a]\n"
+		    /* Ensure completion on all PEs. */
+		    "dsb ish\n"
+		    /* Synchronize context on this PE. */
+		    "isb\n"
+		    : : [a] "r" (a) : "memory"
 		);
 }
 
@@ -84,8 +88,7 @@ static void ensure_visibility(void *addr, size_t size)
  */
 static memtype_t get_memtype(uint32_t type)
 {
-	switch (type)
-	{
+	switch (type) {
 	case EFI_RESERVED:
 	case EFI_RUNTIME_SERVICES_CODE:
 	case EFI_RUNTIME_SERVICES_DATA:
@@ -115,7 +118,7 @@ static memtype_t get_memtype(uint32_t type)
  */
 static void scons_sendb(uint8_t byte)
 {
-	int16_t out[2] = {byte, '\0'};
+	int16_t out[2] = { byte, '\0' };
 	efi_system_table->cons_out->output_string(efi_system_table->cons_out,
 	    out);
 }

@@ -62,8 +62,8 @@ static inline void __tcb_set(tcb_t *tcb)
 	uint8_t *tls = (uint8_t *) tcb;
 	tls += sizeof(tcb_t) + ARM64_TP_OFFSET;
 	asm volatile (
-		"msr tpidr_el0, %[tls]"
-		: : [tls] "r" (tls)
+	    "msr tpidr_el0, %[tls]"
+	    : : [tls] "r" (tls)
 	);
 }
 
@@ -76,8 +76,8 @@ static inline tcb_t *__tcb_get(void)
 {
 	uint8_t *ret;
 	asm volatile (
-		"mrs %[tls], tpidr_el0"
-		: [tls] "=r" (ret)
+	    "mrs %[tls], tpidr_el0"
+	    : [tls] "=r" (ret)
 	);
 	return (tcb_t *) (ret - ARM64_TP_OFFSET - sizeof(tcb_t));
 }

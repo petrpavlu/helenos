@@ -43,13 +43,13 @@
 void tlb_invalidate_all(void)
 {
 	asm volatile (
-		/* TLB Invalidate All, EL1, Inner Shareable. */
-		"tlbi alle1is\n"
-		/* Ensure completion on all PEs. */
-		"dsb ish\n"
-		/* Synchronize context on this PE. */
-		"isb\n"
-		: : : "memory"
+	    /* TLB Invalidate All, EL1, Inner Shareable. */
+	    "tlbi alle1is\n"
+	    /* Ensure completion on all PEs. */
+	    "dsb ish\n"
+	    /* Synchronize context on this PE. */
+	    "isb\n"
+	    : : : "memory"
 	);
 }
 
@@ -62,13 +62,13 @@ void tlb_invalidate_asid(asid_t asid)
 	uintptr_t val = (uintptr_t)asid << TLBI_ASID_SHIFT;
 
 	asm volatile (
-		/* TLB Invalidate by ASID, EL1, Inner Shareable. */
-		"tlbi aside1is, %[val]\n"
-		/* Ensure completion on all PEs. */
-		"dsb ish\n"
-		/* Synchronize context on this PE. */
-		"isb\n"
-		: : [val] "r" (val) : "memory"
+	    /* TLB Invalidate by ASID, EL1, Inner Shareable. */
+	    "tlbi aside1is, %[val]\n"
+	    /* Ensure completion on all PEs. */
+	    "dsb ish\n"
+	    /* Synchronize context on this PE. */
+	    "isb\n"
+	    : : [val] "r" (val) : "memory"
 	);
 }
 
@@ -88,14 +88,13 @@ void tlb_invalidate_pages(asid_t asid, uintptr_t page, size_t cnt)
 		val |= (uintptr_t) asid << TLBI_ASID_SHIFT;
 
 		asm volatile (
-			/* TLB Invalidate by Virtual Address, EL1, Inner
-			 * Shareable. */
-			"tlbi vae1is, %[val]\n"
-			/* Ensure completion on all PEs. */
-			"dsb ish\n"
-			/* Synchronize context on this PE. */
-			"isb\n"
-			: : [val] "r" (val) : "memory"
+		    /* TLB Invalidate by Virt. Address, EL1, Inner Shareable. */
+		    "tlbi vae1is, %[val]\n"
+		    /* Ensure completion on all PEs. */
+		    "dsb ish\n"
+		    /* Synchronize context on this PE. */
+		    "isb\n"
+		    : : [val] "r" (val) : "memory"
 		);
 	}
 }

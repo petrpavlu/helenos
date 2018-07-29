@@ -45,8 +45,10 @@
 #define CS_ENTER_BARRIER()  asm volatile ("" ::: "memory")
 #define CS_LEAVE_BARRIER()  asm volatile ("" ::: "memory")
 
-/* TODO It is unneccessary to use full-system barriers in most cases where
- * these macros are used. Provide a better granularity. */
+/*
+ * TODO It is unneccessary to use full-system barriers in most cases where these
+ * macros are used. Provide a better granularity.
+ */
 /** Full system data synchronization barrier. */
 #define memory_barrier()  asm volatile ("dsb sy" ::: "memory")
 /** Full system data synchronization barrier for reads. */
