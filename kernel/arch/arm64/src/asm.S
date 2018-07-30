@@ -60,15 +60,7 @@ FUNCTION_BEGIN(early_putwchar)
 	ret
 FUNCTION_END(early_putwchar)
 
-/* Exception vector. */
-.macro handler i
-handler_\i:
-	/*
-	 * Initial code for each handler, at maximum 128 bytes (32
-	 * instructions).
-	 */
-
-	/* Static checks for the following code. */
+/* Static checks for the istate_t save/load. */
 #if ISTATE_OFFSET_X0 + 8 != ISTATE_OFFSET_X1
 #error x0 and x1 are not successive in istate_t
 #endif
@@ -120,6 +112,14 @@ handler_\i:
 #if ISTATE_OFFSET_PC + 8 != ISTATE_OFFSET_TPIDR
 #error pc and tpidr are not successive in istate_t
 #endif
+
+/* Exception vector. */
+.macro handler i
+handler_\i:
+	/*
+	 * Initial code for each handler, at maximum 128 bytes (32
+	 * instructions).
+	 */
 
 	/* Save current state. */
 	sub sp, sp, #ISTATE_SIZE                /* 0x00 */

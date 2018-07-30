@@ -27,19 +27,40 @@
  */
 
 #include <abi/asmtool.h>
+#include <arch/context_struct.h>
 
 .text
+
+/* Static checks for the context_t save/load. */
+#if CONTEXT_OFFSET_SP + 8 != CONTEXT_OFFSET_PC
+#error sp and pc are not successive in context_t
+#endif
+#if CONTEXT_OFFSET_X19 + 8 != CONTEXT_OFFSET_X20
+#error x19 and x20 are not successive in context_t
+#endif
+#if CONTEXT_OFFSET_X21 + 8 != CONTEXT_OFFSET_X22
+#error x21 and x22 are not successive in istate_t
+#endif
+#if CONTEXT_OFFSET_X23 + 8 != CONTEXT_OFFSET_X24
+#error x23 and x24 are not successive in istate_t
+#endif
+#if CONTEXT_OFFSET_X25 + 8 != CONTEXT_OFFSET_X26
+#error x25 and x26 are not successive in istate_t
+#endif
+#if CONTEXT_OFFSET_X27 + 8 != CONTEXT_OFFSET_X28
+#error x27 and x28 are not successive in istate_t
+#endif
 
 FUNCTION_BEGIN(context_save_arch)
 	/* Save callee-saved registers into context_t pointed by x0. */
 	mov x1, sp
-	stp x1, x30, [x0], #16
-	stp x19, x20, [x0], #16
-	stp x21, x22, [x0], #16
-	stp x23, x24, [x0], #16
-	stp x25, x26, [x0], #16
-	stp x27, x28, [x0], #16
-	str x29, [x0]
+	stp x1, x30, [x0, #CONTEXT_OFFSET_SP]
+	stp x19, x20, [x0, #CONTEXT_OFFSET_X19]
+	stp x21, x22, [x0, #CONTEXT_OFFSET_X21]
+	stp x23, x24, [x0, #CONTEXT_OFFSET_X23]
+	stp x25, x26, [x0, #CONTEXT_OFFSET_X25]
+	stp x27, x28, [x0, #CONTEXT_OFFSET_X27]
+	str x29, [x0, #CONTEXT_OFFSET_X29]
 
 	/* Return 1. */
 	mov x0, #1
@@ -48,14 +69,14 @@ FUNCTION_END(context_save_arch)
 
 FUNCTION_BEGIN(context_restore_arch)
 	/* Restore callee-saved registers from context_t pointed by x0. */
-	ldp x1, x30, [x0], #16
+	ldp x1, x30, [x0, #CONTEXT_OFFSET_SP]
 	mov sp, x1
-	ldp x19, x20, [x0], #16
-	ldp x21, x22, [x0], #16
-	ldp x23, x24, [x0], #16
-	ldp x25, x26, [x0], #16
-	ldp x27, x28, [x0], #16
-	ldr x29, [x0]
+	ldp x19, x20, [x0, #CONTEXT_OFFSET_X19]
+	ldp x21, x22, [x0, #CONTEXT_OFFSET_X21]
+	ldp x23, x24, [x0, #CONTEXT_OFFSET_X23]
+	ldp x25, x26, [x0, #CONTEXT_OFFSET_X25]
+	ldp x27, x28, [x0, #CONTEXT_OFFSET_X27]
+	ldr x29, [x0, #CONTEXT_OFFSET_X29]
 
 	/* Return 0. */
 	mov x0, #0
