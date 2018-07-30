@@ -96,19 +96,19 @@ def platform_to_qemu_options(platform, machine, processor):
 	elif platform == 'arm64':
 		# Check that ROM image is present. Provide the user with
 		# appropriate steps to fix this problem.
-		if not os.path.exists('QEMU_EFI.fd'):
-			sys.stderr.write('Could not find \'QEMU_EFI.fd\' ' +
-			    'which is expected to contain EDK2 firmware ' +
-			    'image.\n')
-			sys.stderr.write('Pre-build image can be obtained by ' +
+		if not os.path.exists('QEMU_EFI_ARM64.fd'):
+			sys.stderr.write('Could not find ' +
+			    '\'QEMU_EFI_ARM64.fd\' which is expected to ' +
+			    'contain EDK2 firmware image.\n')
+			sys.stderr.write('Pre-built image can be obtained by ' +
 			    'running the following command:\n')
 			sys.stderr.write('$ wget http://snapshots.linaro.org/' +
 			    'components/kernel/leg-virt-tianocore-edk2-' +
 			    'upstream/latest/QEMU-AARCH64/RELEASE_GCC49/' +
-			    'QEMU_EFI.fd\n')
+			    'QEMU_EFI.fd -O QEMU_EFI_ARM64.fd\n')
 			raise Exception
 		return 'system-aarch64', \
-		    '-M virt -cpu cortex-a57 -m 1024 -bios QEMU_EFI.fd'
+		    '-M virt -cpu cortex-a57 -m 1024 -bios QEMU_EFI_ARM64.fd'
 	elif platform == 'ia32':
 		return 'system-i386', pc_options(32)
 	elif platform == 'mips32':

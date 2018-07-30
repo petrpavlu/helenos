@@ -13,7 +13,7 @@
 .*.swp
 /Makefile.common
 /Makefile.config
-/QEMU_EFI.fd
+/QEMU_EFI_ARM64.fd
 /common.h
 /config.h
 /cscope.out
