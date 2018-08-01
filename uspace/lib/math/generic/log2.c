@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Jakub Jermar
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,43 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup libmath
  * @{
  */
 /** @file
  */
 
-#ifndef LIBC_THREAD_H_
-#define LIBC_THREAD_H_
+#include <log2.h>
+#include <math.h>
 
-#include <errno.h>
-#include <libarch/thread.h>
-#include <stdint.h>
-#include <abi/proc/thread.h>
-#include <time.h>
+/** Base-2 logarithm (32-bit floating point)
+ *
+ * Compute base-2 logarithm value.
+ *
+ * @param arg Logarithm argument.
+ *
+ * @return Logarithm value.
+ *
+ */
+float32_t float32_log2(float32_t arg)
+{
+	return log_f32(arg) / M_LN2;
+}
 
-extern errno_t thread_create(void (*)(void *), void *, const char *, thread_id_t *);
-extern void thread_exit(int) __attribute__((noreturn));
-extern void thread_detach(thread_id_t);
-extern errno_t thread_join(thread_id_t);
-extern thread_id_t thread_get_id(void);
-extern int thread_usleep(useconds_t);
-extern unsigned int thread_sleep(unsigned int);
+/** Base-2 logarithm (64-bit floating point)
+ *
+ * Compute base-2 logarithm value.
+ *
+ * @param arg Logarithm argument.
+ *
+ * @return Logarithm value.
+ *
+ */
+float64_t float64_log2(float64_t arg)
+{
+	return log_f64(arg) / M_LN2;
+}
 
-#endif
 
 /** @}
  */
