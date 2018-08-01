@@ -36,13 +36,10 @@
 #ifndef LIBC_arm64_TLS_H_
 #define LIBC_arm64_TLS_H_
 
-#include <stdint.h>
-
 #define CONFIG_TLS_VARIANT_1
 
-/** Offsets for accessing thread-local variables are shifted 16 bytes higher.
- */
-#define ARM64_TP_OFFSET  (-16)
+/** Offsets for accessing thread-local variables are shifted 16 bytes higher. */
+#define ARCH_TP_OFFSET  (sizeof(tcb_t) - 16)
 
 /** TCB (Thread Control Block) struct.
  *
@@ -53,33 +50,16 @@ typedef struct {
 	void *fibril_data;
 } tcb_t;
 
-/** Sets TLS address to the TPIDR_EL0 register.
- *
- * @param tcb TCB (TLS starts behind).
- */
-static inline void __tcb_set(tcb_t *tcb)
+static inline void __tcb_raw_set(void *tls)
 {
-	uint8_t *tls = (uint8_t *) tcb;
-	tls += sizeof(tcb_t) + ARM64_TP_OFFSET;
-	asm volatile (
-	    "msr tpidr_el0, %[tls]"
-	    : : [tls] "r" (tls)
-	);
+	asm volatile ("msr tpidr_el0, %[tls]" : : [tls] "r" (tls));
 }
 
-/** Returns TCB address.
- *
- * @return TCB address (starts before TLS which address is stored in the
- * TPIDR_EL0 register).
- */
-static inline tcb_t *__tcb_get(void)
+static inline void *__tcb_raw_get(void)
 {
-	uint8_t *ret;
-	asm volatile (
-	    "mrs %[tls], tpidr_el0"
-	    : [tls] "=r" (ret)
-	);
-	return (tcb_t *) (ret - ARM64_TP_OFFSET - sizeof(tcb_t));
+	void *retval;
+	asm volatile ("mrs %[tls], tpidr_el0" : [tls] "=r" (retval));
+	return retval;
 }
 
 #endif

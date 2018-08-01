@@ -39,7 +39,6 @@
 #include <types/common.h>
 #include <align.h>
 #include <libarch/fibril_context.h>
-#include <libarch/tls.h>
 
 /** Size of a stack item. */
 #define STACK_ITEM_SIZE	 8
@@ -61,8 +60,7 @@
 	do { \
 		(c)->pc = (uint64_t) (_pc); \
 		(c)->sp = ((uint64_t) (stack)) + (size) - SP_DELTA; \
-		(c)->tls = ((uint64_t) (ptls)) + sizeof(tcb_t) + \
-		    ARM64_TP_OFFSET; \
+		(c)->tls = ((uint64_t) (ptls)) + ARCH_TP_OFFSET; \
 		/* Set frame pointer too. */ \
 		(c)->x29 = 0; \
 	} while (0)
