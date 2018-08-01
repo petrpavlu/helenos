@@ -72,7 +72,6 @@
 #include <stddef.h>
 #include <compiler/barrier.h>
 #include <libarch/barrier.h>
-#include <futex.h>
 #include <macros.h>
 #include <async.h>
 #include <adt/list.h>
@@ -80,7 +79,7 @@
 #include <assert.h>
 #include <time.h>
 
-#include "private/fibril.h"
+#include "../private/fibril.h"
 
 
 /** RCU sleeps for RCU_SLEEP_MS before polling an active RCU reader again. */

@@ -110,7 +110,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <sys/time.h>
-#include <libarch/barrier.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <mem.h>
@@ -123,15 +122,6 @@
 #include "../private/fibril.h"
 
 #define DPRINTF(...)  ((void) 0)
-
-/** Async framework global futex */
-futex_t async_futex = FUTEX_INITIALIZER;
-
-/** Call data */
-typedef struct {
-	link_t link;
-	ipc_call_t call;
-} msg_t;
 
 /* Client connection data */
 typedef struct {
@@ -159,17 +149,11 @@ typedef struct {
 	/** Link to the client tracking structure. */
 	client_t *client;
 
-	/** Message event. */
-	fibril_event_t msg_arrived;
-
-	/** Messages that should be delivered to this fibril. */
-	list_t msg_queue;
+	/** Channel for messages that should be delivered to this fibril. */
+	mpsc_t *msg_channel;
 
 	/** Call data of the opening call. */
 	ipc_call_t call;
-
-	/** Identification of the closing call. */
-	cap_call_handle_t close_chandle;
 
 	/** Fibril function that will be used to handle the connection. */
 	async_port_handler_t handler;
@@ -249,7 +233,7 @@ static long notification_freelist_used = 0;
 
 static sysarg_t notification_avail = 0;
 
-/* The remaining structures are guarded by async_futex. */
+static FIBRIL_RMUTEX_INITIALIZE(conn_mutex);
 static hash_table_t conn_hash_table;
 
 static size_t client_key_hash(void *key)
@@ -426,36 +410,35 @@ static errno_t connection_fibril(void *arg)
 	 */
 	async_client_put(client);
 
+	fibril_rmutex_lock(&conn_mutex);
+
 	/*
 	 * Remove myself from the connection hash table.
 	 */
-	futex_lock(&async_futex);
 	hash_table_remove(&conn_hash_table, &(conn_key_t){
 		.task_id = fibril_connection->in_task_id,
 		.phone_hash = fibril_connection->in_phone_hash
 	});
-	futex_unlock(&async_futex);
+
+	/*
+	 * Close the channel, if it isn't closed already.
+	 */
+	mpsc_t *c = fibril_connection->msg_channel;
+	mpsc_close(c);
+
+	fibril_rmutex_unlock(&conn_mutex);
 
 	/*
 	 * Answer all remaining messages with EHANGUP.
 	 */
-	while (!list_empty(&fibril_connection->msg_queue)) {
-		msg_t *msg =
-		    list_get_instance(list_first(&fibril_connection->msg_queue),
-		    msg_t, link);
-
-		list_remove(&msg->link);
-		ipc_answer_0(msg->call.cap_handle, EHANGUP);
-		free(msg);
-	}
+	ipc_call_t call;
+	while (mpsc_receive(c, &call, NULL) == EOK)
+		ipc_answer_0(call.cap_handle, EHANGUP);
 
 	/*
-	 * If the connection was hung-up, answer the last call,
-	 * i.e. IPC_M_PHONE_HUNGUP.
+	 * Clean up memory.
 	 */
-	if (fibril_connection->close_chandle)
-		ipc_answer_0(fibril_connection->close_chandle, EOK);
-
+	mpsc_destroy(c);
 	free(fibril_connection);
 	return EOK;
 }
@@ -491,9 +474,7 @@ static fid_t async_new_connection(task_id_t in_task_id, sysarg_t in_phone_hash,
 
 	conn->in_task_id = in_task_id;
 	conn->in_phone_hash = in_phone_hash;
-	conn->msg_arrived = FIBRIL_EVENT_INIT;
-	list_initialize(&conn->msg_queue);
-	conn->close_chandle = CAP_NIL;
+	conn->msg_channel = mpsc_create(sizeof(ipc_call_t));
 	conn->handler = handler;
 	conn->data = data;
 
@@ -506,6 +487,7 @@ static fid_t async_new_connection(task_id_t in_task_id, sysarg_t in_phone_hash,
 	conn->fid = fibril_create(connection_fibril, conn);
 
 	if (conn->fid == 0) {
+		mpsc_destroy(conn->msg_channel);
 		free(conn);
 
 		if (call)
@@ -516,11 +498,11 @@ static fid_t async_new_connection(task_id_t in_task_id, sysarg_t in_phone_hash,
 
 	/* Add connection to the connection hash table */
 
-	futex_lock(&async_futex);
+	fibril_rmutex_lock(&conn_mutex);
 	hash_table_insert(&conn_hash_table, &conn->link);
-	futex_unlock(&async_futex);
+	fibril_rmutex_unlock(&conn_mutex);
 
-	fibril_add_ready(conn->fid);
+	fibril_start(conn->fid);
 
 	return conn->fid;
 }
@@ -609,45 +591,41 @@ static hash_table_ops_t notification_hash_table_ops = {
  *
  * @param call Data of the incoming call.
  *
- * @return False if the call doesn't match any connection.
- * @return True if the call was passed to the respective connection fibril.
+ * @return EOK if the call was successfully passed to the respective fibril.
+ * @return ENOENT if the call doesn't match any connection.
+ * @return Other error code if routing failed for other reasons.
  *
  */
-static bool route_call(ipc_call_t *call)
+static errno_t route_call(ipc_call_t *call)
 {
 	assert(call);
 
-	futex_lock(&async_futex);
+	fibril_rmutex_lock(&conn_mutex);
 
 	ht_link_t *link = hash_table_find(&conn_hash_table, &(conn_key_t){
 		.task_id = call->in_task_id,
 		.phone_hash = call->in_phone_hash
 	});
 	if (!link) {
-		futex_unlock(&async_futex);
-		return false;
+		fibril_rmutex_unlock(&conn_mutex);
+		return ENOENT;
 	}
 
 	connection_t *conn = hash_table_get_inst(link, connection_t, link);
 
-	// FIXME: malloc in critical section
-	msg_t *msg = malloc(sizeof(*msg));
-	if (!msg) {
-		futex_unlock(&async_futex);
-		return false;
+	errno_t rc = mpsc_send(conn->msg_channel, call);
+
+	if (IPC_GET_IMETHOD(*call) == IPC_M_PHONE_HUNGUP) {
+		/* Close the channel, but let the connection fibril answer. */
+		mpsc_close(conn->msg_channel);
+		// FIXME: Ideally, we should be able to discard/answer the
+		//        hungup message here and just close the channel without
+		//        passing it out. Unfortunatelly, somehow that breaks
+		//        handling of CPU exceptions.
 	}
 
-	msg->call = *call;
-	list_append(&msg->link, &conn->msg_queue);
-
-	if (IPC_GET_IMETHOD(*call) == IPC_M_PHONE_HUNGUP)
-		conn->close_chandle = call->cap_handle;
-
-	/* If the connection fibril is waiting for an event, activate it */
-	fibril_notify(&conn->msg_arrived);
-
-	futex_unlock(&async_futex);
-	return true;
+	fibril_rmutex_unlock(&conn_mutex);
+	return rc;
 }
 
 /** Function implementing the notification handler fibril. Never returns. */
@@ -942,15 +920,6 @@ bool async_get_call_timeout(ipc_call_t *call, suseconds_t usecs)
 	assert(call);
 	assert(fibril_connection);
 
-	/*
-	 * Why doing this?
-	 * GCC 4.1.0 coughs on fibril_connection-> dereference.
-	 * GCC 4.1.1 happilly puts the rdhwr instruction in delay slot.
-	 *           I would never expect to find so many errors in
-	 *           a compiler.
-	 */
-	connection_t *conn = fibril_connection;
-
 	struct timeval tv;
 	struct timeval *expires = NULL;
 	if (usecs) {
@@ -959,42 +928,21 @@ bool async_get_call_timeout(ipc_call_t *call, suseconds_t usecs)
 		expires = &tv;
 	}
 
-	futex_lock(&async_futex);
+	errno_t rc = mpsc_receive(fibril_connection->msg_channel,
+	    call, expires);
 
-	/* If nothing in queue, wait until something arrives */
-	while (list_empty(&conn->msg_queue)) {
-		if (conn->close_chandle) {
-			/*
-			 * Handle the case when the connection was already
-			 * closed by the client but the server did not notice
-			 * the first IPC_M_PHONE_HUNGUP call and continues to
-			 * call async_get_call_timeout(). Repeat
-			 * IPC_M_PHONE_HUNGUP until the caller notices.
-			 */
-			memset(call, 0, sizeof(ipc_call_t));
-			IPC_SET_IMETHOD(*call, IPC_M_PHONE_HUNGUP);
-			futex_unlock(&async_futex);
-			return true;
-		}
+	if (rc == ETIMEOUT)
+		return false;
 
-		// TODO: replace with cvar
-		futex_unlock(&async_futex);
+	if (rc != EOK) {
+		/*
+		 * The async_get_call_timeout() interface doesn't support
+		 * propagating errors. Return a null call instead.
+		 */
 
-		errno_t rc = fibril_wait_timeout(&conn->msg_arrived, expires);
-		if (rc == ETIMEOUT)
-			return false;
-
-		futex_lock(&async_futex);
+		memset(call, 0, sizeof(ipc_call_t));
 	}
 
-	msg_t *msg = list_get_instance(list_first(&conn->msg_queue),
-	    msg_t, link);
-	list_remove(&msg->link);
-
-	*call = msg->call;
-	free(msg);
-
-	futex_unlock(&async_futex);
 	return true;
 }
 
@@ -1074,11 +1022,15 @@ static void handle_call(ipc_call_t *call)
 	}
 
 	/* Try to route the call through the connection hash table */
-	if (route_call(call))
+	errno_t rc = route_call(call);
+	if (rc == EOK)
 		return;
 
-	/* Unknown call from unknown phone - hang it up */
-	ipc_answer_0(call->cap_handle, EHANGUP);
+	// TODO: Log the error.
+
+	if (call->cap_handle != CAP_NIL)
+		/* Unknown call from unknown phone - hang it up */
+		ipc_answer_0(call->cap_handle, EHANGUP);
 }
 
 /** Endless loop dispatching incoming calls and answers.

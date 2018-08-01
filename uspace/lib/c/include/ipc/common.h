@@ -36,10 +36,9 @@
 #define LIBC_IPC_COMMON_H_
 
 #include <abi/ipc/ipc.h>
-#include <atomic.h>
 #include <abi/proc/task.h>
-#include <futex.h>
 #include <abi/cap.h>
+#include <types/common.h>
 
 #define IPC_FLAG_BLOCKING  0x01
 
@@ -51,8 +50,6 @@ typedef struct {
 	void *label;
 	cap_call_handle_t cap_handle;
 } ipc_call_t;
-
-extern futex_t async_futex;
 
 #endif
 

@@ -41,16 +41,17 @@
 #include <stdlib.h>
 #include <as.h>
 #include <context.h>
-#include <futex.h>
 #include <assert.h>
 
 #include <mem.h>
 #include <str.h>
 #include <ipc/ipc.h>
 #include <libarch/faddr.h>
-#include "private/thread.h"
-#include "private/fibril.h"
-#include "private/libc.h"
+
+#include "../private/thread.h"
+#include "../private/futex.h"
+#include "../private/fibril.h"
+#include "../private/libc.h"
 
 #define DPRINTF(...) ((void)0)
 #undef READY_DEBUG
@@ -475,6 +476,8 @@ static void _fibril_cleanup_dead(void)
 /** Switch to a fibril. */
 static void _fibril_switch_to(_switch_type_t type, fibril_t *dstf, bool locked)
 {
+	assert(fibril_self()->rmutex_locks == 0);
+
 	if (!locked)
 		futex_lock(&fibril_futex);
 	else
@@ -632,6 +635,8 @@ static void _insert_timeout(_timeout_t *timeout)
  */
 errno_t fibril_wait_timeout(fibril_event_t *event, const struct timeval *expires)
 {
+	assert(fibril_self()->rmutex_locks == 0);
+
 	DPRINTF("### Fibril %p sleeping on event %p.\n", fibril_self(), event);
 
 	if (!fibril_self()->thread_ctx) {
@@ -712,9 +717,17 @@ errno_t fibril_wait_timeout(fibril_event_t *event, const struct timeval *expires
 
 void fibril_wait_for(fibril_event_t *event)
 {
+	assert(fibril_self()->rmutex_locks == 0);
+
 	(void) fibril_wait_timeout(event, NULL);
 }
 
+/**
+ * Wake up the fibril waiting for the given event.
+ * Up to one wakeup is remembered if the fibril is not currently waiting.
+ *
+ * This function is safe for use under restricted mutex lock.
+ */
 void fibril_notify(fibril_event_t *event)
 {
 	futex_lock(&fibril_futex);
@@ -768,6 +781,9 @@ fid_t fibril_get_id(void)
  */
 void fibril_yield(void)
 {
+	if (fibril_self()->rmutex_locks > 0)
+		return;
+
 	fibril_t *f = _ready_list_pop_nonblocking(false);
 	if (f)
 		_fibril_switch_to(SWITCH_FROM_YIELD, f, false);
@@ -788,6 +804,8 @@ static void _runner_fn(void *arg)
  */
 int fibril_test_spawn_runners(int n)
 {
+	assert(fibril_self()->rmutex_locks == 0);
+
 	if (!multithreaded) {
 		_ready_debug_check();
 		atomic_set(&ready_semaphore.val, ready_st_count);
