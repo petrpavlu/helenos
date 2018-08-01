@@ -38,6 +38,7 @@
 #include <stdio.h>
 
 extern void __sstream_init(const char *, FILE *);
+extern const char *__sstream_getpos(FILE *);
 
 #endif
 

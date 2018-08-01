@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Jaroslav Jindrak
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This file contains glue code that makes different
- * architectures pass.
- */
+#include <pcut/pcut.h>
 
-#ifdef PLATFORM_arm32
+PCUT_INIT;
 
-/**
- * ARM32 does not have GCC atomic operations inlined by
- * the compiler, so we need to define stubs for our library
- * to compile on this architecture.
- * TODO: make this synchronized
- */
-extern "C"
-{
-#define LIBCPP_GLUE_OP_AND_FETCH(NAME, OP, TYPE, SIZE) \
-    TYPE __sync_##NAME##_and_fetch_##SIZE (volatile void* vptr, TYPE val) \
-    { \
-        TYPE* ptr = (TYPE*)vptr; \
-        *ptr = *ptr OP val; \
-        return *ptr; \
-    }
+PCUT_IMPORT(volume);
 
-LIBCPP_GLUE_OP_AND_FETCH(add, +, unsigned, 4)
-LIBCPP_GLUE_OP_AND_FETCH(sub, -, unsigned, 4)
-
-#define LIBCPP_GLUE_CMP_AND_SWAP(TYPE, SIZE) \
-    TYPE __sync_val_compare_and_swap_##SIZE (TYPE* ptr, TYPE old_val, TYPE new_val) \
-    { \
-        if (*ptr == old_val) \
-            *ptr = new_val; \
-        return *ptr; \
-    }
-
-LIBCPP_GLUE_CMP_AND_SWAP(unsigned, 4)
-}
-#endif
+PCUT_MAIN();

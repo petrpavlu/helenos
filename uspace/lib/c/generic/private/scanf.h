@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Jiri Svoboda
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,19 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libcipc
+/** @addtogroup libc
  * @{
  */
+/** @file
+ */
 
-#ifndef LIBC_IPC_VOL_H_
-#define LIBC_IPC_VOL_H_
+#ifndef LIBC_PRIVATE_SCANF_H_
+#define LIBC_PRIVATE_SCANF_H_
 
-#include <ipc/common.h>
+#include <stddef.h>
+#include <stdio.h>
 
-#define VOL_LABEL_MAXLEN 63
-#define VOL_MOUNTP_MAXLEN 4096
-
-typedef enum {
-	VOL_GET_PARTS = IPC_FIRST_USER_METHOD,
-	VOL_PART_ADD,
-	VOL_PART_INFO,
-	VOL_PART_EJECT,
-	VOL_PART_EMPTY,
-	VOL_PART_LSUPP,
-	VOL_PART_MKFS,
-	VOL_PART_SET_MOUNTP
-} vol_request_t;
+extern errno_t __fstrtold(FILE *, int *, size_t, long double *);
 
 #endif
 

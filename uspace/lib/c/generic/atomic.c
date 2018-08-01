@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Jiri Svoboda
+ * Copyright (c) 2018 CZ.NIC, z.s.p.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,43 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libcipc
- * @{
+#include <atomic.h>
+
+#ifdef PLATFORM_arm32
+
+/*
+ * Older ARMs don't have atomic instructions, so we need to define a bunch
+ * of symbols for GCC to use.
  */
 
-#ifndef LIBC_IPC_VOL_H_
-#define LIBC_IPC_VOL_H_
+unsigned __sync_add_and_fetch_4(volatile void *vptr, unsigned val)
+{
+	return atomic_add((atomic_t *)vptr, val);
+}
 
-#include <ipc/common.h>
+unsigned __sync_sub_and_fetch_4(volatile void *vptr, unsigned val)
+{
+	return atomic_add((atomic_t *)vptr, -(atomic_signed_t)val);
+}
 
-#define VOL_LABEL_MAXLEN 63
-#define VOL_MOUNTP_MAXLEN 4096
+bool __sync_bool_compare_and_swap_4(volatile void *ptr, unsigned old_val, unsigned new_val)
+{
+	return cas((atomic_t *)ptr, old_val, new_val);
+}
 
-typedef enum {
-	VOL_GET_PARTS = IPC_FIRST_USER_METHOD,
-	VOL_PART_ADD,
-	VOL_PART_INFO,
-	VOL_PART_EJECT,
-	VOL_PART_EMPTY,
-	VOL_PART_LSUPP,
-	VOL_PART_MKFS,
-	VOL_PART_SET_MOUNTP
-} vol_request_t;
+unsigned __sync_val_compare_and_swap_4(volatile void *ptr, unsigned old_val, unsigned new_val)
+{
+	while (true) {
+		if (__sync_bool_compare_and_swap_4(ptr, old_val, new_val)) {
+			return old_val;
+		}
+
+		unsigned current = *(volatile unsigned *)ptr;
+		if (current != old_val)
+			return current;
+
+		/* If the current value is the same as old_val, retry. */
+	}
+}
 
 #endif
-
-/** @}
- */
