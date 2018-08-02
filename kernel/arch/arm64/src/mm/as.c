@@ -35,6 +35,7 @@
 
 #include <arch/mm/as.h>
 #include <arch/regutils.h>
+#include <genarch/mm/asid_fifo.h>
 #include <genarch/mm/page_pt.h>
 #include <mm/as.h>
 #include <mm/asid.h>
@@ -46,6 +47,7 @@
 void as_arch_init(void)
 {
 	as_operations = &as_pt_operations;
+	asid_fifo_init();
 }
 
 /** Perform ARM64-specific tasks when an address space becomes active on the
