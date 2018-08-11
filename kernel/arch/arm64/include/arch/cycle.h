@@ -30,22 +30,23 @@
  * @{
  */
 /** @file
- * @brief Count of CPU cycles.
+ * @brief Information about a current cycle.
  */
 
 #ifndef KERN_arm64_CYCLE_H_
 #define KERN_arm64_CYCLE_H_
 
+#include <arch/asm.h>
 #include <trace.h>
 
-/** Return count of CPU cycles.
+/** Get a current cycle.
  *
- * @return Count of CPU cycles.
+ * No instruction exists on ARM64 to get the actual CPU cycle. The function
+ * instead returns the value of the virtual counter.
  */
 NO_TRACE static inline uint64_t get_cycle(void)
 {
-	/* REVISIT */
-	return 0;
+	return CNTVCT_EL0_read();
 }
 
 #endif
