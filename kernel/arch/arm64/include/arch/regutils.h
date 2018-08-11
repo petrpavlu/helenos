@@ -80,9 +80,9 @@ SPECIAL_REG_GEN_READ(CNTVCT_EL0);
 /* CNTV_CTL_EL0 */
 SPECIAL_REG_GEN_READ(CNTV_CTL_EL0);
 SPECIAL_REG_GEN_WRITE(CNTV_CTL_EL0);
-#define CNTV_CTL_ENABLE_SHIFT  0  /* Enable flag */
+#define CNTV_CTL_ENABLE_SHIFT  0
 #define CNTV_CTL_ENABLE_FLAG  (UWORD64(1) << CNTV_CTL_ENABLE_SHIFT)
-#define CNTV_CTL_IMASK_SHIFT  1  /* Imask flag */
+#define CNTV_CTL_IMASK_SHIFT  1
 #define CNTV_CTL_IMASK_FLAG  (UWORD64(1) << CNTV_CTL_IMASK_SHIFT)
 
 /* CNTV_CVAL_EL0 */
@@ -99,7 +99,7 @@ SPECIAL_REG_GEN_READ(CurrentEL);
 /* DAIF */
 SPECIAL_REG_GEN_READ(DAIF);
 SPECIAL_REG_GEN_WRITE(DAIF);
-#define DAIF_IRQ_SHIFT  7  /* I flag */
+#define DAIF_IRQ_SHIFT  7
 #define DAIF_IRQ_FLAG  (UWORD64(1) << DAIF_IRQ_SHIFT)
 
 /* ELR */
@@ -108,7 +108,7 @@ SPECIAL_REG_GEN_WRITE(ELR_EL1);
 /* ESR */
 SPECIAL_REG_GEN_READ(ESR_EL1);
 #define ESR_EC_SHIFT  26
-#define ESR_EC_MASK  (0x3f << ESR_EC_SHIFT)
+#define ESR_EC_MASK  (UWORD64(0x3f) << ESR_EC_SHIFT)
 
 /** Exception from SVC instruction execution. */
 #define ESR_EC_SVC  0x15
@@ -122,7 +122,7 @@ SPECIAL_REG_GEN_READ(ESR_EL1);
 
 /** Instruction/data Fault Status Code. */
 #define ESR_IDFSC_SHIFT  0
-#define ESR_IDFSC_MASK  (0x3f << ESR_IDFSC_SHIFT)
+#define ESR_IDFSC_MASK  (UWORD64(0x3f) << ESR_IDFSC_SHIFT)
 
 /** Instruction/data abort, translation fault, zeroth level. */
 #define ESR_IDA_IDFSC_TF0  0x4
@@ -141,7 +141,7 @@ SPECIAL_REG_GEN_READ(ESR_EL1);
 SPECIAL_REG_GEN_READ(FAR_EL1);
 
 /* SCTLR */
-#define SCTLR_M_SHIFT  0  /* M flag */
+#define SCTLR_M_SHIFT  0
 #define SCTLR_M_FLAG  (UWORD64(1) << SCTLR_M_SHIFT)
 
 /* SP */
@@ -150,7 +150,8 @@ SPECIAL_REG_GEN_WRITE(SP_EL0);
 /* SPSR */
 SPECIAL_REG_GEN_READ(SPSR_EL1);
 SPECIAL_REG_GEN_WRITE(SPSR_EL1);
-#define SPSR_MODE_MASK  0x1f
+#define SPSR_MODE_SHIFT  0
+#define SPSR_MODE_MASK  (UWORD64(0x1f) << SPSR_MODE_SHIFT)
 #define SPSR_MODE_ARM64_EL0T  0x00  /* ARM64, Exception Level 0, SP_EL0 */
 
 /* TPIDR */
