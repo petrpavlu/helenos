@@ -85,6 +85,12 @@ size_t machine_get_irq_count(void)
 	return machine_ops->machine_get_irq_count();
 }
 
+/** Enable virtual timer interrupt and return its number. */
+inr_t machine_enable_vtimer_irq(void)
+{
+	return machine_ops->machine_enable_vtimer_irq();
+}
+
 /** Get platform identifier. */
 const char *machine_get_platform_name(void)
 {

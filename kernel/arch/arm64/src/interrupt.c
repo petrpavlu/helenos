@@ -36,6 +36,11 @@
 #include <arch/interrupt.h>
 #include <arch/machine_func.h>
 #include <ddi/irq.h>
+#include <interrupt.h>
+#include <time/clock.h>
+
+static irq_t timer_irq;
+static uint64_t timer_increment;
 
 /** Disable interrupts.
  *
@@ -93,11 +98,75 @@ bool interrupts_disabled(void)
 	return DAIF_read() & DAIF_IRQ_FLAG;
 }
 
+/** Suspend the virtual timer. */
+static void timer_suspend(void)
+{
+	uintptr_t cntv_ctl = CNTV_CTL_EL0_read();
+
+	CNTV_CTL_EL0_write(cntv_ctl | CNTV_CTL_IMASK_FLAG);
+}
+
+/** Start the virtual timer. */
+static void timer_start(void)
+{
+	uintptr_t cntfrq = CNTFRQ_EL0_read();
+	uintptr_t cntvct = CNTVCT_EL0_read();
+	uintptr_t cntv_ctl = CNTV_CTL_EL0_read();
+
+	/* Calculate the increment. */
+	timer_increment = cntfrq / HZ;
+
+	/* Program the timer. */
+	CNTV_CVAL_EL0_write(cntvct + timer_increment);
+	CNTV_CTL_EL0_write(
+	    (cntv_ctl & ~CNTV_CTL_IMASK_FLAG) | CNTV_CTL_ENABLE_FLAG);
+}
+
+/** Claim the virtual timer interrupt. */
+static irq_ownership_t timer_claim(irq_t *irq)
+{
+	return IRQ_ACCEPT;
+}
+
+/** Handle the virtual timer interrupt. */
+static void timer_irq_handler(irq_t *irq)
+{
+	uintptr_t cntvct = CNTVCT_EL0_read();
+	uintptr_t cntv_cval = CNTV_CVAL_EL0_read();
+
+	uint64_t drift = cntvct - cntv_cval;
+	while (drift > timer_increment) {
+		drift -= timer_increment;
+		CPU->missed_clock_ticks++;
+	}
+	CNTV_CVAL_EL0_write(cntvct + timer_increment - drift);
+
+	/*
+	 * We are holding a lock which prevents preemption.
+	 * Release the lock, call clock() and reacquire the lock again.
+	 */
+	irq_spinlock_unlock(&irq->lock, false);
+	clock();
+	irq_spinlock_lock(&irq->lock, false);
+}
+
 /** Initialize basic tables for exception dispatching. */
 void interrupt_init(void)
 {
 	size_t irq_count = machine_get_irq_count();
 	irq_init(irq_count, irq_count);
+
+	/* Initialize virtual timer. */
+	timer_suspend();
+	inr_t timer_inr = machine_enable_vtimer_irq();
+
+	irq_initialize(&timer_irq);
+	timer_irq.inr = timer_inr;
+	timer_irq.claim = timer_claim;
+	timer_irq.handler = timer_irq_handler;
+	irq_register(&timer_irq);
+
+	timer_start();
 }
 
 /** @}

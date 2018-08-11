@@ -41,15 +41,17 @@
 #include <mm/km.h>
 #include <sysinfo/sysinfo.h>
 
-#define VIRT_UART_IRQ  33
-#define VIRT_UART_ADDRESS       0x09000000
+#define VIRT_VTIMER_IRQ         27
+#define VIRT_UART_IRQ           33
 #define VIRT_GIC_DISTR_ADDRESS  0x08000000
 #define VIRT_GIC_CPUI_ADDRESS   0x08010000
+#define VIRT_UART_ADDRESS       0x09000000
 
 static void virt_init(void);
 static void virt_irq_exception(unsigned int exc_no, istate_t *istate);
 static void virt_output_init(void);
 static void virt_input_init(void);
+inr_t virt_enable_vtimer_irq(void);
 size_t virt_get_irq_count(void);
 static const char *virt_get_platform_name(void);
 
@@ -63,6 +65,7 @@ struct arm_machine_ops virt_machine_ops = {
 	virt_irq_exception,
 	virt_output_init,
 	virt_input_init,
+	virt_enable_vtimer_irq,
 	virt_get_irq_count,
 	virt_get_platform_name
 };
@@ -73,13 +76,10 @@ static void virt_init(void)
 	gicv2_distr_regs_t *distr = (void *) km_map(VIRT_GIC_DISTR_ADDRESS,
 	    ALIGN_UP(sizeof(*distr), PAGE_SIZE),
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
-	gicv2_cpui_regs_t *cpui =  (void *) km_map(VIRT_GIC_CPUI_ADDRESS,
+	gicv2_cpui_regs_t *cpui = (void *) km_map(VIRT_GIC_CPUI_ADDRESS,
 	    ALIGN_UP(sizeof(*cpui), PAGE_SIZE),
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
 	gicv2_init(&virt.gicv2, distr, cpui);
-
-	/* Initialize timer. */
-	/* REVISIT */
 }
 
 static void virt_irq_exception(unsigned int exc_no, istate_t *istate)
@@ -120,6 +120,12 @@ static void virt_input_init(void)
 	indev_t *srln = srln_wire(srln_instance, sink);
 	pl011_uart_input_wire(&virt.uart, srln);
 	gicv2_enable(&virt.gicv2, VIRT_UART_IRQ);
+}
+
+inr_t virt_enable_vtimer_irq(void)
+{
+	gicv2_enable(&virt.gicv2, VIRT_VTIMER_IRQ);
+	return VIRT_VTIMER_IRQ;
 }
 
 size_t virt_get_irq_count(void)
