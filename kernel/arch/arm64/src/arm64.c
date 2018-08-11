@@ -46,12 +46,10 @@
 #include <userspace.h>
 
 static void arm64_post_mm_init(void);
-static void arm64_post_cpu_init(void);
 static void arm64_post_smp_init(void);
 
 arch_ops_t arm64_ops = {
 	.post_mm_init = arm64_post_mm_init,
-	.post_cpu_init = arm64_post_cpu_init,
 	.post_smp_init = arm64_post_smp_init,
 };
 
@@ -147,12 +145,6 @@ void asm_delay_loop(uint32_t usec)
 		;
 }
 
-/** Perform ARM64 specific tasks needed after cpu is initialized. */
-void arm64_post_cpu_init(void)
-{
-	/* REVISIT */
-}
-
 /** Change processor mode.
  *
  * @param kernel_uarg Userspace settings (entry point, stack, ...).
@@ -221,27 +213,23 @@ void userspace(uspace_arg_t *kernel_uarg)
 /** Perform ARM64 specific tasks needed before the new task is run. */
 void before_task_runs_arch(void)
 {
-	/* REVISIT */
 }
 
 /** Perform ARM64 specific tasks needed before the new thread is scheduled.
  */
 void before_thread_runs_arch(void)
 {
-	/* REVISIT */
 }
 
 /** Perform ARM64 specific tasks before a thread stops running. */
 void after_thread_ran_arch(void)
 {
-	/* REVISIT */
 }
 
 /** Reboot the system. */
 void arch_reboot(void)
 {
 	/* Not implemented. */
-	/* REVISIT */
 	while (true)
 		;
 }

@@ -76,7 +76,6 @@ NO_TRACE static inline uintptr_t get_stack_base(void)
 /** Halts CPU. */
 NO_TRACE static inline __attribute__((noreturn)) void cpu_halt(void)
 {
-	/* REVISIT */
 	while (true)
 		;
 }

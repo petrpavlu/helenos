@@ -55,7 +55,6 @@ FUNCTION_BEGIN(memcpy_to_uspace_failover_address)
 FUNCTION_END(memcpy_from_uspace_failover_address)
 FUNCTION_END(memcpy_to_uspace_failover_address)
 
-/* REVISIT */
 FUNCTION_BEGIN(early_putwchar)
 	ret
 FUNCTION_END(early_putwchar)
