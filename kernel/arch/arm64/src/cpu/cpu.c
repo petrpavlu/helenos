@@ -88,7 +88,7 @@ void cpu_identify(void)
 void cpu_print_report(cpu_t *m)
 {
 	printf("cpu%d: vendor=%s, variant=%" PRIx32 ", part number=%" PRIx32
-	       ", revision=%" PRIx32 "\n",
+	    ", revision=%" PRIx32 "\n",
 	    m->id, implementer(m->arch.implementer), m->arch.variant,
 	    m->arch.partnum, m->arch.revision);
 }

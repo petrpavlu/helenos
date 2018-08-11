@@ -62,8 +62,8 @@ NO_TRACE static inline void istate_set_retaddr(istate_t *istate,
 /** Return true if exception happened while in userspace. */
 NO_TRACE static inline int istate_from_uspace(istate_t *istate)
 {
-	return (istate->spsr & SPSR_MODE_MASK) >> SPSR_MODE_SHIFT
-	    == SPSR_MODE_ARM64_EL0T;
+	return (istate->spsr & SPSR_MODE_MASK) >> SPSR_MODE_SHIFT ==
+	    SPSR_MODE_ARM64_EL0T;
 }
 
 /** Return Program Counter member of given istate structure. */
