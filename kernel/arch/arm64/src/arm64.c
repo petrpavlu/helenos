@@ -36,6 +36,7 @@
 #include <abi/errno.h>
 #include <arch.h>
 #include <arch/arch.h>
+#include <arch/asm.h>
 #include <arch/exception.h>
 #include <arch/machine_func.h>
 #include <interrupt.h>
@@ -122,10 +123,28 @@ void arm64_post_smp_init(void)
 	machine_input_init();
 }
 
-/** Calibrate delay loop. */
+/** Calibrate delay loop.
+ *
+ * On ARM64, we implement delay() by waiting for the CNTVCT_EL0 register to
+ * reach a pre-computed value, as opposed to performing some pre-computed amount
+ * of instructions of known duration. We set the delay_loop_const to 1 in order
+ * to neutralize the multiplication done by delay().
+ */
 void calibrate_delay_loop(void)
 {
-	/* REVISIT */
+	CPU->delay_loop_const = 1;
+}
+
+/** Wait several microseconds.
+ *
+ * @param t Microseconds to wait.
+ */
+void asm_delay_loop(uint32_t usec)
+{
+	uint64_t stop = CNTVCT_EL0_read() + usec * CNTFRQ_EL0_read() / 1000000;
+
+	while (CNTVCT_EL0_read() < stop)
+		;
 }
 
 /** Perform ARM64 specific tasks needed after cpu is initialized. */

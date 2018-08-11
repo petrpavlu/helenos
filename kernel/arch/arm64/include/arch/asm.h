@@ -41,6 +41,12 @@
 
 extern char exc_vector;
 
+/*
+ * Note: Function asm_delay_loop() is defined in arm64.c but declared here
+ * because the generic kernel code expects it in arch/asm.h.
+ */
+extern void asm_delay_loop(uint32_t usec);
+
 /** CPU specific way to sleep cpu. */
 NO_TRACE static inline void cpu_sleep(void)
 {
@@ -65,11 +71,6 @@ NO_TRACE static inline uintptr_t get_stack_base(void)
 	);
 
 	return v;
-}
-
-NO_TRACE static inline void asm_delay_loop(uint32_t usec)
-{
-	/* REVISIT */
 }
 
 /** Halts CPU. */
