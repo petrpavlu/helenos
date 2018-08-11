@@ -61,10 +61,13 @@
 		); \
 	}
 
+#define UWORD64(c)  UINT64_C(c)
+
 #else /* __ASSEMBLER__ */
 
 #define SPECIAL_REG_GEN_READ(name)
 #define SPECIAL_REG_GEN_WRITE(name)
+#define UWORD64(c)  c
 
 #endif /* __ASSEMBLER__*/
 
@@ -79,7 +82,7 @@ SPECIAL_REG_GEN_READ(CurrentEL);
 SPECIAL_REG_GEN_READ(DAIF);
 SPECIAL_REG_GEN_WRITE(DAIF);
 #define DAIF_IRQ_SHIFT  7  /* I flag */
-#define DAIF_IRQ_FLAG  (1 << DAIF_IRQ_SHIFT)
+#define DAIF_IRQ_FLAG  (UWORD64(1) << DAIF_IRQ_SHIFT)
 
 /* ELR */
 SPECIAL_REG_GEN_WRITE(ELR_EL1);
@@ -114,14 +117,14 @@ SPECIAL_REG_GEN_READ(ESR_EL1);
 
 /** Data abort, Write not Read. */
 #define ESR_DA_WNR_SHIFT  6
-#define ESR_DA_WNR_FLAG  (1 << ESR_DA_WNR_SHIFT)
+#define ESR_DA_WNR_FLAG  (UWORD64(1) << ESR_DA_WNR_SHIFT)
 
 /* FAR */
 SPECIAL_REG_GEN_READ(FAR_EL1);
 
 /* SCTLR */
 #define SCTLR_M_SHIFT  0  /* M flag */
-#define SCTLR_M_FLAG  (1 << SCTLR_M_SHIFT)
+#define SCTLR_M_FLAG  (UWORD64(1) << SCTLR_M_SHIFT)
 
 /* SP */
 SPECIAL_REG_GEN_WRITE(SP_EL0);
