@@ -41,9 +41,9 @@
 #include <stdint.h>
 
 #define SPECIAL_REG_GEN_READ(name) \
-	static inline uintptr_t name##_read(void) \
+	static inline uint64_t name##_read(void) \
 	{ \
-		uintptr_t res; \
+		uint64_t res; \
 		asm volatile ( \
 			"mrs %[res], " #name \
 			: [res] "=r" (res) \
@@ -52,7 +52,7 @@
 	}
 
 #define SPECIAL_REG_GEN_WRITE(name) \
-	static inline void name##_write(uintptr_t regn) \
+	static inline void name##_write(uint64_t regn) \
 	{ \
 		asm volatile ( \
 			"msr " #name ", %[regn]\n" \

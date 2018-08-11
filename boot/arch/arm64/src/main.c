@@ -142,7 +142,7 @@ efi_status_t bootstrap(void *efi_handle_in,
     efi_system_table_t *efi_system_table_in, void *load_address)
 {
 	efi_status_t status;
-	uintptr_t current_el;
+	uint64_t current_el;
 	uint64_t memmap = 0;
 	sysarg_t memmap_size;
 	sysarg_t memmap_key;
@@ -182,7 +182,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	current_el = CurrentEL_read();
 	if (current_el != CURRENT_EL_EL1) {
 		printf("Error: Unexpected CurrentEL value %0#18" PRIx64 ".\n",
-		    (uint64_t) current_el);
+		    current_el);
 		status = EFI_UNSUPPORTED;
 		goto fail;
 	}

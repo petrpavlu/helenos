@@ -60,11 +60,11 @@ void as_arch_init(void)
  */
 void as_install_arch(as_t *as)
 {
-	uintptr_t val;
+	uint64_t val;
 
-	val = (uintptr_t)as->genarch.page_table;
+	val = (uint64_t) as->genarch.page_table;
 	if (as->asid != ASID_KERNEL) {
-		val |= (uintptr_t)as->asid << TTBR0_ASID_SHIFT;
+		val |= (uint64_t) as->asid << TTBR0_ASID_SHIFT;
 		TTBR0_EL1_write(val);
 	} else
 		TTBR1_EL1_write(val);

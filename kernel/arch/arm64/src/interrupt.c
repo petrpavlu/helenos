@@ -48,7 +48,7 @@ static uint64_t timer_increment;
  */
 ipl_t interrupts_disable(void)
 {
-	uintptr_t daif = DAIF_read();
+	uint64_t daif = DAIF_read();
 
 	DAIF_write(daif | DAIF_IRQ_FLAG);
 
@@ -61,7 +61,7 @@ ipl_t interrupts_disable(void)
  */
 ipl_t interrupts_enable(void)
 {
-	uintptr_t daif = DAIF_read();
+	uint64_t daif = DAIF_read();
 
 	DAIF_write(daif & ~DAIF_IRQ_FLAG);
 
@@ -74,7 +74,7 @@ ipl_t interrupts_enable(void)
  */
 void interrupts_restore(ipl_t ipl)
 {
-	uintptr_t daif = DAIF_read();
+	uint64_t daif = DAIF_read();
 
 	DAIF_write((daif & ~DAIF_IRQ_FLAG) |
 	    ((ipl & 1) << DAIF_IRQ_SHIFT));
@@ -101,7 +101,7 @@ bool interrupts_disabled(void)
 /** Suspend the virtual timer. */
 static void timer_suspend(void)
 {
-	uintptr_t cntv_ctl = CNTV_CTL_EL0_read();
+	uint64_t cntv_ctl = CNTV_CTL_EL0_read();
 
 	CNTV_CTL_EL0_write(cntv_ctl | CNTV_CTL_IMASK_FLAG);
 }
@@ -109,9 +109,9 @@ static void timer_suspend(void)
 /** Start the virtual timer. */
 static void timer_start(void)
 {
-	uintptr_t cntfrq = CNTFRQ_EL0_read();
-	uintptr_t cntvct = CNTVCT_EL0_read();
-	uintptr_t cntv_ctl = CNTV_CTL_EL0_read();
+	uint64_t cntfrq = CNTFRQ_EL0_read();
+	uint64_t cntvct = CNTVCT_EL0_read();
+	uint64_t cntv_ctl = CNTV_CTL_EL0_read();
 
 	/* Calculate the increment. */
 	timer_increment = cntfrq / HZ;
@@ -131,8 +131,8 @@ static irq_ownership_t timer_claim(irq_t *irq)
 /** Handle the virtual timer interrupt. */
 static void timer_irq_handler(irq_t *irq)
 {
-	uintptr_t cntvct = CNTVCT_EL0_read();
-	uintptr_t cntv_cval = CNTV_CVAL_EL0_read();
+	uint64_t cntvct = CNTVCT_EL0_read();
+	uint64_t cntv_cval = CNTV_CVAL_EL0_read();
 
 	uint64_t drift = cntvct - cntv_cval;
 	while (drift > timer_increment) {
