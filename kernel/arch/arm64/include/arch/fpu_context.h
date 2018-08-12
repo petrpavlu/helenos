@@ -36,16 +36,9 @@
 #ifndef KERN_arm64_FPU_CONTEXT_H_
 #define KERN_arm64_FPU_CONTEXT_H_
 
-#include <stdint.h>
+#include <arch/fpu_context_struct.h>
 
 #define FPU_CONTEXT_ALIGN  16
-
-/** ARM64 FPU context. */
-typedef struct {
-	uint128_t v[32];
-	uint32_t fpcr;
-	uint32_t fpsr;
-} fpu_context_t;
 
 #endif
 

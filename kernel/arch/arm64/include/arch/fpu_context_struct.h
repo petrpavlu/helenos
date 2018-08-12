@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2015 Petr Pavlu
- * All rights reserved.
+ * Copyright (c) 2018 Petr Pavlu
+ * All rights preserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,33 +26,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup arm64
- * @{
- */
-/** @file
- * @brief ARM64 FPU context.
- */
+#ifndef KERN_ARCH_FPU_CONTEXT_STRUCT_H_
+#define KERN_ARCH_FPU_CONTEXT_STRUCT_H_
 
-#include <arch/regutils.h>
-#include <fpu_context.h>
+#define FPU_CONTEXT_OFFSET_VREGS  0x000
+#define FPU_CONTEXT_OFFSET_FPCR   0x200
+#define FPU_CONTEXT_OFFSET_FPSR   0x204
+#define FPU_CONTEXT_SIZE          0x210
 
-/** Initialize FPU functionality. */
-void fpu_init(void)
-{
-	/* REVISIT */
-	/* Mask all exception traps. */
-}
+#ifndef __ASSEMBLER__
 
-/** Enable FPU instructions. */
-void fpu_enable(void)
-{
-	CPACR_EL1_write((CPACR_EL1_read() & ~CPACR_FPEN_MASK) |
-	    (CPACR_FPEN_TRAP_NONE << CPACR_FPEN_SHIFT));
-}
+#include <typedefs.h>
 
-/** Disable FPU instructions. */
-void fpu_disable(void)
-{
-	CPACR_EL1_write((CPACR_EL1_read() & ~CPACR_FPEN_MASK) |
-	    (CPACR_FPEN_TRAP_ALL << CPACR_FPEN_SHIFT));
-}
+/** ARM64 FPU context. */
+typedef struct fpu_context {
+	uint128_t vregs[32];
+	uint32_t fpcr;
+	uint32_t fpsr;
+} fpu_context_t;
+
+#endif
+#endif

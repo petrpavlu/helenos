@@ -133,6 +133,14 @@ static void lower_el_aarch64_synch_exception(unsigned int exc_no,
 	bool exec = false;
 
 	switch ((esr_el1 & ESR_EC_MASK) >> ESR_EC_SHIFT) {
+	case ESR_EC_FP:
+		/* Access to Advanced SIMD or floating-point functionality. */
+#ifdef CONFIG_FPU_LAZY
+		scheduler_fpu_lazy_request();
+#else
+		fault_from_uspace(istate, "AdvSIMD/FP fault.");
+#endif
+		return;
 	case ESR_EC_SVC:
 		/* SVC instruction. */
 		interrupts_enable();

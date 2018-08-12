@@ -44,6 +44,7 @@ ARCH_SOURCES = \
 	arch/$(KARCH)/src/debug/stacktrace.c \
 	arch/$(KARCH)/src/debug/stacktrace_asm.S \
 	arch/$(KARCH)/src/exception.c \
+	arch/$(KARCH)/src/fpu.S \
 	arch/$(KARCH)/src/fpu_context.c \
 	arch/$(KARCH)/src/interrupt.c \
 	arch/$(KARCH)/src/machine_func.c \
@@ -62,6 +63,6 @@ ifeq ($(MACHINE),virt)
 endif
 
 ARCH_AUTOCHECK_HEADERS = \
-	arch/$(KARCH)/include/arch/istate_struct.h \
-	arch/$(KARCH)/include/arch/context_struct.h
-
+	arch/$(KARCH)/include/arch/context_struct.h \
+	arch/$(KARCH)/include/arch/fpu_context_struct.h \
+	arch/$(KARCH)/include/arch/istate_struct.h

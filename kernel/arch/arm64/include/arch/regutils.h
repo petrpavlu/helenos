@@ -89,6 +89,14 @@ SPECIAL_REG_GEN_WRITE(CNTV_CTL_EL0);
 SPECIAL_REG_GEN_READ(CNTV_CVAL_EL0);
 SPECIAL_REG_GEN_WRITE(CNTV_CVAL_EL0);
 
+/* CPACR_EL1 */
+SPECIAL_REG_GEN_READ(CPACR_EL1);
+SPECIAL_REG_GEN_WRITE(CPACR_EL1);
+#define CPACR_FPEN_SHIFT  20
+#define CPACR_FPEN_MASK  (UWORD64(0x3) << CPACR_FPEN_SHIFT)
+#define CPACR_FPEN_TRAP_ALL  0x0
+#define CPACR_FPEN_TRAP_NONE  0x3
+
 /* CurrentEL */
 SPECIAL_REG_GEN_READ(CurrentEL);
 #define CURRENT_EL_EL0  0x0
@@ -110,6 +118,8 @@ SPECIAL_REG_GEN_READ(ESR_EL1);
 #define ESR_EC_SHIFT  26
 #define ESR_EC_MASK  (UWORD64(0x3f) << ESR_EC_SHIFT)
 
+/** Exception from access to Advanced SIMD or floating-point functionality. */
+#define ESR_EC_FP  0x07
 /** Exception from SVC instruction execution. */
 #define ESR_EC_SVC  0x15
 
