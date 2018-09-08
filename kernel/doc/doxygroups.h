@@ -1,7 +1,8 @@
 
 /* Definitions of modules and its relations for generating Doxygen documentation */
 
-/** @defgroup kernel Kernel
+/** @defgroup kernel kernel
+ * @brief HelenOS kernel
  */
 
 /** @defgroup genericadt Data types
@@ -28,6 +29,12 @@
  *     @ingroup proc
  */
 
+/**
+ *     @cond abs32le
+ *     @defgroup abs32leproc abs32le
+ *     @ingroup proc
+ *     @endcond
+ */
 
 /**
  *     @cond amd64
@@ -72,8 +79,8 @@
  */
 
 /**
- *     @cond ppc64
- *     @defgroup ppc64proc ppc64
+ *     @cond riscv64
+ *     @defgroup riscv64proc riscv64
  *     @ingroup proc
  *     @endcond
  */
@@ -103,6 +110,13 @@
 /**
  *     @defgroup genarchmm genarch
  *     @ingroup mm
+ */
+
+/**
+ *     @cond abs32le
+ *     @defgroup abs32lemm abs32le
+ *     @ingroup mm
+ *     @endcond
  */
 
 /**
@@ -148,8 +162,8 @@
  */
 
 /**
- *     @cond ppc64
- *     @defgroup ppc64mm ppc64
+ *     @cond riscv64
+ *     @defgroup riscv64mm riscv64
  *     @ingroup mm
  *     @endcond
  */
@@ -161,8 +175,6 @@
  *     @endcond
  */
 
-
-
 /** @defgroup genericipc IPC
  * @ingroup kernel
  */
@@ -172,7 +184,6 @@
  * @ingroup genericconsole
  */
 
-
 /** @defgroup ddi Device Driver Interface
  * @ingroup kernel
  */
@@ -180,6 +191,13 @@
 /**
  *     @defgroup genericddi generic
  *     @ingroup ddi
+ */
+
+/**
+ *     @cond abs32le
+ *     @defgroup abs32leddi abs32le
+ *     @ingroup ddi
+ *     @endcond
  */
 
 /**
@@ -225,8 +243,8 @@
  */
 
 /**
- *     @cond ppc64
- *     @defgroup ppc64ddi ppc64
+ *     @cond riscv64
+ *     @defgroup riscv64ddi riscv64
  *     @ingroup ddi
  *     @endcond
  */
@@ -245,6 +263,13 @@
 /**
  *     @defgroup genericdebug generic
  *     @ingroup debug
+ */
+
+/**
+ *     @cond abs32le
+ *     @defgroup abs32ledebug abs32le
+ *     @ingroup debug
+ *     @endcond
  */
 
 /**
@@ -290,8 +315,8 @@
  */
 
 /**
- *     @cond ppc64
- *     @defgroup ppc64debug ppc64
+ *     @cond riscv64
+ *     @defgroup riscv64debug riscv64
  *     @ingroup debug
  *     @endcond
  */
@@ -309,6 +334,13 @@
 /**
  *     @defgroup genericinterrupt generic
  *     @ingroup interrupt
+ */
+
+/**
+ *     @cond abs32le
+ *     @defgroup abs32leinterrupt abs32le
+ *     @ingroup interrupt
+ *     @endcond
  */
 
 /**
@@ -354,8 +386,8 @@
  */
 
 /**
- *     @cond ppc64
- *     @defgroup ppc64interrupt ppc64
+ *     @cond riscv64
+ *     @defgroup riscv64interrupt riscv64
  *     @ingroup interrupt
  *     @endcond
  */
@@ -380,6 +412,13 @@
 /**
  *     @defgroup genarch genarch
  *     @ingroup others
+ */
+
+/**
+ *     @cond abs32le
+ *     @defgroup abs32le abs32le
+ *     @ingroup others
+ *     @endcond
  */
 
 /**
@@ -425,8 +464,8 @@
  */
 
 /**
- *     @cond ppc64
- *     @defgroup ppc64 ppc64
+ *     @cond riscv64
+ *     @defgroup riscv64 riscv64
  *     @ingroup others
  *     @endcond
  */
@@ -437,3 +476,4 @@
  *     @ingroup others
  *     @endcond
  */
+
