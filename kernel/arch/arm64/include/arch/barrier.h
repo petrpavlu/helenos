@@ -36,11 +36,8 @@
 #ifndef KERN_arm64_BARRIER_H_
 #define KERN_arm64_BARRIER_H_
 
-#ifdef KERNEL
-#include <typedefs.h>
-#else
-#include <stdint.h>
-#endif
+#include <stddef.h>
+#include <trace.h>
 
 #define CS_ENTER_BARRIER()  asm volatile ("" ::: "memory")
 #define CS_LEAVE_BARRIER()  asm volatile ("" ::: "memory")
@@ -60,44 +57,43 @@
 
 #ifdef KERNEL
 
-/** Ensure visibility of instruction update for a multiprocessor.
- *
- * @param addr Address of the instruction.
- */
-#define smc_coherence(addr) \
-do { \
-	asm volatile ( \
-		/*
-		 * Clean to Point of Unification to make the new instruction
-		 * visible to the instruction cache.
-		 */ \
-		"dc cvau, %[a]\n" \
-		/* Ensure completion on all PEs. */ \
-		"dsb ish\n" \
-		/*
-		 * Ensure instruction cache/branch predictor discards stale
-		 * data.
-		 */ \
-		"ic ivau, %[a]\n" \
-		/* Ensure completion on all PEs. */ \
-		"dsb ish\n" \
-		/* Synchronize context on this PE. */ \
-		"isb\n" \
-		: : [a] "r" (addr) : "memory" \
-	); \
-} while (0)
+#define COHERENCE_INVAL_MIN  4
 
 /** Ensure visibility of instruction updates for a multiprocessor.
  *
  * @param addr Address of the first instruction.
  * @param size Size of the instruction block (in bytes).
  */
-#define smc_coherence_block(addr, size) \
-do { \
-	for (uintptr_t a = (uintptr_t) addr; a < (uintptr_t) addr + size; \
-	    a += 4) \
-		smc_coherence(a); \
-} while (0)
+NO_TRACE static inline void smc_coherence(void *addr, size_t len)
+{
+	size_t i;
+
+	/*
+	 * Clean to Point of Unification to make the new instructions visible to
+	 * the instruction cache.
+	 */
+	for (i = 0; i < len; i += COHERENCE_INVAL_MIN)
+		asm volatile (
+		    "dc cvau, %[addr]\n"
+		    : : [addr] "r" (addr + i)
+		);
+
+	/* Ensure completion on all PEs. */
+	asm volatile ("dsb ish" ::: "memory");
+
+	/* Ensure instruction cache/branch predictor discards stale data. */
+	for (i = 0; i < len; i += COHERENCE_INVAL_MIN)
+		asm volatile (
+		    "ic ivau, %[addr]\n"
+		    : : [addr] "r" (addr + i)
+		);
+
+	/* Ensure completion on all PEs. */
+	asm volatile ("dsb ish" ::: "memory");
+
+	/* Synchronize context on this PE. */
+	asm volatile ("isb");
+}
 
 #endif /* KERNEL */
 

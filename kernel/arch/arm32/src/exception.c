@@ -39,7 +39,7 @@
 #include <interrupt.h>
 #include <arch/mm/page_fault.h>
 #include <arch/cp15.h>
-#include <arch/barrier.h>
+#include <barrier.h>
 #include <print.h>
 #include <syscall/syscall.h>
 #include <stacktrace.h>
@@ -74,7 +74,7 @@ static void install_handler(unsigned handler_addr, unsigned *vector)
 
 	/* Make it LDR instruction and store at exception vector */
 	*vector = handler_address_ptr | LDR_OPCODE;
-	smc_coherence(vector);
+	smc_coherence(vector, 4);
 
 	/* Store handler's address */
 	*(vector + EXC_VECTORS) = handler_addr;

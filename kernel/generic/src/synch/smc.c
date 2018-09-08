@@ -38,7 +38,7 @@
 #include <arch.h>
 #include <macros.h>
 #include <errno.h>
-#include <arch/barrier.h>
+#include <barrier.h>
 #include <synch/smc.h>
 #include <mm/as.h>
 
@@ -53,7 +53,7 @@ sys_errno_t sys_smc_coherence(uintptr_t va, size_t size)
 			return EINVAL;
 	}
 
-	smc_coherence_block((void *) va, size);
+	smc_coherence((void *) va, size);
 	return 0;
 }
 
