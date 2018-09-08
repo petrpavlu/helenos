@@ -29,21 +29,22 @@
 #ifndef LIBC_ARCH_FIBRIL_CONTEXT_H_
 #define LIBC_ARCH_FIBRIL_CONTEXT_H_
 
-#define CONTEXT_OFFSET_SP   0x00
-#define CONTEXT_OFFSET_PC   0x08
-#define CONTEXT_OFFSET_X19  0x10
-#define CONTEXT_OFFSET_X20  0x18
-#define CONTEXT_OFFSET_X21  0x20
-#define CONTEXT_OFFSET_X22  0x28
-#define CONTEXT_OFFSET_X23  0x30
-#define CONTEXT_OFFSET_X24  0x38
-#define CONTEXT_OFFSET_X25  0x40
-#define CONTEXT_OFFSET_X26  0x48
-#define CONTEXT_OFFSET_X27  0x50
-#define CONTEXT_OFFSET_X28  0x58
-#define CONTEXT_OFFSET_X29  0x60
-#define CONTEXT_OFFSET_TLS  0x68
-#define CONTEXT_SIZE        0x70
+#define CONTEXT_OFFSET_SP     0x00
+#define CONTEXT_OFFSET_PC     0x08
+#define CONTEXT_OFFSET_X19    0x10
+#define CONTEXT_OFFSET_X20    0x18
+#define CONTEXT_OFFSET_X21    0x20
+#define CONTEXT_OFFSET_X22    0x28
+#define CONTEXT_OFFSET_X23    0x30
+#define CONTEXT_OFFSET_X24    0x38
+#define CONTEXT_OFFSET_X25    0x40
+#define CONTEXT_OFFSET_X26    0x48
+#define CONTEXT_OFFSET_X27    0x50
+#define CONTEXT_OFFSET_X28    0x58
+#define CONTEXT_OFFSET_X29    0x60
+#define CONTEXT_OFFSET_TLS    0x68
+#define CONTEXT_OFFSET_VREGS  0x70
+#define CONTEXT_SIZE          0xb0
 
 #ifndef __ASSEMBLER__
 
@@ -64,6 +65,8 @@ typedef struct context {
 	uint64_t x28;
 	uint64_t x29;
 	uint64_t tls;
+	/* v8-v15, low 64 bits only. */
+	uint64_t vregs[8];
 } context_t;
 
 #endif
