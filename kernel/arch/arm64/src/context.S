@@ -39,16 +39,16 @@
 #error x19 and x20 are not successive in context_t
 #endif
 #if CONTEXT_OFFSET_X21 + 8 != CONTEXT_OFFSET_X22
-#error x21 and x22 are not successive in istate_t
+#error x21 and x22 are not successive in context_t
 #endif
 #if CONTEXT_OFFSET_X23 + 8 != CONTEXT_OFFSET_X24
-#error x23 and x24 are not successive in istate_t
+#error x23 and x24 are not successive in context_t
 #endif
 #if CONTEXT_OFFSET_X25 + 8 != CONTEXT_OFFSET_X26
-#error x25 and x26 are not successive in istate_t
+#error x25 and x26 are not successive in context_t
 #endif
 #if CONTEXT_OFFSET_X27 + 8 != CONTEXT_OFFSET_X28
-#error x27 and x28 are not successive in istate_t
+#error x27 and x28 are not successive in context_t
 #endif
 
 FUNCTION_BEGIN(context_save_arch)
