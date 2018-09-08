@@ -74,10 +74,10 @@ static void virt_init(void)
 {
 	/* Initialize interrupt controller. */
 	gicv2_distr_regs_t *distr = (void *) km_map(VIRT_GIC_DISTR_ADDRESS,
-	    ALIGN_UP(sizeof(*distr), PAGE_SIZE),
+	    ALIGN_UP(sizeof(*distr), PAGE_SIZE), KM_NATURAL_ALIGNMENT,
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
 	gicv2_cpui_regs_t *cpui = (void *) km_map(VIRT_GIC_CPUI_ADDRESS,
-	    ALIGN_UP(sizeof(*cpui), PAGE_SIZE),
+	    ALIGN_UP(sizeof(*cpui), PAGE_SIZE), KM_NATURAL_ALIGNMENT,
 	    PAGE_NOT_CACHEABLE | PAGE_READ | PAGE_WRITE | PAGE_KERNEL);
 	gicv2_init(&virt.gicv2, distr, cpui);
 }
