@@ -39,18 +39,18 @@
 #define RELOC_MKARRAY_ENTRY(label, index, name, symbol) \
 do { \
 	asm volatile ( \
-		".global " #symbol "\n" \
-		"adr x0, " #label "s + %[off]\n" \
-		"adr x1, 1f\n" \
-		"adrp x2, " #symbol "\n" \
-		"add x2, x2, #:lo12:" #symbol "\n" \
-		"stp x1, x2, [x0]\n" \
-		"b 2f\n" \
-		"1:\n" \
-		".asciz " #name "\n" \
-		".align 2\n" \
-		"2:\n" \
-		: : [off] "i" (index * sizeof(label##_t)) : "x0", "x1", "x2" \
+	    ".global " #symbol "\n" \
+	    "adr x0, " #label "s + %[off]\n" \
+	    "adr x1, 1f\n" \
+	    "adrp x2, " #symbol "\n" \
+	    "add x2, x2, #:lo12:" #symbol "\n" \
+	    "stp x1, x2, [x0]\n" \
+	    "b 2f\n" \
+	    "1:\n" \
+	    ".asciz " #name "\n" \
+	    ".align 2\n" \
+	    "2:\n" \
+	    : : [off] "i" (index * sizeof(label##_t)) : "x0", "x1", "x2" \
 	); \
 } while (0)
 
@@ -58,9 +58,9 @@ do { \
 do { \
 	label##_t *res; \
 	asm volatile ( \
-		".global " #label "s\n" \
-		"adr %[res], " #label "s\n" \
-		: [res] "=r" (res) \
+	    ".global " #label "s\n" \
+	    "adr %[res], " #label "s\n" \
+	    : [res] "=r" (res) \
 	); \
 	return res; \
 } while (0)

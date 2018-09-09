@@ -45,8 +45,8 @@
 	{ \
 		uint64_t res; \
 		asm volatile ( \
-			"mrs %[res], " #name \
-			: [res] "=r" (res) \
+		    "mrs %[res], " #name \
+		    : [res] "=r" (res) \
 		); \
 		return res; \
 	}
@@ -55,9 +55,9 @@
 	static inline void name##_write(uint64_t regn) \
 	{ \
 		asm volatile ( \
-			"msr " #name ", %[regn]\n" \
-			"isb\n" \
-			:: [regn] "r" (regn) \
+		    "msr " #name ", %[regn]\n" \
+		    "isb\n" \
+		    :: [regn] "r" (regn) \
 		); \
 	}
 
