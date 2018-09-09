@@ -75,7 +75,7 @@ NO_TRACE static inline void smc_coherence(void *addr, size_t len)
 	for (i = 0; i < len; i += COHERENCE_INVAL_MIN)
 		asm volatile (
 		    "dc cvau, %[addr]\n"
-		    : : [addr] "r" (addr + i)
+		    : : [addr] "r" ((char *) addr + i)
 		);
 
 	/* Ensure completion on all PEs. */
@@ -85,7 +85,7 @@ NO_TRACE static inline void smc_coherence(void *addr, size_t len)
 	for (i = 0; i < len; i += COHERENCE_INVAL_MIN)
 		asm volatile (
 		    "ic ivau, %[addr]\n"
-		    : : [addr] "r" (addr + i)
+		    : : [addr] "r" ((char *) addr + i)
 		);
 
 	/* Ensure completion on all PEs. */
