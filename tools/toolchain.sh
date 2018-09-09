@@ -204,6 +204,10 @@ prepare() {
 	git -C "gdb-$GDB_VERSION" pull
 	git -C "gcc-$GCC_VERSION" pull
 
+	# Add AArch64 support.
+	git -C "gcc-$GCC_VERSION" reset --hard "remotes/origin/$GCC_BRANCH"
+	git -C "gcc-$GCC_VERSION" am "${BASEDIR}/toolchain-arm64.patch"
+
 	echo ">>> Downloading GCC prerequisites"
 	cd "gcc-${GCC_VERSION}"
 	./contrib/download_prerequisites
