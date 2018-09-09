@@ -463,6 +463,7 @@ case "$1" in
 		prepare
 		build_target "amd64"
 		build_target "arm32"
+		build_target "arm64"
 		build_target "ia32"
 		build_target "ia64"
 		build_target "mips32"
