@@ -37,6 +37,7 @@
 #include <align.h>
 #include <arch/arch.h>
 #include <arch/asm.h>
+#include <arch/barrier.h>
 #include <arch/boot.h>
 #include <arch/main.h>
 #include <arch/regutils.h>
@@ -51,36 +52,6 @@
 #include "../../components.h"
 
 static efi_system_table_t *efi_system_table;
-
-/** Ensure the visibility of updates to instructions in the given range.
- *
- * @param addr Address of the first instruction.
- * @param size Size of the instruction block (in bytes).
- */
-static void ensure_visibility(void *addr, size_t size)
-{
-	for (uintptr_t a = (uintptr_t) addr; a < (uintptr_t) addr + size;
-	    a += 4)
-		asm volatile (
-		    /*
-		     * Clean to Point of Unification to make the new instruction
-		     * visible to the instruction cache.
-		     */
-		    "dc cvau, %[a]\n"
-		    /* Ensure completion on all PEs. */
-		    "dsb ish\n"
-		    /*
-		     * Ensure instruction cache/branch predictor discards stale
-		     * data.
-		     */
-		    "ic ivau, %[a]\n"
-		    /* Ensure completion on all PEs. */
-		    "dsb ish\n"
-		    /* Synchronize context on this PE. */
-		    "isb\n"
-		    : : [a] "r" (a) : "memory"
-		);
-}
 
 /** Translate given UEFI memory type to the bootinfo memory type.
  *
@@ -318,7 +289,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 			goto fail;
 		}
 		/* Ensure visibility of the component. */
-		ensure_visibility(dest[i - 1], components[i - 1].inflated);
+		smc_coherence(dest[i - 1], components[i - 1].inflated);
 	}
 
 	printf(".\n");

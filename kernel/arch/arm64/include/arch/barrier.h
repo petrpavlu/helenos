@@ -37,7 +37,6 @@
 #define KERN_arm64_BARRIER_H_
 
 #include <stddef.h>
-#include <trace.h>
 
 #define CS_ENTER_BARRIER()  asm volatile ("" ::: "memory")
 #define CS_LEAVE_BARRIER()  asm volatile ("" ::: "memory")
@@ -55,7 +54,7 @@
 /** Instruction synchronization barrier. */
 #define inst_barrier()    asm volatile ("isb" ::: "memory")
 
-#ifdef KERNEL
+#if defined(KERNEL) || defined(BOOT)
 
 #define COHERENCE_INVAL_MIN  4
 
@@ -64,7 +63,7 @@
  * @param addr Address of the first instruction.
  * @param size Size of the instruction block (in bytes).
  */
-NO_TRACE static inline void smc_coherence(void *addr, size_t len)
+static inline void smc_coherence(void *addr, size_t len)
 {
 	size_t i;
 
@@ -95,7 +94,7 @@ NO_TRACE static inline void smc_coherence(void *addr, size_t len)
 	asm volatile ("isb");
 }
 
-#endif /* KERNEL */
+#endif /* KERNEL || BOOT */
 
 #endif
 
