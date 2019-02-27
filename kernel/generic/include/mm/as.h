@@ -47,6 +47,7 @@
 #include <adt/btree.h>
 #include <lib/elf.h>
 #include <arch.h>
+#include <lib/refcount.h>
 
 #define AS                   THE->as
 
@@ -116,7 +117,7 @@ typedef struct as {
 	asid_t asid;
 
 	/** Number of references (i.e. tasks that reference this as). */
-	atomic_t refcount;
+	atomic_refcount_t refcount;
 
 	mutex_t lock;
 
