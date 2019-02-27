@@ -38,24 +38,6 @@
 
 #include <stddef.h>
 
-#define CS_ENTER_BARRIER()  asm volatile ("" ::: "memory")
-#define CS_LEAVE_BARRIER()  asm volatile ("" ::: "memory")
-
-/*
- * TODO It is unneccessary to use full-system barriers in most cases where these
- * macros are used. Provide a better granularity.
- */
-/** Full system data synchronization barrier. */
-#define memory_barrier()  asm volatile ("dsb sy" ::: "memory")
-/** Full system data synchronization barrier for reads. */
-#define read_barrier()    asm volatile ("dsb ld" ::: "memory")
-/** Full system data synchronization barrier for writes. */
-#define write_barrier()   asm volatile ("dsb st" ::: "memory")
-/** Instruction synchronization barrier. */
-#define inst_barrier()    asm volatile ("isb" ::: "memory")
-
-#if defined(KERNEL) || defined(BOOT)
-
 #define COHERENCE_INVAL_MIN  4
 
 /** Ensure visibility of instruction updates for a multiprocessor.
@@ -63,7 +45,7 @@
  * @param addr Address of the first instruction.
  * @param size Size of the instruction block (in bytes).
  */
-static inline void smc_coherence(void *addr, size_t len)
+static inline void ensure_visibility(void *addr, size_t len)
 {
 	size_t i;
 
@@ -93,8 +75,6 @@ static inline void smc_coherence(void *addr, size_t len)
 	/* Synchronize context on this PE. */
 	asm volatile ("isb");
 }
-
-#endif /* KERNEL || BOOT */
 
 #endif
 

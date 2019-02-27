@@ -289,7 +289,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 			goto fail;
 		}
 		/* Ensure visibility of the component. */
-		smc_coherence(dest[i - 1], components[i - 1].inflated);
+		ensure_visibility(dest[i - 1], components[i - 1].inflated);
 	}
 
 	printf(".\n");
