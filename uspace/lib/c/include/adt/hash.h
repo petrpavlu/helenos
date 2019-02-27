@@ -26,13 +26,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup genericadt
+/** @addtogroup libc
  * @{
  */
 /** @file
  */
-#ifndef KERN_HASH_H_
-#define KERN_HASH_H_
+#ifndef LIBC_ADT_HASH_H_
+#define LIBC_ADT_HASH_H_
 
 #include <stdint.h>
 #include <types/common.h>

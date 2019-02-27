@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2004 Jakub Jermar
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,36 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup kernel_generic
+/** @addtogroup libext4
  * @{
  */
-/** @file
- */
 
-#ifndef KERN_PUTCHAR_H_
-#define KERN_PUTCHAR_H_
+#ifndef LIBEXT4_CFG_H_
+#define LIBEXT4_CFG_H_
 
-#include <stddef.h>
+#include "types.h"
 
-extern void putwchar(wchar_t);
+/** Versions available to choose from when creating a new file system. */
+typedef enum {
+	/** Ext2 original */
+	extver_ext2_old,
+	/** Ext2 dynamic revision */
+	extver_ext2
+} ext4_cfg_ver_t;
+
+/** Default file system version */
+#define ext4_def_fs_version extver_ext2
+
+/** Configuration of a new ext4 file system */
+typedef struct {
+	/** File system version */
+	ext4_cfg_ver_t version;
+	/** Volume name encoded as UTF-8 string */
+	const char *volume_name;
+} ext4_cfg_t;
 
 #endif
 
-/** @}
+/**
+ * @}
  */

@@ -47,6 +47,7 @@
 #include "ext4/balloc.h"
 #include "ext4/bitmap.h"
 #include "ext4/block_group.h"
+#include "ext4/cfg.h"
 #include "ext4/directory.h"
 #include "ext4/extent.h"
 #include "ext4/filesystem.h"
@@ -247,9 +248,10 @@ error:
 
 /** Create new filesystem.
  *
- * @param service_id Block device where to create new filesystem
+ * @param cfg Configuration of new file system
+ * @param service_id Block device where to create new file system
  */
-errno_t ext4_filesystem_create(service_id_t service_id)
+errno_t ext4_filesystem_create(ext4_cfg_t *cfg, service_id_t service_id)
 {
 	errno_t rc;
 	ext4_superblock_t *superblock = NULL;
@@ -279,7 +281,7 @@ errno_t ext4_filesystem_create(service_id_t service_id)
 		goto err;
 
 	/* Create superblock */
-	rc = ext4_superblock_create(dev_bsize, dev_nblocks, &superblock);
+	rc = ext4_superblock_create(dev_bsize, dev_nblocks, cfg, &superblock);
 	if (rc != EOK)
 		goto err;
 
@@ -371,11 +373,13 @@ error:
 /** Probe filesystem.
  *
  * @param service_id Block device to probe
+ * @param info Place to store probe information
  *
  * @return EOK or an error code.
  *
  */
-errno_t ext4_filesystem_probe(service_id_t service_id)
+errno_t ext4_filesystem_probe(service_id_t service_id,
+    ext4_fs_probe_info_t *info)
 {
 	ext4_filesystem_t *fs = NULL;
 	errno_t rc;
@@ -388,6 +392,13 @@ errno_t ext4_filesystem_probe(service_id_t service_id)
 	rc = ext4_filesystem_init(fs, service_id, CACHE_MODE_WT);
 	if (rc != EOK) {
 		free(fs);
+		return rc;
+	}
+
+	rc = ext4_superblock_get_volume_name(fs->superblock, info->vol_name,
+	    sizeof(info->vol_name));
+	if (rc != EOK) {
+		ext4_filesystem_fini(fs);
 		return rc;
 	}
 
@@ -702,6 +713,8 @@ static errno_t ext4_filesystem_init_block_groups(ext4_filesystem_t *fs)
 		    bg_ref->index);
 		/* One for block bitmap one for inode bitmap */
 		free_blocks = free_blocks - reserved - 2 - inode_table_blocks;
+		if (bg_index == 0)
+			++free_blocks; /* XXX Why? */
 
 		ext4_block_group_set_free_blocks_count(bg_ref->block_group,
 		    sb, free_blocks);
