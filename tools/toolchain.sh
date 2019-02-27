@@ -69,9 +69,7 @@ show_usage() {
 	echo " ia64       IA-64 (Itanium)"
 	echo " mips32     MIPS little-endian 32b"
 	echo " mips32eb   MIPS big-endian 32b"
-	echo " mips64     MIPS little-endian 64b"
 	echo " ppc32      PowerPC 32b"
-	echo " ppc64      PowerPC 64v"
 	echo " riscv64    RISC-V 64b"
 	echo " sparc64    SPARC V9"
 	echo " all        build all targets"
@@ -230,9 +228,6 @@ set_target_from_platform() {
 			;;
 		"mips32eb")
 			GNU_ARCH="mips"
-			;;
-		"mips64")
-			GNU_ARCH="mips64el"
 			;;
 		"ppc32")
 			GNU_ARCH="ppc"
@@ -439,8 +434,7 @@ if [ "$#" -lt "1" ] ; then
 fi
 
 case "$1" in
-	amd64|arm32|arm64|ia32|ia64|mips32|mips32eb|mips64|ppc32|ppc64| \
-	    riscv64|sparc64)
+	amd64|arm32|arm64|ia32|ia64|mips32|mips32eb|ppc32|riscv64|sparc64)
 		prepare
 		build_target "$1"
 		;;
@@ -453,9 +447,7 @@ case "$1" in
 		build_target "ia64"
 		build_target "mips32"
 		build_target "mips32eb"
-		build_target "mips64"
 		build_target "ppc32"
-		build_target "ppc64"
 		build_target "riscv64"
 		build_target "sparc64"
 		;;
@@ -480,9 +472,7 @@ case "$1" in
 		build_target "ia64" &
 		build_target "mips32" &
 		build_target "mips32eb" &
-		build_target "mips64" &
 		build_target "ppc32" &
-		build_target "ppc64" &
 		build_target "riscv64" &
 		build_target "sparc64" &
 		wait
@@ -502,11 +492,7 @@ case "$1" in
 		wait
 
 		build_target "mips32eb" &
-		build_target "mips64" &
-		wait
-
 		build_target "ppc32" &
-		build_target "ppc64" &
 		wait
 
 		build_target "riscv64" &
