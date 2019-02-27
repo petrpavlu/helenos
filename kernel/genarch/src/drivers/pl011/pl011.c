@@ -159,4 +159,3 @@ void pl011_uart_input_wire(pl011_uart_t *uart, indev_t *indev)
 
 /** @}
  */
-
