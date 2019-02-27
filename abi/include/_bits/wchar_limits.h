@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Josef Cejka
+ * Copyright (c) 2017 CZ.NIC, z.s.p.o.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/*
+ * Authors:
+ *	Jiří Zárevúcky (jzr) <zarevucky.jiri@gmail.com>
+ */
+
+/** @addtogroup bits
  * @{
  */
 /** @file
  */
 
-#ifndef LIBC_STDARG_H_
-#define LIBC_STDARG_H_
+#ifndef _BITS_WCHAR_MIN_H_
+#define _BITS_WCHAR_MIN_H_
 
-#ifdef __cplusplus
-extern "C" {
+/* wchar_t should always be signed int in HelenOS. */
+
+#include <_bits/wchar_t.h>
+
+#ifndef __cplusplus
+_Static_assert(((wchar_t)-1) < 0, "wchar_t is not int");
+_Static_assert(sizeof(wchar_t) == 4, "wchar_t is not int");
 #endif
 
-typedef __builtin_va_list va_list;
-
-#define va_start(ap, last)  __builtin_va_start(ap, last)
-#define va_arg(ap, type)    __builtin_va_arg(ap, type)
-#define va_end(ap)          __builtin_va_end(ap)
-#define va_copy(dst, src)   __builtin_va_copy(dst, src)
-
-#ifdef __cplusplus
-}
+#ifndef WCHAR_MAX
+#define WCHAR_MAX  0x7fffffff
+#endif
+#ifndef WCHAR_MIN
+#define WCHAR_MIN  (-WCHAR_MIN - 1)
 #endif
 
 #endif
