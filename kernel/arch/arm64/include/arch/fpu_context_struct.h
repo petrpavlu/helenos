@@ -37,6 +37,7 @@
 #ifndef __ASSEMBLER__
 
 #include <typedefs.h>
+#include <_bits/int128_t.h>
 
 /** ARM64 FPU context. */
 typedef struct fpu_context {
