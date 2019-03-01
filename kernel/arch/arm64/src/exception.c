@@ -37,9 +37,9 @@
 #include <arch/exception.h>
 #include <arch/machine_func.h>
 #include <arch/regutils.h>
-#include <mm/as.h>
 #include <interrupt.h>
-#include <print.h>
+#include <mm/as.h>
+#include <stdio.h>
 #include <syscall/syscall.h>
 
 static void current_el_sp_sel0_synch_exception(unsigned int exc_no,
