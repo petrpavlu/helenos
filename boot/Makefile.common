@@ -287,4 +287,3 @@ RAW ?= image.raw
 JOB ?= image.job
 MAP ?= image.map
 BUILD ?= Makefile.build
-COMPS_MKARRAY_FLAGS ?=
