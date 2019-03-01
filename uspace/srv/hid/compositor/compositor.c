@@ -917,7 +917,7 @@ static void client_connection(ipc_call_t *icall, void *arg)
 
 	/* Allocate resources for new window and register it to the location service. */
 	if (service_id == winreg_id) {
-		async_answer_0(icall, EOK);
+		async_accept_0(icall);
 
 		async_get_call(&call);
 		if (IPC_GET_IMETHOD(call) == WINDOW_REGISTER) {
@@ -925,7 +925,7 @@ static void client_connection(ipc_call_t *icall, void *arg)
 
 			window_t *win = window_create();
 			if (!win) {
-				async_answer_2(&call, ENOMEM, 0, 0);
+				async_answer_0(&call, EHANGUP);
 				fibril_mutex_unlock(&window_list_mtx);
 				return;
 			}
@@ -944,7 +944,7 @@ static void client_connection(ipc_call_t *icall, void *arg)
 
 			if (loc_service_register(name_in, &win->in_dsid) != EOK) {
 				window_destroy(win);
-				async_answer_2(&call, EINVAL, 0, 0);
+				async_answer_0(&call, EHANGUP);
 				fibril_mutex_unlock(&window_list_mtx);
 				return;
 			}
@@ -952,7 +952,7 @@ static void client_connection(ipc_call_t *icall, void *arg)
 			if (loc_service_register(name_out, &win->out_dsid) != EOK) {
 				loc_service_unregister(win->in_dsid);
 				window_destroy(win);
-				async_answer_2(&call, EINVAL, 0, 0);
+				async_answer_0(&call, EHANGUP);
 				fibril_mutex_unlock(&window_list_mtx);
 				return;
 			}
@@ -973,11 +973,10 @@ static void client_connection(ipc_call_t *icall, void *arg)
 				comp_post_event_win(event_unfocus, win_unfocus);
 			}
 
-			return;
-		} else {
-			async_answer_0(&call, EINVAL);
-			return;
+			async_get_call(&call);
 		}
+		async_answer_0(&call, EHANGUP);
+		return;
 	}
 
 	/* Match the client with pre-allocated window. */
@@ -996,7 +995,7 @@ static void client_connection(ipc_call_t *icall, void *arg)
 	fibril_mutex_unlock(&window_list_mtx);
 
 	if (win) {
-		async_answer_0(icall, EOK);
+		async_accept_0(icall);
 	} else {
 		async_answer_0(icall, EINVAL);
 		return;

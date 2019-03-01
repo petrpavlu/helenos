@@ -212,7 +212,7 @@ static void dnsr_client_conn(ipc_call_t *icall, void *arg)
 	log_msg(LOG_DEFAULT, LVL_DEBUG, "dnsr_conn()");
 
 	/* Accept the connection */
-	async_answer_0(icall, EOK);
+	async_accept_0(icall);
 
 	while (true) {
 		ipc_call_t call;

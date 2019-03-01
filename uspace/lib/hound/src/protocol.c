@@ -395,7 +395,7 @@ void hound_connection_handler(ipc_call_t *icall, void *arg)
 
 	/* Accept connection if there is a valid iface*/
 	if (server_iface) {
-		async_answer_0(icall, EOK);
+		async_accept_0(icall);
 	} else {
 		async_answer_0(icall, ENOTSUP);
 		return;

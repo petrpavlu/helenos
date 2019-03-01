@@ -57,7 +57,7 @@ static void callback_connection(ipc_call_t *icall, void *arg)
 {
 	assert(DEV != NULL);
 
-	async_answer_0(icall, EOK);
+	async_accept_0(icall);
 
 	while (true) {
 		ipc_call_t call;

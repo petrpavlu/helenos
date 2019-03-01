@@ -97,7 +97,7 @@ void logger_connection_handler_writer(ipc_call_t *icall)
 	errno_t rc;
 
 	/* Acknowledge the connection. */
-	async_answer_0(icall, EOK);
+	async_accept_0(icall);
 
 	logger_log("writer: new client.\n");
 

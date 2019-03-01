@@ -340,6 +340,14 @@ static __attribute__((noreturn)) void ldr_run(ipc_call_t *req)
 	DPRINTF("Reply OK\n");
 	async_answer_0(req, EOK);
 
+	/*
+	 * Wait for the hangup from the other side in order not to leave any
+	 * unanswered IPC_M_PHONE_HUNGUP messages behind.
+	 */
+	async_get_call(req);
+	assert(!IPC_GET_IMETHOD(*req));
+	async_answer_0(req, EOK);
+
 	DPRINTF("Jump to entry point at %p\n", pcb.entry);
 
 	__tcb_reset();
@@ -365,7 +373,7 @@ static void ldr_connection(ipc_call_t *icall, void *arg)
 	connected = true;
 
 	/* Accept the connection */
-	async_answer_0(icall, EOK);
+	async_accept_0(icall);
 
 	/* Ignore parameters, the connection is already open */
 	(void) icall;
