@@ -38,9 +38,9 @@
 #include <arch/arch.h>
 #include <arch/asm.h>
 #include <arch/barrier.h>
-#include <arch/boot.h>
 #include <arch/main.h>
 #include <arch/regutils.h>
+#include <arch/types.h>
 #include <errno.h>
 #include <inflate.h>
 #include <macros.h>
@@ -49,7 +49,7 @@
 #include <putchar.h>
 #include <str.h>
 #include <version.h>
-#include "../../components.h"
+#include <payload.h>
 
 static efi_system_table_t *efi_system_table;
 
@@ -135,19 +135,11 @@ efi_status_t bootstrap(void *efi_handle_in,
 
 	version_print();
 
-	printf("Boot data: %p -> %p\n", get_bdata_start(), get_bdata_end());
+	printf("Boot loader: %p -> %p\n", get_loader_start(), get_loader_end());
 	printf("\nMemory statistics\n");
 	printf(" %p|%p: loader\n", load_address, load_address);
 	printf(" %p|%p: UEFI system table\n", efi_system_table_in,
 	    efi_system_table_in);
-
-	component_t *components = get_components();
-	for (size_t i = 0; i < COMPONENTS; i++) {
-		printf(" %p|%p: %s image (%zu/%zu bytes)\n",
-		    components[i].addr, components[i].addr,
-		    components[i].name, components[i].inflated,
-		    components[i].size);
-	}
 
 	/* Validate the exception level. */
 	current_el = CurrentEL_read();
@@ -193,7 +185,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 
 	/*
 	 * Check that everything is aligned on a 4kB boundary and the kernel can
-	 * be placed by the inflate code at a correct address.
+	 * be placed by the decompression code at a correct address.
 	 */
 
 	/* Statically check PAGE_SIZE and BOOT_OFFSET. */
@@ -219,27 +211,20 @@ efi_status_t bootstrap(void *efi_handle_in,
 	 * Calculate where the components (including the kernel) will get
 	 * placed.
 	 */
-	uint64_t inflated_base = memory_base + BOOT_OFFSET;
-	printf(" %p|%p: kernel entry point\n", (void *) inflated_base,
-	    (void *) inflated_base);
+	uint64_t decompress_base = memory_base + BOOT_OFFSET;
+	printf(" %p|%p: kernel entry point\n", (void *) decompress_base,
+	    (void *) decompress_base);
 
 	/*
-	 * Determine where components should be placed and how much memory is
-	 * needed for them.
+	 * Allocate memory for the decompressed components and for the bootinfo.
 	 */
-	void *dest[COMPONENTS];
-	uint64_t top = inflated_base;
-	for (size_t i = 0; i < COMPONENTS; i++) {
-		dest[i] = (void *) top;
-		top += components[i].inflated;
-		top = ALIGN_UP(top, PAGE_SIZE);
-	}
-
-	/* Allocate memory for the inflated components and for the bootinfo. */
-	alloc_pages = (ALIGN_UP(top, EFI_PAGE_SIZE) -
-	    ALIGN_DOWN(inflated_base, EFI_PAGE_SIZE)) / EFI_PAGE_SIZE +
-	    ALIGN_UP(sizeof(*bootinfo), EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
-	alloc_addr = inflated_base;
+	uint64_t component_pages =
+	    ALIGN_UP(payload_uncompressed_size(), EFI_PAGE_SIZE) / 
+	    EFI_PAGE_SIZE;
+	uint64_t bootinfo_pages = ALIGN_UP(sizeof(*bootinfo), EFI_PAGE_SIZE) /
+	    EFI_PAGE_SIZE;
+	alloc_pages = component_pages + bootinfo_pages;
+	alloc_addr = decompress_base;
 	status = efi_system_table->boot_services->allocate_pages(
 	    EFI_ALLOCATE_ADDRESS, EFI_LOADER_CODE, alloc_pages, &alloc_addr);
 	if (status != EFI_SUCCESS) {
@@ -249,50 +234,16 @@ efi_status_t bootstrap(void *efi_handle_in,
 		goto fail;
 	}
 
-	bootinfo = (void *) alloc_addr + (alloc_pages - 1) * EFI_PAGE_SIZE;
+	bootinfo = (void *) alloc_addr + component_pages * EFI_PAGE_SIZE;
 	printf(" %p|%p: boot info structure\n", bootinfo, bootinfo);
 	memset(bootinfo, 0, sizeof(*bootinfo));
 
-	/*
-	 * Statically check that information about all components can be
-	 * recorded in the bootinfo.
-	 */
-#if COMPONENTS - 1 > TASKMAP_MAX_RECORDS
-#error TASKMAP_MAX_RECORDS too small
-#endif
+	/* Decompress the components. */
+	uint8_t *kernel_dest = (uint8_t *) alloc_addr;
+	uint8_t *ram_end = kernel_dest + component_pages * EFI_PAGE_SIZE;
 
-	/*
-	 * Store information about the components in the bootinfo (excluding the
-	 * kernel component).
-	 */
-	bootinfo->taskmap.cnt = COMPONENTS - 1;
-	for (size_t i = 0; i < bootinfo->taskmap.cnt; i++) {
-		bootinfo->taskmap.tasks[i].addr = dest[i + 1];
-		bootinfo->taskmap.tasks[i].size = components[i + 1].inflated;
-
-		str_cpy(bootinfo->taskmap.tasks[i].name,
-		    BOOTINFO_TASK_NAME_BUFLEN, components[i + 1].name);
-	}
-
-	printf("\nInflating components ... ");
-
-	for (size_t i = COMPONENTS; i > 0; i--) {
-		printf("%s ", components[i - 1].name);
-
-		int err = inflate(components[i - 1].addr,
-		    components[i - 1].size, dest[i - 1],
-		    components[i - 1].inflated);
-		if (err != EOK) {
-			printf("\n%s: Inflating error %d\n",
-			    components[i - 1].name, err);
-			status = EFI_LOAD_ERROR;
-			goto fail;
-		}
-		/* Ensure visibility of the component. */
-		ensure_visibility(dest[i - 1], components[i - 1].inflated);
-	}
-
-	printf(".\n");
+	extract_payload(&bootinfo->taskmap, kernel_dest, ram_end,
+	    (uintptr_t) kernel_dest, ensure_visibility);
 
 	/* Get final memory map. */
 	status = efi_get_memory_map(efi_system_table, &memmap_size,
@@ -356,7 +307,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	efi_system_table->boot_services->exit_boot_services(efi_handle_in,
 	    memmap_key);
 
-	jump_to_kernel((void *) inflated_base, bootinfo);
+	jump_to_kernel((void *) decompress_base, bootinfo);
 
 fail:
 	if (memmap != 0)

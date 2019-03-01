@@ -50,7 +50,6 @@ ENDIANESS = LE
 # processor is in the execution mode that has unaligned access enabled. The
 # -mstrict-align option is therefore not needed.
 EXTRA_CFLAGS = -fpic
-COMPS_MKARRAY_FLAGS = --pic
 RAW_OBJECTS_CHECK = arch/$(BARCH)/check-pic.sh $(OBJDUMP)
 
 ifeq ($(MACHINE), virt)
@@ -63,15 +62,15 @@ endif
 SOURCES = \
 	arch/$(BARCH)/src/asm.S \
 	arch/$(BARCH)/src/main.c \
-	$(COMPS).s \
-	$(COMPS)_desc.c \
+	$(COMPS).o \
 	genarch/src/efi.c \
+	generic/src/gzip.c \
 	generic/src/inflate.c \
 	generic/src/memstr.c \
+	generic/src/payload.c \
 	generic/src/printf.c \
 	generic/src/printf_core.c \
 	generic/src/str.c \
+	generic/src/tar.c \
 	generic/src/version.c \
 	generic/src/vprintf.c
-
-PRE_DEPEND = $(COMPS).s $(COMPS).h $(COMPS)_desc.c $(COMPONENTS_DEFLATE)

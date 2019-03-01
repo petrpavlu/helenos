@@ -32,8 +32,10 @@
 
 .section BOOTSTRAP
 
-.global bdata_start
-.global bdata_end
+.global loader_start
+.global loader_end
+.global payload_start
+.global payload_end
 
 /* MS-DOS stub */
 msdos_stub:
@@ -62,7 +64,7 @@ opt_header:
 	.short 0x20b                    /* Magic = PE32+ */
 	.byte 0                         /* Major linker version */
 	.byte 0                         /* Minor linker version */
-	.long bdata_end - msdos_stub    /* Size of code */
+	.long payload_end - msdos_stub  /* Size of code */
 	.long 0                         /* Size of initialized data */
 	.long 0                         /* Size of uninitialized data */
 	.long start - msdos_stub        /* Address of entry point */
@@ -79,7 +81,7 @@ opt_header:
 	.short 0                        /* Major subsystem version */
 	.short 0                        /* Minor subsystem version */
 	.long 0                         /* Win32 version value */
-	.long bdata_end - msdos_stub    /* Size of image */
+	.long payload_end - msdos_stub  /* Size of image */
 	.long start - msdos_stub        /* Size of headers */
 	.long 0                         /* Checksum */
 	.short 10                       /* Subsystem = EFI application */
@@ -93,9 +95,9 @@ opt_header:
 
 sec_table:
         .ascii ".text\x0\x0\x0"         /* Name */
-	.long bdata_end - start         /* Virtual size */
+	.long payload_end - start       /* Virtual size */
 	.long start - msdos_stub        /* Virtual address */
-	.long bdata_end - start         /* Size of raw data */
+	.long payload_end - start       /* Size of raw data */
 	.long start - msdos_stub        /* Pointer to raw data */
 	.long 0                         /* Pointer to relocations */
 	.long 0                         /* Pointer to line numbers */
@@ -124,17 +126,33 @@ SYMBOL(start)
 	adr x2, msdos_stub
 	b bootstrap
 
-FUNCTION_BEGIN(get_bdata_start)
-	adrp x0, bdata_start
-	add x0, x0, #:lo12:bdata_start
+FUNCTION_BEGIN(get_loader_start)
+	adrp x0, loader_start
+	add x0, x0, #:lo12:loader_start
 	ret
-FUNCTION_END(get_bdata_start)
+FUNCTION_END(get_loader_start)
 
-FUNCTION_BEGIN(get_bdata_end)
-	adrp x0, bdata_end
-	add x0, x0, #:lo12:bdata_end
+FUNCTION_BEGIN(get_loader_end)
+	adrp x0, loader_end
+	add x0, x0, #:lo12:loader_end
 	ret
-FUNCTION_END(get_bdata_end)
+FUNCTION_END(get_loader_end)
+
+FUNCTION_BEGIN(get_payload_start)
+	adrp x0, payload_start
+	add x0, x0, #:lo12:payload_start
+	ret
+FUNCTION_END(get_payload_start)
+
+FUNCTION_BEGIN(get_payload_end)
+	adrp x0, payload_end
+	add x0, x0, #:lo12:payload_end
+	ret
+FUNCTION_END(get_payload_end)
+
+FUNCTION_BEGIN(halt)
+	b halt
+FUNCTION_END(halt)
 
 FUNCTION_BEGIN(jump_to_kernel)
 	/*

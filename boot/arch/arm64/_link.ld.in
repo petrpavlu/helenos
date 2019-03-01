@@ -4,21 +4,21 @@ ENTRY(start)
 
 SECTIONS {
 	. = 0x0;
-	rel_start = .;          /* relative start symbol for components */
-
 	.text : {
+		loader_start = .;
 		*(BOOTSTRAP);
 		*(.text);
 	}
 	. = 0x8000;
 	.data : {
-		bdata_start = .;
 		*(.data*);      /* initialized data */
 		*(.rodata*);
 		*(.bss);        /* uninitialized static variables */
 		*(COMMON);      /* global variables */
-		*(.components);
-		bdata_end = .;
+		loader_end = .;
+		payload_start = .;
+		*(.payload);
+		payload_end = .;
 	}
 
 	/DISCARD/ : {
