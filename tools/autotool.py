@@ -323,6 +323,30 @@ def check_gcc(path, prefix, common, details):
 
 	check_app([common['GCC'], "--version"], "GNU GCC", details)
 
+def check_libgcc(common):
+	sys.stderr.write("Checking for libgcc.a ... ")
+	libgcc_path = None
+	proc = subprocess.Popen([ common['GCC'], "-print-search-dirs" ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	for line in proc.stdout:
+		line = line.decode('utf-8').strip('\n')
+		parts = line.split()
+		if parts[0] == "install:":
+			p = parts[1] + "libgcc.a"
+			if os.path.isfile(p):
+				libgcc_path = p
+	proc.wait()
+
+	if libgcc_path is None:
+		sys.stderr.write("failed\n")
+		print_error(["Unable to find gcc library (libgcc.a).",
+					"",
+					"Please ensure that you have installed the",
+					"toolchain properly."])
+
+	sys.stderr.write("ok\n")
+	common['LIBGCC_PATH'] = libgcc_path
+
+
 def check_binutils(path, prefix, common, details):
 	"Check for binutils toolchain"
 
@@ -579,9 +603,12 @@ def main():
 
 		cc_autogen = None
 
+		# We always need to check for GCC as we
+		# need libgcc
+		check_gcc(path, prefix, common, PACKAGE_CROSS)
+
 		# Compiler
 		if (config['COMPILER'] == "gcc_cross"):
-			check_gcc(path, prefix, common, PACKAGE_CROSS)
 			check_binutils(path, prefix, common, PACKAGE_CROSS)
 
 			check_common(common, "GCC")
@@ -604,6 +631,9 @@ def main():
 
 			if (config['INTEGRATED_AS'] == "no"):
 				common['CC'] += " -no-integrated-as"
+
+		# Find full path to libgcc
+		check_libgcc(common)
 
 		# Platform-specific utilities
 		if (config['BARCH'] in ('amd64', 'arm64', 'ia32', 'ppc32', 'sparc64')):
