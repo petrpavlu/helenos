@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Jiri Svoboda
+ * Copyright (c) 2006 Sergey Bondari
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup abi_mips32
  * @{
  */
 /** @file
  */
 
-#ifndef LIBC_ELF_H_
-#define LIBC_ELF_H_
+#ifndef ABI_mips32_ELF_H_
+#define ABI_mips32_ELF_H_
 
-#include <stdint.h>
-#include <types/common.h>
-#include <abi/elf.h>
+#define ELF_MACHINE  EM_MIPS
 
-extern const elf_segment_header_t *elf_get_phdr(const void *, unsigned);
-extern uintptr_t elf_get_bias(const void *);
+#ifdef __BE__
+#define ELF_DATA_ENCODING  ELFDATA2MSB
+#else
+#define ELF_DATA_ENCODING  ELFDATA2LSB
+#endif
+
+#define ELF_CLASS  ELFCLASS32
 
 #endif
 

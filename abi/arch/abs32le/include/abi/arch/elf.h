@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Jiri Svoboda
+ * Copyright (c) 2010 Martin Decky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libc
+/** @addtogroup abi_abs32le
  * @{
  */
 /** @file
  */
 
-#ifndef LIBC_ELF_H_
-#define LIBC_ELF_H_
+#ifndef ABI_abs32le_ELF_H_
+#define ABI_abs32le_ELF_H_
 
-#include <stdint.h>
-#include <types/common.h>
-#include <abi/elf.h>
-
-extern const elf_segment_header_t *elf_get_phdr(const void *, unsigned);
-extern uintptr_t elf_get_bias(const void *);
+#define ELF_MACHINE        EM_NO
+#define ELF_DATA_ENCODING  ELFDATA2LSB
+#define ELF_CLASS          ELFCLASS32
 
 #endif
 
