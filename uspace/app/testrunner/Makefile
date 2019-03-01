@@ -1,6 +1,5 @@
 #
-# Copyright (c) 2005 Martin Decky
-# Copyright (c) 2007 Jakub Jermar
+# Copyright (c) 2018 Jiří Zárevúcky
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,11 +26,10 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-USPACE_PREFIX = ../../../..
-
-BINARY = s3c24xx_uart
+USPACE_PREFIX = ../..
+BINARY = testrunner
 
 SOURCES = \
-	s3c24xx_uart.c
+	main.c
 
 include $(USPACE_PREFIX)/Makefile.common

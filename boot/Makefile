@@ -43,17 +43,22 @@ build_dist: clean_dist
 	mkdir -p "$(DIST_PATH)/lib/"
 	mkdir -p "$(DIST_PATH)/loc/"
 	mkdir -p "$(DIST_PATH)/log/"
-	mkdir -p "$(DIST_PATH)/srv/"
 	mkdir -p "$(DIST_PATH)/test/"
 	mkdir -p "$(DIST_PATH)/tmp/"
 	mkdir -p "$(DIST_PATH)/vol/"
 	mkdir -p "$(DIST_PATH)/w/"
-	for file in $(RD_SRVS) ; do \
-		cp "$$file" "$(DIST_PATH)/srv/" ; \
+
+	for srv in $(RD_SRVS) ; do \
+		srv_dir="`dirname "$$srv"`" ; \
+		srv_name="`basename "$$srv"`" ; \
+		mkdir -p "$(DIST_PATH)/srv/$$srv_dir" ; \
+		cp "$(USPACE_PATH)/srv/$$srv/$$srv_name" "$(DIST_PATH)/srv/$$srv" ; \
 	done
+
 	for file in $(RD_LIBS) ; do \
 		cp "$$file" "$(DIST_PATH)/lib/" ; \
 	done
+
 ifeq ($(CONFIG_DEVEL_FILES), y)
 	mkdir -p "$(DIST_PATH)/inc/c/"
 	cp -r -L "$(USPACE_PATH)/lib/c/include/." "$(DIST_PATH)/inc/c/"
@@ -61,45 +66,27 @@ ifeq ($(CONFIG_DEVEL_FILES), y)
 	cp -r -L "$(USPACE_PATH)/lib/c/arch/$(UARCH)/include/." "$(DIST_PATH)/inc/c/"
 	cat "$(USPACE_PATH)/lib/c/arch/$(UARCH)/_link.ld" | sed 's/^STARTUP(.*)$$//g' > "$(DIST_PATH)/inc/_link.ld"
 endif
-	for file in $(RD_APPS) ; do \
-		cp "$$file" "$(DIST_PATH)/app/" ; \
+
+	for app in $(RD_APPS) ; do \
+		app_dir="`dirname "$$app"`" ; \
+		app_name="`basename "$$app"`" ; \
+		mkdir -p "$(DIST_PATH)/app/$$app_dir" ; \
+		cp "$(USPACE_PATH)/app/$$app/$$app_name" "$(DIST_PATH)/app/$$app" ; \
 	done
 	for file in $(RD_DATA) ; do \
 		cp "$$file" "$(DIST_PATH)/" ; \
 	done
+
 ifeq ($(CONFIG_PCUT_TESTS),y)
-	echo "echo Running all tests..." >"$(DIST_PATH)/test/run_all"
-	echo "<html><head><title>HelenOS test results</title></head><body>" >"$(DIST_PATH)/test/test.html"
-	echo "<h1>HelenOS test results</h1><ul>" >>"$(DIST_PATH)/test/test.html"
 	for file in $(RD_TESTS) ; do \
-		file2=`basename $$file`; \
 		cp "$$file" "$(DIST_PATH)/test/" ; \
-		echo "echo ' ->' $$file2" >>"$(DIST_PATH)/test/run_all"; \
-		echo "/test/$$file2 | to /test/$$file2.out" >>"$(DIST_PATH)/test/run_all"; \
-		echo "cat /test/$$file2.out" >>"$(DIST_PATH)/test/run_all"; \
-		echo "cp -f /test/$$file2.out /data/web/result-$$file2.txt" >>"$(DIST_PATH)/test/run_all"; \
-		echo "<li><a href=\"result-$$file2.txt\">$$file2</a></li>" >>"$(DIST_PATH)/test/test.html"; \
 	done
-	echo "cp -f /test/test.html /data/web/test.html" >>"$(DIST_PATH)/test/run_all"
-	echo "</ul></body></html>" >>"$(DIST_PATH)/test/test.html"
 endif
 
 ifeq ($(CONFIG_PCUT_SELF_TESTS),y)
-	echo "echo Running all PCUT self-tests..." >"$(DIST_PATH)/test/run_pcut"
-	echo "<html><head><title>Results of PCUT self-tests on HelenOS</title></head><body>" >"$(DIST_PATH)/test/pcut.html"
-	echo "<h1>Results of PCUT self-tests on HelenOS</h1><ul>" >>"$(DIST_PATH)/test/pcut.html"
 	for file in $(USPACE_PATH)/lib/pcut/test-libpcut-*; do \
-		file2=`basename $$file`; \
-		name=`echo "$$file2" | sed 's/test-libpcut-//'`; \
 		cp "$$file" "$(DIST_PATH)/test/" ; \
-		echo "echo ' ->' $$name" >>"$(DIST_PATH)/test/run_pcut"; \
-		echo "/test/$$file2 | to /test/$$file2.out" >>"$(DIST_PATH)/test/run_pcut"; \
-		echo "cat /test/$$file2.out" >>"$(DIST_PATH)/test/run_pcut"; \
-		echo "cp -f /test/$$file2.out /data/web/result-$$file2.txt" >>"$(DIST_PATH)/test/run_pcut"; \
-		echo "<li><a href=\"result-$$file2.txt\">$$name</a></li>" >>"$(DIST_PATH)/test/pcut.html"; \
 	done
-	echo "cp -f /test/pcut.html /data/web/pcut.html" >>"$(DIST_PATH)/test/run_pcut"
-	echo "</ul></body></html>" >>"$(DIST_PATH)/test/pcut.html"
 endif
 
 	for drv in $(RD_DRVS) ; do \
@@ -135,9 +122,9 @@ endif
 clean_dist:
 	rm -f $(INITRD).img $(COMPS).o $(COMPS).tar $(LINK)
 	find $(USPACE_PATH)/dist -mindepth 1 -maxdepth 1 -type f -exec rm \{\} \;
-	rm -f $(USPACE_PATH)/dist/app/*
+	rm -rf $(USPACE_PATH)/dist/app
 	rm -f $(USPACE_PATH)/dist/cfg/*
-	rm -f $(USPACE_PATH)/dist/srv/*
+	rm -rf $(USPACE_PATH)/dist/srv
 	rm -rf $(USPACE_PATH)/dist/drv/*
 	rm -rf $(USPACE_PATH)/dist/lib/*
 	rm -rf $(USPACE_PATH)/dist/inc/*
