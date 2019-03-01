@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2005 Jakub Jermar
- * Copyright (c) 2017 Jiri Svoboda
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,18 @@
 /** @file Ski console driver.
  */
 
+#include <as.h>
 #include <async.h>
 #include <ddf/driver.h>
 #include <ddf/log.h>
+#include <ddi.h>
 #include <errno.h>
 #include <fibril.h>
 #include <io/chardev.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sysinfo.h>
 
 #include "ski-con.h"
 
@@ -67,6 +70,8 @@ errno_t ski_con_add(ski_con_t *con)
 	fid_t fid;
 	ddf_fun_t *fun = NULL;
 	bool bound = false;
+	uintptr_t faddr;
+	void *addr = AS_AREA_ANY;
 	errno_t rc;
 
 	circ_buf_init(&con->cbuf, con->buf, ski_con_buf_size, 1);
@@ -85,6 +90,20 @@ errno_t ski_con_add(ski_con_t *con)
 	chardev_srvs_init(&con->cds);
 	con->cds.ops = &ski_con_chardev_ops;
 	con->cds.sarg = con;
+
+	rc = sysinfo_get_value("ski.paddr", &faddr);
+	if (rc != EOK)
+		faddr = 0; /* No kernel driver to arbitrate with */
+
+	if (faddr != 0) {
+		addr = AS_AREA_ANY;
+		rc = physmem_map(faddr, 1, AS_AREA_READ | AS_AREA_CACHEABLE,
+		    &addr);
+		if (rc != EOK) {
+			ddf_msg(LVL_ERROR, "Cannot map kernel driver arbitration area.");
+			goto error;
+		}
+	}
 
 	rc = ddf_fun_bind(fun);
 	if (rc != EOK) {
@@ -106,6 +125,8 @@ errno_t ski_con_add(ski_con_t *con)
 	fibril_add_ready(fid);
 	return EOK;
 error:
+	if (addr != AS_AREA_ANY)
+		as_area_destroy(addr);
 	if (bound)
 		ddf_fun_unbind(fun);
 	if (fun != NULL)
@@ -126,6 +147,28 @@ errno_t ski_con_gone(ski_con_t *con)
 	return ENOTSUP;
 }
 
+/** Detect if SKI console is in use by the kernel.
+ *
+ * This is needed since the kernel has no way of fencing off the user-space
+ * driver.
+ *
+ * @return @c true if in use by the kernel.
+ */
+static bool ski_con_disabled(void)
+{
+	sysarg_t kconsole;
+
+	/*
+	 * XXX Ideally we should get information from our kernel counterpart
+	 * driver. But there needs to be a mechanism for the kernel console
+	 * to inform the kernel driver.
+	 */
+	if (sysinfo_get_value("kconsole", &kconsole) != EOK)
+		return false;
+
+	return kconsole != false;
+}
+
 /** Poll Ski for keypresses. */
 static errno_t ski_con_fibril(void *arg)
 {
@@ -134,7 +177,7 @@ static errno_t ski_con_fibril(void *arg)
 	errno_t rc;
 
 	while (true) {
-		while (true) {
+		while (!ski_con_disabled()) {
 			c = ski_con_getchar();
 			if (c == 0)
 				break;
@@ -245,8 +288,11 @@ static errno_t ski_con_write(chardev_srv_t *srv, const void *data, size_t size,
 	size_t i;
 	uint8_t *dp = (uint8_t *) data;
 
-	for (i = 0; i < size; i++)
-		ski_con_putchar(con, dp[i]);
+	if (!ski_con_disabled()) {
+		for (i = 0; i < size; i++) {
+			ski_con_putchar(con, dp[i]);
+		}
+	}
 
 	*nwr = size;
 	return EOK;
