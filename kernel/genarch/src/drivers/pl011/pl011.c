@@ -134,7 +134,7 @@ bool pl011_uart_init(pl011_uart_t *uart, inr_t interrupt, uintptr_t addr)
 	uart->irq.handler = pl011_uart_irq_handler;
 	uart->irq.instance = uart;
 
-	link_initialize(&uart->parea.link);
+	ddi_parea_init(&uart->parea);
 	uart->parea.pbase = addr;
 	uart->parea.frames = 1;
 	uart->parea.unpriv = false;
