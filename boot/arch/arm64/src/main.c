@@ -43,13 +43,14 @@
 #include <arch/types.h>
 #include <errno.h>
 #include <inflate.h>
+#include <kernel.h>
 #include <macros.h>
 #include <memstr.h>
+#include <payload.h>
 #include <printf.h>
 #include <putchar.h>
 #include <str.h>
 #include <version.h>
-#include <payload.h>
 
 static efi_system_table_t *efi_system_table;
 
@@ -300,13 +301,17 @@ efi_status_t bootstrap(void *efi_handle_in,
 	}
 	bootinfo->memmap.cnt = cnt;
 
+	uintptr_t entry = check_kernel_translated((void *) decompress_base,
+	    BOOT_OFFSET);
+
 	printf("Booting the kernel...\n");
 
 	/* Exit boot services. This is a point of no return. */
 	efi_system_table->boot_services->exit_boot_services(efi_handle_in,
 	    memmap_key);
 
-	jump_to_kernel((void *) decompress_base, bootinfo);
+	entry = memory_base + KA2PA(entry);
+	jump_to_kernel((void *) entry, bootinfo);
 
 fail:
 	if (memmap != 0)

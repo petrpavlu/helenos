@@ -38,8 +38,6 @@
 
 #include <_bits/all.h>
 
-#define BOOT_OFFSET  0x80000
-
 #define BOOTINFO_TASK_NAME_BUFLEN  32
 #define TASKMAP_MAX_RECORDS        32
 #define MEMMAP_MAX_RECORDS        128

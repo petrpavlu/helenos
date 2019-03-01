@@ -66,6 +66,7 @@ SOURCES = \
 	genarch/src/efi.c \
 	generic/src/gzip.c \
 	generic/src/inflate.c \
+	generic/src/kernel.c \
 	generic/src/memstr.c \
 	generic/src/payload.c \
 	generic/src/printf.c \
