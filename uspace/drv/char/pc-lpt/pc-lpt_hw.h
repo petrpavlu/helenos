@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Decky
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,67 +26,56 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup kernel_generic
+/** @addtogroup uspace_drv_pc_lpt
  * @{
  */
 /** @file
  */
 
-#include <test.h>
-#include <stddef.h>
-#include <str.h>
+#ifndef PC_LPT_HW_H
+#define PC_LPT_HW_H
 
-bool test_quiet;
+#include <ddi.h>
 
-test_t tests[] = {
-#include <atomic/atomic1.def>
-#include <debug/mips1.def>
-#include <fault/fault1.def>
-#include <mm/falloc1.def>
-#include <mm/falloc2.def>
-#include <mm/mapping1.def>
-#include <mm/slab1.def>
-#include <mm/slab2.def>
-#include <synch/semaphore1.def>
-#include <synch/semaphore2.def>
-#include <print/print1.def>
-#include <print/print2.def>
-#include <print/print3.def>
-#include <print/print4.def>
-#include <print/print5.def>
-#include <thread/thread1.def>
-	{
-		.name = NULL,
-		.desc = NULL,
-		.entry = NULL
-	}
-};
+/** PC parallel port registers */
+typedef struct {
+	/** Data out register */
+	ioport8_t data;
+	/** Status register */
+	ioport8_t status;
+	/** Control register */
+	ioport8_t control;
+} pc_lpt_regs_t;
 
-const char *tests_hints_enum(const char *input, const char **help,
-    void **ctx)
-{
-	size_t len = str_length(input);
-	test_t **test = (test_t **) ctx;
+/** Printer control register bits */
+typedef enum {
+	/** Strobe */
+	ctl_strobe = 0,
+	/** Auto linefeed */
+	ctl_autofd = 1,
+	/** -Init */
+	ctl_ninit = 2,
+	/** Select */
+	ctl_select = 3,
+	/** IRQ Enable */
+	ctl_irq_enable = 4
+} pc_lpt_ctl_bits_t;
 
-	if (*test == NULL)
-		*test = tests;
+/** Printer status register bits */
+typedef enum {
+	/** -Error */
+	sts_nerror = 3,
+	/** Select */
+	sts_select = 4,
+	/** Init */
+	sts_paper_end = 5,
+	/** -Ack */
+	sts_nack = 6,
+	/** -Busy */
+	sts_nbusy = 7
+} pc_lpt_sts_bits_t;
 
-	for (; (*test)->name; (*test)++) {
-		const char *curname = (*test)->name;
-
-		if (str_length(curname) < len)
-			continue;
-
-		if (str_lcmp(input, curname, len) == 0) {
-			(*test)++;
-			if (help)
-				*help = (*test)->desc;
-			return (curname + str_lsize(curname, len));
-		}
-	}
-
-	return NULL;
-}
+#endif
 
 /** @}
  */

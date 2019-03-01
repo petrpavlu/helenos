@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006 Martin Decky
+ * Copyright (c) 2018 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,67 +26,55 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup kernel_generic
+/** @addtogroup uspace_drv_pc_lpt
  * @{
  */
 /** @file
  */
 
-#include <test.h>
-#include <stddef.h>
-#include <str.h>
+#ifndef PC_LPT_H
+#define PC_LPT_H
 
-bool test_quiet;
+#include <async.h>
+#include <ddf/driver.h>
+#include <ddi.h>
+#include <fibril_synch.h>
+#include <io/chardev_srv.h>
+#include <stdint.h>
 
-test_t tests[] = {
-#include <atomic/atomic1.def>
-#include <debug/mips1.def>
-#include <fault/fault1.def>
-#include <mm/falloc1.def>
-#include <mm/falloc2.def>
-#include <mm/mapping1.def>
-#include <mm/slab1.def>
-#include <mm/slab2.def>
-#include <synch/semaphore1.def>
-#include <synch/semaphore2.def>
-#include <print/print1.def>
-#include <print/print2.def>
-#include <print/print3.def>
-#include <print/print4.def>
-#include <print/print5.def>
-#include <thread/thread1.def>
-	{
-		.name = NULL,
-		.desc = NULL,
-		.entry = NULL
-	}
-};
+#include "pc-lpt_hw.h"
 
-const char *tests_hints_enum(const char *input, const char **help,
-    void **ctx)
-{
-	size_t len = str_length(input);
-	test_t **test = (test_t **) ctx;
+/** PC parallel port resources */
+typedef struct {
+	uintptr_t base;
+	int irq;
+} pc_lpt_res_t;
 
-	if (*test == NULL)
-		*test = tests;
+/** PC parallel port */
+typedef struct {
+	/** DDF device */
+	ddf_dev_t *dev;
+	/** Character device service structure */
+	chardev_srvs_t cds;
+	/** Hardware resources */
+	pc_lpt_res_t res;
+	/** PIO range */
+	irq_pio_range_t irq_range[1];
+	/** IRQ code */
+	irq_code_t irq_code;
+	/** Hardware access lock */
+	fibril_mutex_t hw_lock;
+	/** Hardware registers */
+	pc_lpt_regs_t *regs;
+	/** IRQ handle */
+	cap_irq_handle_t irq_handle;
+} pc_lpt_t;
 
-	for (; (*test)->name; (*test)++) {
-		const char *curname = (*test)->name;
+extern errno_t pc_lpt_add(pc_lpt_t *, pc_lpt_res_t *);
+extern errno_t pc_lpt_remove(pc_lpt_t *);
+extern errno_t pc_lpt_gone(pc_lpt_t *);
 
-		if (str_length(curname) < len)
-			continue;
-
-		if (str_lcmp(input, curname, len) == 0) {
-			(*test)++;
-			if (help)
-				*help = (*test)->desc;
-			return (curname + str_lsize(curname, len));
-		}
-	}
-
-	return NULL;
-}
+#endif
 
 /** @}
  */

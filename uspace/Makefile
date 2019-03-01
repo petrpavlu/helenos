@@ -57,6 +57,7 @@ DIRS = \
 	app/kio \
 	app/loc \
 	app/logset \
+	app/lprint \
 	app/mixerctl \
 	app/mkfat \
 	app/mkexfat \
@@ -165,6 +166,7 @@ DIRS = \
 	drv/char/i8042 \
 	drv/char/msim-con \
 	drv/char/ns8250 \
+	drv/char/pc-lpt \
 	drv/char/pl011 \
 	drv/char/pl050 \
 	drv/char/ski-con \
@@ -276,6 +278,7 @@ $(BUILDS_TESTS): $(BASE_BUILDS) $(BUILDS)
 	$(MAKE) -r -C $(basename $@) all-test PRECHECK=$(PRECHECK)
 
 export: $(BUILDS)
+	mkdir -p $(EXPORT_DIR)
 	$(MAKE) -r -C lib/posix export EXPORT_DIR=$(EXPORT_DIR)
 
 clean: $(CLEANS)

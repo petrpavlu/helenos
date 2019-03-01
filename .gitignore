@@ -114,6 +114,7 @@ uspace/app/gunzip/gunzip
 uspace/app/inet/inet
 uspace/app/init/init
 uspace/app/init/init.gz
+uspace/app/lprint/lprint
 uspace/app/kill/kill
 uspace/app/killall/killall
 uspace/app/kio/kio
@@ -137,8 +138,6 @@ uspace/app/perf/perf
 uspace/app/ping/ping
 uspace/app/ping6/ping6
 uspace/app/pkg/pkg
-uspace/app/rcubench/rcubench
-uspace/app/rcutest/rcutest
 uspace/app/redir/redir
 uspace/app/sbi/sbi
 uspace/app/sportdmp/sportdmp
@@ -215,8 +214,6 @@ uspace/dist/app/nterm
 uspace/dist/app/ping
 uspace/dist/app/ping6
 uspace/dist/app/pkg
-uspace/dist/app/rcubench
-uspace/dist/app/rcutest
 uspace/dist/app/redir
 uspace/dist/app/sbi
 uspace/dist/app/sportdmp
@@ -320,6 +317,7 @@ uspace/drv/bus/usb/xhci/xhci
 uspace/drv/char/i8042/i8042
 uspace/drv/char/msim-con/msim-con
 uspace/drv/char/ns8250/ns8250
+uspace/drv/char/pc-lpt/pc-lpt
 uspace/drv/char/pl011/pl011
 uspace/drv/char/pl050/pl050
 uspace/drv/char/ps2mouse/ps2mouse
