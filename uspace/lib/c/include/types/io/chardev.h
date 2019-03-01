@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2011 Jan Vesely
- * Copyright (c) 2017 Jiri Svoboda
+ * Copyright (c) 2019 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,22 +29,16 @@
  * @{
  */
 
-#ifndef LIBC_IO_CHARDEV_H_
-#define LIBC_IO_CHARDEV_H_
+#ifndef LIBC_TYPES_IO_CHARDEV_H_
+#define LIBC_TYPES_IO_CHARDEV_H_
 
-#include <async.h>
-#include <stddef.h>
-#include <types/io/chardev.h>
-
-typedef struct {
-	async_sess_t *sess;
-} chardev_t;
-
-extern errno_t chardev_open(async_sess_t *, chardev_t **);
-extern void chardev_close(chardev_t *);
-extern errno_t chardev_read(chardev_t *, void *, size_t, size_t *,
-    chardev_flags_t);
-extern errno_t chardev_write(chardev_t *, const void *, size_t, size_t *);
+/** Chardev read/write operation flags */
+typedef enum {
+	/** No flags */
+	chardev_f_none = 0,
+	/** Do not block even if no bytes can be transferred */
+	chardev_f_nonblock = 0x1
+} chardev_flags_t;
 
 #endif
 /**

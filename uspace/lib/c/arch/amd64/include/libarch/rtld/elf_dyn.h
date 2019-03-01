@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2011 Jan Vesely
- * Copyright (c) 2017 Jiri Svoboda
+ * Copyright (c) 2016 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +25,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** @addtogroup libc
+
+/** @addtogroup generic
  * @{
  */
+/** @file amd64 dynamic relocation types
+ */
 
-#ifndef LIBC_IO_CHARDEV_H_
-#define LIBC_IO_CHARDEV_H_
+#ifndef LIBC_amd64_RTLD_ELF_DYN_H_
+#define LIBC_amd64_RTLD_ELF_DYN_H_
 
-#include <async.h>
-#include <stddef.h>
-#include <types/io/chardev.h>
+#define R_X86_64_64		1
+#define R_X86_64_PC32		2
+#define R_X86_64_COPY		5
+#define R_X86_64_GLOB_DAT	6
+#define R_X86_64_JUMP_SLOT	7
+#define R_X86_64_RELATIVE	8
 
-typedef struct {
-	async_sess_t *sess;
-} chardev_t;
-
-extern errno_t chardev_open(async_sess_t *, chardev_t **);
-extern void chardev_close(chardev_t *);
-extern errno_t chardev_read(chardev_t *, void *, size_t, size_t *,
-    chardev_flags_t);
-extern errno_t chardev_write(chardev_t *, const void *, size_t, size_t *);
+#define R_X86_64_DTPMOD64	16
+#define R_X86_64_DTPOFF64	17
+#define R_X86_64_TPOFF64	18
 
 #endif
-/**
- * @}
+
+/** @}
  */

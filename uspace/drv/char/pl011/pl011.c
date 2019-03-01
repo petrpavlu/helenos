@@ -141,7 +141,8 @@ typedef struct {
 
 static void pl011_connection(ipc_call_t *, void *);
 
-static errno_t pl011_read(chardev_srv_t *, void *, size_t, size_t *);
+static errno_t pl011_read(chardev_srv_t *, void *, size_t, size_t *,
+    chardev_flags_t);
 static errno_t pl011_write(chardev_srv_t *, const void *, size_t, size_t *);
 
 static chardev_ops_t pl011_chardev_ops = {
@@ -326,7 +327,7 @@ static void pl011_putchar(pl011_t *pl011, uint8_t ch)
 
 /** Read from a PL011 device. */
 static errno_t pl011_read(chardev_srv_t *srv, void *buf, size_t size,
-    size_t *nread)
+    size_t *nread, chardev_flags_t flags)
 {
 	pl011_t *pl011 = (pl011_t *) srv->srvs->sarg;
 	size_t p;
@@ -335,7 +336,8 @@ static errno_t pl011_read(chardev_srv_t *srv, void *buf, size_t size,
 
 	fibril_mutex_lock(&pl011->buf_lock);
 
-	while (circ_buf_nused(&pl011->cbuf) == 0)
+	while ((flags & chardev_f_nonblock) == 0 &&
+	    circ_buf_nused(&pl011->cbuf) == 0)
 		fibril_condvar_wait(&pl011->buf_cv, &pl011->buf_lock);
 
 	p = 0;

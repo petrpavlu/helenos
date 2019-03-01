@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2011 Jan Vesely
- * Copyright (c) 2017 Jiri Svoboda
+ * Copyright (c) 2016 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +25,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** @addtogroup libc
+
+/** @addtogroup libcia32
+ * @brief
  * @{
  */
-
-#ifndef LIBC_IO_CHARDEV_H_
-#define LIBC_IO_CHARDEV_H_
-
-#include <async.h>
-#include <stddef.h>
-#include <types/io/chardev.h>
-
-typedef struct {
-	async_sess_t *sess;
-} chardev_t;
-
-extern errno_t chardev_open(async_sess_t *, chardev_t **);
-extern void chardev_close(chardev_t *);
-extern errno_t chardev_read(chardev_t *, void *, size_t, size_t *,
-    chardev_flags_t);
-extern errno_t chardev_write(chardev_t *, const void *, size_t, size_t *);
-
-#endif
 /**
- * @}
+ * @file
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <rtld/elf_dyn.h>
+#include <rtld/dynamic.h>
+
+void dyn_parse_arch(elf_dyn_t *dp, size_t bias, dyn_info_t *info)
+{
+	(void) dp;
+	(void) bias;
+	(void) info;
+}
+
+/** @}
  */
