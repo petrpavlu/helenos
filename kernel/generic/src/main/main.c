@@ -172,15 +172,19 @@ NO_TRACE void main_bsp(void)
 	config.kernel_size =
 	    ALIGN_UP((uintptr_t) kdata_end - config.base, PAGE_SIZE);
 
+	// XXX: All kernel stacks must be aligned to STACK_SIZE,
+	//      see get_stack_base().
+
 	/* Place the stack after the kernel, init and ballocs. */
-	config.stack_base = config.base + config.kernel_size;
+	config.stack_base =
+	    ALIGN_UP(config.base + config.kernel_size, STACK_SIZE);
 	config.stack_size = STACK_SIZE;
 
 	/* Avoid placing stack on top of init */
 	size_t i;
 	for (i = 0; i < init.cnt; i++) {
 		uintptr_t p = init.tasks[i].paddr + init.tasks[i].size;
-		uintptr_t bottom = PA2KA(ALIGN_UP(p, PAGE_SIZE));
+		uintptr_t bottom = PA2KA(ALIGN_UP(p, STACK_SIZE));
 
 		if (config.stack_base < bottom)
 			config.stack_base = bottom;
@@ -189,13 +193,13 @@ NO_TRACE void main_bsp(void)
 	/* Avoid placing stack on top of boot allocations. */
 	if (ballocs.size) {
 		uintptr_t bottom =
-		    ALIGN_UP(ballocs.base + ballocs.size, PAGE_SIZE);
+		    ALIGN_UP(ballocs.base + ballocs.size, STACK_SIZE);
 		if (config.stack_base < bottom)
 			config.stack_base = bottom;
 	}
 
 	if (config.stack_base < stack_safe)
-		config.stack_base = ALIGN_UP(stack_safe, PAGE_SIZE);
+		config.stack_base = ALIGN_UP(stack_safe, STACK_SIZE);
 
 	context_save(&ctx);
 	context_set(&ctx, FADDR(main_bsp_separated_stack),
@@ -212,7 +216,7 @@ NO_TRACE void main_bsp(void)
 void main_bsp_separated_stack(void)
 {
 	/* Keep this the first thing. */
-	the_initialize(THE);
+	current_initialize(CURRENT);
 
 	version_print();
 
@@ -341,9 +345,9 @@ void main_ap(void)
 	config.cpu_active++;
 
 	/*
-	 * The THE structure is well defined because ctx.sp is used as stack.
+	 * The CURRENT structure is well defined because ctx.sp is used as stack.
 	 */
-	the_initialize(THE);
+	current_initialize(CURRENT);
 
 	ARCH_OP(pre_mm_init);
 	frame_init();
@@ -355,7 +359,7 @@ void main_ap(void)
 	calibrate_delay_loop();
 	ARCH_OP(post_cpu_init);
 
-	the_copy(THE, (the_t *) CPU->stack);
+	current_copy(CURRENT, (current_t *) CPU->stack);
 
 	/*
 	 * If we woke kmp up before we left the kernel stack, we could

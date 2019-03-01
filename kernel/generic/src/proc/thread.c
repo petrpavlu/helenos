@@ -193,6 +193,9 @@ static errno_t thr_constructor(void *obj, unsigned int kmflags)
 	kmflags |= FRAME_LOWMEM;
 	kmflags &= ~FRAME_HIGHMEM;
 
+	// XXX: All kernel stacks must be aligned to STACK_SIZE,
+	//      see get_stack_base().
+
 	uintptr_t stack_phys =
 	    frame_alloc(STACK_FRAMES, kmflags, STACK_SIZE - 1);
 	if (!stack_phys) {
@@ -355,7 +358,7 @@ thread_t *thread_create(void (*func)(void *), void *arg, task_t *task,
 	context_set(&thread->saved_context, FADDR(cushion),
 	    (uintptr_t) thread->kstack, STACK_SIZE);
 
-	the_initialize((the_t *) thread->kstack);
+	current_initialize((current_t *) thread->kstack);
 
 	ipl_t ipl = interrupts_disable();
 	thread->saved_context.ipl = interrupts_read();
