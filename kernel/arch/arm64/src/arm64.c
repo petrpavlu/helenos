@@ -205,9 +205,7 @@ void userspace(uspace_arg_t *kernel_uarg)
 	    :: [uspace_uarg] "r" (kernel_uarg->uspace_uarg)
 	);
 
-	/* Unreachable. */
-	while (1)
-		;
+	unreachable();
 }
 
 /** Perform ARM64 specific tasks needed before the new task is run. */
