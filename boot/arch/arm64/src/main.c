@@ -219,8 +219,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 	 * Allocate memory for the decompressed components and for the bootinfo.
 	 */
 	uint64_t component_pages =
-	    ALIGN_UP(payload_uncompressed_size(), EFI_PAGE_SIZE) / 
-	    EFI_PAGE_SIZE;
+	    ALIGN_UP(payload_unpacked_size(), EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
 	uint64_t bootinfo_pages = ALIGN_UP(sizeof(*bootinfo), EFI_PAGE_SIZE) /
 	    EFI_PAGE_SIZE;
 	alloc_pages = component_pages + bootinfo_pages;

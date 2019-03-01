@@ -54,7 +54,7 @@ extern uint8_t payload_end[];
 #define payload_end_arch() payload_end
 #endif
 
-size_t payload_uncompressed_size(void);
+size_t payload_unpacked_size(void);
 void extract_payload(taskmap_t *, uint8_t *, uint8_t *, uintptr_t,
     void (*)(void *, size_t));
 
