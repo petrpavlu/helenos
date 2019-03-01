@@ -56,7 +56,6 @@ ARCH_SOURCES = \
 	arch/$(KARCH)/src/smc.c \
 	arch/$(KARCH)/src/smp/ipi.c \
 	arch/$(KARCH)/src/smp/smp.c \
-	arch/$(KARCH)/src/smp/smp_call.c \
 	arch/$(KARCH)/src/start.S
 
 ifeq ($(MACHINE),virt)
