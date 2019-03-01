@@ -16,6 +16,8 @@ OUTPUT_ARCH(aarch64)
 ENTRY(kernel_image_start)
 
 SECTIONS {
+	kernel_load_address = LOAD_ADDRESS_V;
+
 	.image LOAD_ADDRESS_V: AT (LOAD_ADDRESS_P) {
 		ktext_start = .;
 		*(K_TEXT_START)
@@ -25,12 +27,6 @@ SECTIONS {
 		kdata_start = .;
 		*(K_DATA_START)
 		*(.data);                       /* initialized data */
-		hardcoded_ktext_size = .;
-		QUAD(ktext_end - ktext_start);
-		hardcoded_kdata_size = .;
-		QUAD(kdata_end - kdata_start);
-		hardcoded_load_address = .;
-		QUAD(LOAD_ADDRESS_V);
 		*(.bss);                        /* uninitialized static variables */
 		*(COMMON);                      /* global variables */
 
