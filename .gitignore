@@ -133,6 +133,7 @@ uspace/app/nettest2/nettest2
 uspace/app/nettest3/nettest3
 uspace/app/nic/nic
 uspace/app/nterm/nterm
+uspace/app/perf/perf
 uspace/app/ping/ping
 uspace/app/ping6/ping6
 uspace/app/pkg/pkg
@@ -462,6 +463,7 @@ uspace/srv/ns/ns
 uspace/srv/ns/ns.gz
 uspace/srv/taskmon/taskmon
 uspace/srv/test/chardev-test/chardev-test
+uspace/srv/test/ipc-test/ipc-test
 uspace/srv/vfs/vfs
 uspace/srv/vfs/vfs.gz
 uspace/srv/volsrv/test-volsrv

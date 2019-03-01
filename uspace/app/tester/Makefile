@@ -55,7 +55,7 @@ SOURCES = \
 	float/float1.c \
 	float/float2.c \
 	vfs/vfs1.c \
-	ipc/ping_pong.c \
+	ipc/sharein.c \
 	ipc/starve.c \
 	loop/loop1.c \
 	mm/common.c \

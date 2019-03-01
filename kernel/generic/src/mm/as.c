@@ -870,6 +870,7 @@ errno_t as_area_resize(as_t *as, uintptr_t address, size_t size, unsigned int fl
 					bool found = page_mapping_find(as,
 					    ptr + P2SZ(i), false, &pte);
 
+					(void) found;
 					assert(found);
 					assert(PTE_VALID(&pte));
 					assert(PTE_PRESENT(&pte));
@@ -983,6 +984,7 @@ errno_t as_area_destroy(as_t *as, uintptr_t address)
 				bool found = page_mapping_find(as,
 				    ptr + P2SZ(size), false, &pte);
 
+				(void) found;
 				assert(found);
 				assert(PTE_VALID(&pte));
 				assert(PTE_PRESENT(&pte));
@@ -1301,6 +1303,7 @@ errno_t as_area_change_flags(as_t *as, unsigned int flags, uintptr_t address)
 				bool found = page_mapping_find(as,
 				    ptr + P2SZ(size), false, &pte);
 
+				(void) found;
 				assert(found);
 				assert(PTE_VALID(&pte));
 				assert(PTE_PRESENT(&pte));
@@ -2226,6 +2229,26 @@ sys_errno_t sys_as_area_resize(uintptr_t address, size_t size, unsigned int flag
 sys_errno_t sys_as_area_change_flags(uintptr_t address, unsigned int flags)
 {
 	return (sys_errno_t) as_area_change_flags(AS, flags, address);
+}
+
+sys_errno_t sys_as_area_get_info(uintptr_t address, as_area_info_t *dest)
+{
+	as_area_t *area;
+
+	mutex_lock(&AS->lock);
+	area = find_area_and_lock(AS, address);
+	if (area == NULL) {
+		mutex_unlock(&AS->lock);
+		return ENOENT;
+	}
+
+	dest->start_addr = area->base;
+	dest->size = P2SZ(area->pages);
+	dest->flags = area->flags;
+
+	mutex_unlock(&area->lock);
+	mutex_unlock(&AS->lock);
+	return EOK;
 }
 
 sys_errno_t sys_as_area_destroy(uintptr_t address)
