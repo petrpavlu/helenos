@@ -43,10 +43,10 @@
 #include <synch/mutex.h>
 #include <synch/futex.h>
 #include <synch/workqueue.h>
-#include <adt/avl.h>
 #include <adt/btree.h>
 #include <adt/cht.h>
 #include <adt/list.h>
+#include <adt/odict.h>
 #include <security/perm.h>
 #include <arch/proc/task.h>
 #include <arch/proc/thread.h>
@@ -69,8 +69,8 @@ struct cap;
 
 /** Task structure. */
 typedef struct task {
-	/** Task's linkage for the tasks_tree AVL tree. */
-	avltree_node_t tasks_tree_node;
+	/** Link to @c tasks ordered dictionary */
+	odlink_t ltasks;
 
 	/** Task lock.
 	 *
@@ -145,8 +145,10 @@ typedef struct task {
 	uint64_t kcycles;
 } task_t;
 
+/** Synchronize access to @c tasks */
 IRQ_SPINLOCK_EXTERN(tasks_lock);
-extern avltree_t tasks_tree;
+/** Ordered dictionary of all tasks by ID (of task_t structures) */
+extern odict_t tasks;
 
 extern void task_init(void);
 extern void task_done(void);
@@ -155,6 +157,9 @@ extern void task_destroy(task_t *);
 extern void task_hold(task_t *);
 extern void task_release(task_t *);
 extern task_t *task_find_by_id(task_id_t);
+extern size_t task_count(void);
+extern task_t *task_first(void);
+extern task_t *task_next(task_t *);
 extern errno_t task_kill(task_id_t);
 extern void task_kill_self(bool) __attribute__((noreturn));
 extern void task_get_accounting(task_t *, uint64_t *, uint64_t *);

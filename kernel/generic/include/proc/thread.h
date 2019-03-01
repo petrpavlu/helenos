@@ -41,7 +41,7 @@
 #include <cpu.h>
 #include <synch/spinlock.h>
 #include <synch/rcu_types.h>
-#include <adt/avl.h>
+#include <adt/odict.h>
 #include <mm/slab.h>
 #include <arch/cpu.h>
 #include <mm/tlb.h>
@@ -74,8 +74,8 @@ typedef struct thread {
 	link_t wq_link;  /**< Wait queue link. */
 	link_t th_link;  /**< Links to threads within containing task. */
 
-	/** Threads linkage to the threads_tree. */
-	avltree_node_t threads_tree_node;
+	/** Link to @c threads ordered dictionary. */
+	odlink_t lthreads;
 
 	/** Lock protecting thread structure.
 	 *
@@ -223,16 +223,8 @@ typedef struct thread {
 #endif /* CONFIG_UDEBUG */
 } thread_t;
 
-/** Thread list lock.
- *
- * This lock protects the threads_tree.
- * Must be acquired before T.lock for each T of type thread_t.
- *
- */
 IRQ_SPINLOCK_EXTERN(threads_lock);
-
-/** AVL tree containing all threads. */
-extern avltree_t threads_tree;
+extern odict_t threads;
 
 extern void thread_init(void);
 extern thread_t *thread_create(void (*)(void *), void *, task_t *,
@@ -268,6 +260,9 @@ extern void thread_detach(thread_t *);
 extern void thread_print_list(bool);
 extern void thread_destroy(thread_t *, bool);
 extern thread_t *thread_find_by_id(thread_id_t);
+extern size_t thread_count(void);
+extern thread_t *thread_first(void);
+extern thread_t *thread_next(thread_t *);
 extern void thread_update_accounting(bool);
 extern bool thread_exists(thread_t *);
 
