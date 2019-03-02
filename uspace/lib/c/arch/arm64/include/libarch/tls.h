@@ -33,8 +33,8 @@
  * @brief Thread-local storage.
  */
 
-#ifndef LIBC_arm64_TLS_H_
-#define LIBC_arm64_TLS_H_
+#ifndef _LIBC_arm64_TLS_H_
+#define _LIBC_arm64_TLS_H_
 
 #define CONFIG_TLS_VARIANT_1
 

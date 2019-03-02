@@ -33,8 +33,8 @@
  * @brief
  */
 
-#ifndef LIBC_arm64_SYSCALL_H_
-#define LIBC_arm64_SYSCALL_H_
+#ifndef _LIBC_arm64_SYSCALL_H_
+#define _LIBC_arm64_SYSCALL_H_
 
 #define LIBARCH_SYSCALL_GENERIC
 
