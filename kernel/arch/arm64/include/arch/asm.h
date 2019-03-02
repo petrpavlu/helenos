@@ -48,7 +48,7 @@ extern char exc_vector;
 extern void asm_delay_loop(uint32_t usec);
 
 /** CPU specific way to sleep cpu. */
-NO_TRACE static inline void cpu_sleep(void)
+_NO_TRACE static inline void cpu_sleep(void)
 {
 	asm volatile ("wfe");
 }
@@ -59,7 +59,7 @@ NO_TRACE static inline void cpu_sleep(void)
  * The stack is assumed to be STACK_SIZE bytes long.
  * The stack must start on page boundary.
  */
-NO_TRACE static inline uintptr_t get_stack_base(void)
+_NO_TRACE static inline uintptr_t get_stack_base(void)
 {
 	uintptr_t v;
 
@@ -74,7 +74,7 @@ NO_TRACE static inline uintptr_t get_stack_base(void)
 }
 
 /** Halts CPU. */
-NO_TRACE static inline __attribute__((noreturn)) void cpu_halt(void)
+_NO_TRACE static inline __attribute__((noreturn)) void cpu_halt(void)
 {
 	while (true)
 		;
@@ -85,7 +85,7 @@ NO_TRACE static inline __attribute__((noreturn)) void cpu_halt(void)
  * @param port Port to write to.
  * @param val  Value to write.
  */
-NO_TRACE static inline void pio_write_8(ioport8_t *port, uint8_t val)
+_NO_TRACE static inline void pio_write_8(ioport8_t *port, uint8_t val)
 {
 	*port = val;
 }
@@ -95,7 +95,7 @@ NO_TRACE static inline void pio_write_8(ioport8_t *port, uint8_t val)
  * @param port Port to write to.
  * @param val  Value to write.
  */
-NO_TRACE static inline void pio_write_16(ioport16_t *port, uint16_t val)
+_NO_TRACE static inline void pio_write_16(ioport16_t *port, uint16_t val)
 {
 	*port = val;
 }
@@ -105,7 +105,7 @@ NO_TRACE static inline void pio_write_16(ioport16_t *port, uint16_t val)
  * @param port Port to write to.
  * @param val  Value to write.
  */
-NO_TRACE static inline void pio_write_32(ioport32_t *port, uint32_t val)
+_NO_TRACE static inline void pio_write_32(ioport32_t *port, uint32_t val)
 {
 	*port = val;
 }
@@ -115,7 +115,7 @@ NO_TRACE static inline void pio_write_32(ioport32_t *port, uint32_t val)
  * @param port Port to read from.
  * @return Value read.
  */
-NO_TRACE static inline uint8_t pio_read_8(const ioport8_t *port)
+_NO_TRACE static inline uint8_t pio_read_8(const ioport8_t *port)
 {
 	return *port;
 }
@@ -125,7 +125,7 @@ NO_TRACE static inline uint8_t pio_read_8(const ioport8_t *port)
  * @param port Port to read from.
  * @return Value read.
  */
-NO_TRACE static inline uint16_t pio_read_16(const ioport16_t *port)
+_NO_TRACE static inline uint16_t pio_read_16(const ioport16_t *port)
 {
 	return *port;
 }
@@ -135,7 +135,7 @@ NO_TRACE static inline uint16_t pio_read_16(const ioport16_t *port)
  * @param port Port to read from.
  * @return Value read.
  */
-NO_TRACE static inline uint32_t pio_read_32(const ioport32_t *port)
+_NO_TRACE static inline uint32_t pio_read_32(const ioport32_t *port)
 {
 	return *port;
 }

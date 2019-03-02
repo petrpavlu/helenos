@@ -44,7 +44,7 @@
  * No instruction exists on ARM64 to get the actual CPU cycle. The function
  * instead returns the value of the virtual counter.
  */
-NO_TRACE static inline uint64_t get_cycle(void)
+_NO_TRACE static inline uint64_t get_cycle(void)
 {
 	return CNTVCT_EL0_read();
 }

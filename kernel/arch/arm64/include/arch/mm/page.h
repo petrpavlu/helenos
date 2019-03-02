@@ -291,7 +291,7 @@ typedef struct {
  * @param pt Level 0, 1, 2 page table.
  * @param i  Index of the entry to return.
  */
-NO_TRACE static inline unsigned int get_pt_level012_flags(pte_t *pt, size_t i)
+_NO_TRACE static inline unsigned int get_pt_level012_flags(pte_t *pt, size_t i)
 {
 	pte_t *p = &pt[i];
 
@@ -306,7 +306,7 @@ NO_TRACE static inline unsigned int get_pt_level012_flags(pte_t *pt, size_t i)
  * @param pt Level 3 page table.
  * @param i  Index of the entry to return.
  */
-NO_TRACE static inline unsigned int get_pt_level3_flags(pte_t *pt, size_t i)
+_NO_TRACE static inline unsigned int get_pt_level3_flags(pte_t *pt, size_t i)
 {
 	pte_t *p = &pt[i];
 
@@ -330,7 +330,7 @@ NO_TRACE static inline unsigned int get_pt_level3_flags(pte_t *pt, size_t i)
  * @param i     Index of the entry to be changed.
  * @param flags New flags.
  */
-NO_TRACE static inline void set_pt_level012_flags(pte_t *pt, size_t i,
+_NO_TRACE static inline void set_pt_level012_flags(pte_t *pt, size_t i,
     int flags)
 {
 	pte_t *p = &pt[i];
@@ -345,7 +345,7 @@ NO_TRACE static inline void set_pt_level012_flags(pte_t *pt, size_t i,
  * @param i     Index of the entry to be changed.
  * @param flags New flags.
  */
-NO_TRACE static inline void set_pt_level3_flags(pte_t *pt, size_t i,
+_NO_TRACE static inline void set_pt_level3_flags(pte_t *pt, size_t i,
     int flags)
 {
 	pte_t *p = &pt[i];
@@ -382,7 +382,7 @@ NO_TRACE static inline void set_pt_level3_flags(pte_t *pt, size_t i,
  * @param pt Level 0, 1, 2, 3 page table.
  * @param i  Index of the entry to be changed.
  */
-NO_TRACE static inline void set_pt_present(pte_t *pt, size_t i)
+_NO_TRACE static inline void set_pt_present(pte_t *pt, size_t i)
 {
 	pte_t *p = &pt[i];
 
@@ -393,7 +393,7 @@ NO_TRACE static inline void set_pt_present(pte_t *pt, size_t i)
  *
  * @param pte Page table entry.
  */
-NO_TRACE static inline bool get_pt_executable(pte_t *pte)
+_NO_TRACE static inline bool get_pt_executable(pte_t *pte)
 {
 	if (pte->access_permission == PTE_AP_USER_NO_KERNEL_FULL ||
 	    pte->access_permission == PTE_AP_USER_NO_KERNEL_LIMITED)
@@ -406,7 +406,7 @@ NO_TRACE static inline bool get_pt_executable(pte_t *pte)
  *
  * @param pte Page table entry.
  */
-NO_TRACE static inline bool get_pt_writable(pte_t *pte)
+_NO_TRACE static inline bool get_pt_writable(pte_t *pte)
 {
 	return pte->access_permission == PTE_AP_USER_FULL_KERNEL_FULL ||
 	    pte->access_permission == PTE_AP_USER_NO_KERNEL_FULL;
