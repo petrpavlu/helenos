@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Jakub Jermar
+ * Copyright (c) 2019 Jakub Jermar
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,55 +26,69 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _VIRTIO_NET_H_
-#define _VIRTIO_NET_H_
+#ifndef _VIRTIO_BLK_H_
+#define _VIRTIO_BLK_H_
 
 #include <virtio-pci.h>
+#include <bd_srv.h>
 #include <abi/cap.h>
-#include <nic/nic.h>
 
-#define RX_BUFFERS	8
-#define TX_BUFFERS	8
-#define CT_BUFFERS	4
+#include <fibril_synch.h>
 
-/** Device handles packets with partial checksum. */
-#define VIRTIO_NET_F_CSUM		(1U << 0)
-/** Driver handles packets with partial checksum. */
-#define VIRTIO_NET_F_GUEST_CSUM		(1U << 2)
-/** Device has given MAC address. */
-#define VIRTIO_NET_F_MAC		(1U << 5)
-/** Control channel is available */
-#define VIRTIO_NET_F_CTRL_VQ		(1U << 17)
+#define VIRTIO_BLK_BLOCK_SIZE	512
 
-#define VIRTIO_NET_HDR_GSO_NONE 0
-typedef struct {
-	uint8_t flags;
-	uint8_t gso_type;
-	uint16_t hdr_len;
-	uint16_t gso_size;
-	uint16_t csum_start;
-	uint16_t csum_offset;
-	uint16_t num_buffers;
-} virtio_net_hdr_t;
+/* Operation types. */
+#define VIRTIO_BLK_T_IN		0
+#define VIRTIO_BLK_T_OUT	1
+
+/* Status codes returned by the device. */
+#define VIRTIO_BLK_S_OK		0
+#define VIRTIO_BLK_S_IOERR	1
+#define VIRTIO_BLK_S_UNSUPP	2
+
+#define RQ_BUFFERS	32
+
+/** Device is read-only. */
+#define VIRTIO_BLK_F_RO		(1U << 5)
 
 typedef struct {
-	uint8_t mac[ETH_ADDR];
-} virtio_net_cfg_t;
+	uint32_t type;
+	uint32_t reserved;
+	uint64_t sector;
+} virtio_blk_req_header_t;
+
+typedef struct {
+	uint8_t status;
+} virtio_blk_req_footer_t;
+
+typedef struct {
+	uint64_t capacity;
+} virtio_blk_cfg_t;
 
 typedef struct {
 	virtio_dev_t virtio_dev;
-	void *rx_buf[RX_BUFFERS];
-	uintptr_t rx_buf_p[RX_BUFFERS];
-	void *tx_buf[TX_BUFFERS];
-	uintptr_t tx_buf_p[TX_BUFFERS];
-	void *ct_buf[CT_BUFFERS];
-	uintptr_t ct_buf_p[CT_BUFFERS];
 
-	uint16_t tx_free_head;
-	uint16_t ct_free_head;
+	void *rq_header[RQ_BUFFERS];
+	uintptr_t rq_header_p[RQ_BUFFERS];
+
+	void *rq_buf[RQ_BUFFERS];
+	uintptr_t rq_buf_p[RQ_BUFFERS];
+
+	void *rq_footer[RQ_BUFFERS];
+	uintptr_t rq_footer_p[RQ_BUFFERS];
+
+	uint16_t rq_free_head;
 
 	int irq;
 	cap_irq_handle_t irq_handle;
-} virtio_net_t;
+
+	bd_srvs_t bds;
+
+	fibril_mutex_t free_lock;
+	fibril_condvar_t free_cv;
+
+	fibril_mutex_t completion_lock[RQ_BUFFERS];
+	fibril_condvar_t completion_cv[RQ_BUFFERS];
+} virtio_blk_t;
 
 #endif
