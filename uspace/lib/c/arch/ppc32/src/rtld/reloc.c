@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup libcsparc64
+/** @addtogroup libcppc32
  * @brief
  * @{
  */
@@ -35,10 +35,11 @@
  */
 
 #include <bitops.h>
-#include <mem.h>
 #include <smc.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
+#include <str.h>
 
 #include <libarch/rtld/elf_dyn.h>
 #include <rtld/symbol.h>
@@ -46,7 +47,12 @@
 #include <rtld/rtld_debug.h>
 #include <rtld/rtld_arch.h>
 
-static void fill_plt_entry_generic(uint32_t *, uintptr_t);
+static void plt_farcall_init(uint32_t *plt, uint32_t *);
+static void plt_entry_init(uint32_t *, uint32_t *, uint32_t *, uintptr_t);
+static uint32_t *plt_entry_ptr(uint32_t *, size_t);
+static size_t plt_entry_index(size_t);
+static uint16_t addr_ha(uint32_t);
+static uint16_t addr_l(uint32_t);
 
 void module_process_pre_arch(module_t *m)
 {
@@ -54,12 +60,10 @@ void module_process_pre_arch(module_t *m)
 }
 
 /**
- * Process (fixup) all relocations in a relocation table with implicit addends.
+ * Process (fixup) all relocations in a relocation table.
  */
 void rel_table_process(module_t *m, elf_rel_t *rt, size_t rt_size)
 {
-
-	DPRINTF("rel table address: 0x%zx, size: %zd\n", (uintptr_t)rt, rt_size);
 	/* Unused */
 	(void)m;
 	(void)rt;
@@ -90,14 +94,36 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 	elf_symbol_t *sym_def;
 	module_t *dest;
 	uint32_t *plt;
+	uint32_t *plt_datawords;
+	size_t jmp_slots;
+
+	DPRINTF("Count jump slots.\n");
+
+	rt_entries = rt_size / sizeof(elf_rela_t);
+
+	jmp_slots = 0;
+	for (i = 0; i < rt_entries; ++i) {
+		r_info = rt[i].r_info;
+		rel_type = ELF32_R_TYPE(r_info);
+
+		if (rel_type == R_PPC_JMP_SLOT)
+			++jmp_slots;
+	}
+
+	DPRINTF("Init farcall section\n");
+
+	plt = (uint32_t *)m->dyn.plt_got;
+
+	/* Table with addresses starts just after last PLT entry */
+	plt_datawords = plt_entry_ptr(plt, jmp_slots);
+
+	/* Init farcall section with reference to datawords table */
+	plt_farcall_init(plt, plt_datawords);
 
 	DPRINTF("parse relocation table\n");
 
 	sym_table = m->dyn.sym_tab;
-	rt_entries = rt_size / sizeof(elf_rela_t);
 	str_tab = m->dyn.str_tab;
-
-	plt = (uint32_t *)m->dyn.plt_got;
 
 	DPRINTF("rel table address: 0x%zx, entries: %zd\n", (uintptr_t)rt, rt_entries);
 
@@ -109,7 +135,7 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 		r_info = rt[i].r_info;
 		r_addend = rt[i].r_addend;
 
-		sym_idx = ELF64_R_SYM(r_info);
+		sym_idx = ELF32_R_SYM(r_info);
 		sym = &sym_table[sym_idx];
 
 #if 0
@@ -118,7 +144,7 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 		    sym->st_value,
 		    sym->st_size);
 #endif
-		rel_type = ELF64_R_TYPE(r_info);
+		rel_type = ELF32_R_TYPE(r_info);
 		r_ptr = (uintptr_t *)(r_offset + m->bias);
 
 		if (sym->st_name != 0) {
@@ -148,14 +174,27 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 		}
 
 		switch (rel_type) {
-		case R_SPARC_COPY:
+		case R_PPC_ADDR32:
+			DPRINTF("fixup R_PPC_ADDR32 (S+A)\n");
+			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr, sym_addr);
+			*r_ptr = sym_addr + r_addend;
+			DPRINTF("OK\n");
+			break;
+		case R_PPC_REL24:
+			DPRINTF("fixup R_PPC_REL24 ((S+A-P) >> 2)\n");
+			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr,
+			    (sym_addr + r_addend - (uintptr_t)r_ptr) >> 2);
+			*r_ptr = (sym_addr + r_addend - (uintptr_t)r_ptr) >> 2;
+			DPRINTF("OK\n");
+			break;
+		case R_PPC_COPY:
 			/*
 			 * Copy symbol data from shared object to specified
 			 * location. Need to find the 'source', i.e. the
 			 * other instance of the object than the one in the
 			 * executable program.
 			 */
-			DPRINTF("fixup R_SPARC_COPY (s)\n");
+			DPRINTF("fixup R_PPC_COPY (s)\n");
 
 			sym_def = symbol_def_find(str_tab + sym->st_name,
 			    m, ssf_noexec, &dest);
@@ -171,7 +210,9 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 
 			sym_size = sym->st_size;
 			if (sym_size != sym_def->st_size) {
+#if 0
 				printf("Warning: Mismatched symbol sizes.\n");
+#endif
 				/* Take the lower value. */
 				if (sym_size > sym_def->st_size)
 					sym_size = sym_def->st_size;
@@ -181,15 +222,8 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 			DPRINTF("OK\n");
 			break;
 
-		case R_SPARC_GLOB_DAT:
-			DPRINTF("fixup R_SPARC_GLOB_DAT (S+A)\n");
-			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr, sym_addr);
-			*r_ptr = sym_addr + r_addend;
-			DPRINTF("OK\n");
-			break;
-
-		case R_SPARC_JMP_SLOT:
-			DPRINTF("fixup R_SPARC_JMP_SLOT (S)\n");
+		case R_PPC_JMP_SLOT:
+			DPRINTF("fixup R_PPC_JMP_SLOT (S)\n");
 			DPRINTF("r_offset=0x%zx r_addend=0x%zx\n",
 			    r_offset, r_addend);
 
@@ -207,7 +241,9 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 
 			sym_size = sym->st_size;
 			if (sym_size != sym_def->st_size) {
+#if 0
 				printf("Warning: Mismatched symbol sizes.\n");
+#endif
 				/* Take the lower value. */
 				if (sym_size > sym_def->st_size)
 					sym_size = sym_def->st_size;
@@ -218,50 +254,32 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 
 			/*
 			 * Fill PLT entry with jump to symbol address.
-			 * r_ptr points to the PLT entry, sym_addr contains
-			 * address of the symbol.
-			 *
-			 * XXX This only works for the first 32768 entries.
-			 * If there are more, the layout is more complex.
 			 */
-			assert((uint32_t *)r_ptr - plt < 32768 * 8);
-			fill_plt_entry_generic((uint32_t *)r_ptr, sym_addr);
-			smc_coherence(r_ptr, 32);
+			plt_entry_init(plt, (uint32_t *)r_ptr, plt_datawords,
+			    sym_addr);
 
 			DPRINTF("OK\n");
 			break;
 
-		case R_SPARC_RELATIVE:
-			DPRINTF("fixup R_SPARC_RELATIVE (B+A)\n");
+		case R_PPC_RELATIVE:
+			DPRINTF("fixup R_PPC_RELATIVE (B+A)\n");
 			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr, m->bias + r_addend);
 			*r_ptr = m->bias + r_addend;
 			DPRINTF("OK\n");
 			break;
 
-		case R_SPARC_64:
-			DPRINTF("fixup R_SPARC_64 (S+A)\n");
-			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr, sym_addr);
-			*r_ptr = sym_addr + r_addend;
-			DPRINTF("OK\n");
-			break;
-
-		case R_SPARC_TLS_DTPMOD64:
-			DPRINTF("fixup R_SPARC_TLS_DTPMOD64\n");
+		case R_PPC_DTPMOD32:
+			DPRINTF("fixup R_PPC_DTPMOD32\n");
 			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr, (size_t)dest->id);
 			*r_ptr = dest->id;
 			DPRINTF("OK\n");
 			break;
 
-		case R_SPARC_TLS_DTPOFF64:
-			DPRINTF("fixup R_SPARC_TLS_DTPOFF64\n");
+		case R_PPC_DTPREL32:
+			DPRINTF("fixup R_PPC_DTPREL32\n"); /* XXXXX */
 			DPRINTF("*0x%zx = 0x%zx\n", (uintptr_t)r_ptr, sym_def->st_value);
-			*r_ptr = sym_def->st_value;
+			*r_ptr = sym_def->st_value + r_addend;
 			DPRINTF("OK\n");
-			break;
-
-		case R_SPARC_TLS_TPOFF64:
-			DPRINTF("fixup R_SPARC_TLS_TPOFF64\n");
-			*r_ptr = sym_def->st_value + dest->tpoff;
 			break;
 
 		default:
@@ -273,37 +291,140 @@ void rela_table_process(module_t *m, elf_rela_t *rt, size_t rt_size)
 	}
 }
 
-/** Fill in generic PLT entry.
+/** Init PLT farcall section. */
+static void plt_farcall_init(uint32_t *plt, uint32_t *plt_datawords)
+{
+	uint16_t hi;
+	uint16_t lo;
+	int i;
+
+	hi = addr_ha((uintptr_t)plt_datawords);
+	lo = addr_l((uintptr_t)plt_datawords);
+
+	plt[0] = 0x3d6b0000 | hi; /* addis %r11,% r11,. plt_datawords@ha */
+	plt[1] = 0x816b0000 | lo; /* lwz %r11, .plt_datawords@l(%r11) */
+	plt[2] = 0x7d6903a6;      /* mtctr %r11 */
+	plt[3] = 0x4e800420;      /* bctr */
+	plt[4] = 0x60000000;      /* nop */
+	plt[5] = 0x60000000;      /* nop */
+
+	smc_coherence(plt, 4 * 6);
+
+	for (i = 0; i < 6; i++)
+		DPRINTF("%p: farcall[%d] = %08zx\n", &plt[i], i, plt[i]);
+}
+
+/** Fill in PLT entry.
  *
- * Fill a PLT entry with SPARC instructions to jump to the specified
- * address.
+ * Fill a PLT entry with PowerPC instructions to set table index and
+ * jump to the farcall section. Fill table entry with target address.
  *
+ * @param plt Pointer to PLT
  * @param plte Pointer to PLT entry to fill in
+ * @param datawords Address table
  * @param ta Target address of the jump
  */
-static void fill_plt_entry_generic(uint32_t *plte, uintptr_t ta)
+static void plt_entry_init(uint32_t *plt, uint32_t *plte, uint32_t *datawords,
+    uintptr_t ta)
 {
-	uint32_t hh, lm, hm, lo;
+	size_t index;
+	size_t woffset;
+	uint16_t i4index;
+	uint32_t btgt;
 
-	hh = BIT_RANGE_EXTRACT(uintptr_t, 63, 42, ta);
-	hm = BIT_RANGE_EXTRACT(uintptr_t, 41, 32, ta);
-	lm = BIT_RANGE_EXTRACT(uintptr_t, 31, 10, ta);
-	lo = BIT_RANGE_EXTRACT(uintptr_t, 9, 0, ta);
+	DPRINTF("plt_entry_init(plt=%p, plte=%p, datawords=%p, ta=0z%zx\n",
+	    plt, plte, datawords, ta);
 
-	plte[0] = 0x01000000;      /* nop */
-	plte[1] = 0x03000000 | hh; /* sethi %hh(target), %g1 */
-	plte[2] = 0x0b000000 | lm; /* sethi %lm(target), %g5 */
-	plte[3] = 0x82106000 | hm; /* or %g1, %hm(target), %g1 */
-	plte[4] = 0x83287020;      /* sllx %g1, 32, %g1 */
-	plte[5] = 0x8a104005;      /* or %g1, %g5, %g5 */
-	plte[6] = 0x81c16000 | lo; /* jmpl %g5+lo(target),%g0 */
-	plte[7] = 0x01000000;      /* nop */
+	/* Entry offset in words */
+	woffset = plte - plt;
 
-	DPRINTF("Fill PTL entry at %p (target=0x%zx)\n",
-	    plte, ta);
-	for (unsigned i = 0; i < 8; i++) {
-		DPRINTF(" - [%d] = 0x%08x\n", i, plte[i]);
+	/* Entry index */
+	index = plt_entry_index(woffset);
+
+	/* This only works for the first 2048 entries */
+	assert(index * 4 < 0x8000);
+	i4index = 4 * index;
+
+	/* Relative branch offset */
+	btgt = ((uint8_t *)plt - (uint8_t *)&plte[1]) & 0x03ffffff;
+
+	/* Write target address to table */
+	datawords[index] = ta;
+	DPRINTF("%p: datawords[%zu] = %08x\n", &datawords[index], index, ta);
+
+	plte[0] = 0x39600000 | i4index; /* li %r11, 4 * index */
+	plte[1] = 0x48000000 | btgt;    /* b .plt_farcall */
+
+	DPRINTF("%p: plte[0] = %08zx\n", &plte[0], plte[0]);
+	DPRINTF("%p: plte[1] = %08zx\n", &plte[1], plte[1]);
+
+	smc_coherence(plte, 4 * 2);
+}
+
+/** Determine PLT entry address.
+ *
+ * @param plt Start of PLT
+ * @param index PLT entry index
+ * @return Pointer to PLT entry
+ */
+static uint32_t *plt_entry_ptr(uint32_t *plt, size_t index)
+{
+	if (index < 8192)
+		return plt + 18 + 2 * index;
+	else
+		return plt + 18 + 2 * 8192 + 4 * (index - 8192);
+}
+
+/** Determine index of PLT entry from its word offset.
+ *
+ * @param woffset Offset of PLT entry in words
+ * @return PLT entry index
+ */
+static size_t plt_entry_index(size_t woffset)
+{
+	assert(woffset >= 18);
+	woffset -= 18;
+
+	if (woffset < 2 * 8192) {
+		assert((woffset & 0x1) == 0);
+		return woffset / 2;
+	} else {
+		assert((woffset & 0x3) == 0);
+		return (woffset - 2 * 8192) / 4;
 	}
+}
+
+/** Determine high bits of address.
+ *
+ * The lower bits are determined by @c addr_l function. The lower bits
+ * are considered to be a 16-bit signed integer.
+ *
+ * @param addr Address
+ * @return Higher bits of address
+ */
+static uint16_t addr_ha(uint32_t addr)
+{
+	int32_t la;
+
+	/* The lower part of the address is a signed 16-bit integer */
+	la = (int16_t)(addr & 0xffff);
+
+	/* Compute higher bits while compensating for the sign extension */
+	return (addr - la) >> 16;
+}
+
+/** Determine lower bits of address.
+ *
+ * The lower bits are considered to be 16-bit signed integer/immediate
+ * operand by the ISA, but we return them here as unsigned unmber so
+ * it can be easily incorporated into an instruction opcode.
+ *
+ * @param addr Address
+ * @return Lower bits of address cast as unsigned 16-bit integer
+ */
+static uint16_t addr_l(uint32_t addr)
+{
+	return (uint16_t) (addr & 0x0000ffff);
 }
 
 /** @}

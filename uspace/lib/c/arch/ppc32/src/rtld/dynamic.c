@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Jaroslav Jindrak
+ * Copyright (c) 2019 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LIBCPP_CASSERT
-#define LIBCPP_CASSERT
+/** @addtogroup libcppc32
+ * @brief
+ * @{
+ */
+/**
+ * @file
+ */
 
+#include <stdio.h>
+#include <stdlib.h>
 
-extern "C" {
-    #include <assert.h>
+#include <rtld/elf_dyn.h>
+#include <rtld/dynamic.h>
+
+void dyn_parse_arch(elf_dyn_t *dp, size_t bias, dyn_info_t *info)
+{
+	(void) dp;
+	(void) bias;
+	(void) info;
 }
 
-// TODO: For some reason, this function isn't visible (maybe the
-//       noreturn attribute?), adding a redeclaration here for the
-//       time being.
-
-extern void __helenos_assert_abort(const char *, const char *, unsigned int);
-
-#define __unimplemented() assert(!"Not implemented!")
-
-#endif
+/** @}
+ */

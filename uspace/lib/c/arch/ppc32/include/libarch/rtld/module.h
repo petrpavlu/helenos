@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Jaroslav Jindrak
+ * Copyright (c) 2019 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LIBCPP_CASSERT
-#define LIBCPP_CASSERT
+/** @addtogroup libc
+ * @{
+ */
+/** @file
+ */
 
+#ifndef LIBC_ppc32_RTLD_MODULE_H_
+#define LIBC_ppc32_RTLD_MODULE_H_
 
-extern "C" {
-    #include <assert.h>
-}
+#include <elf/elf_mod.h>
 
-// TODO: For some reason, this function isn't visible (maybe the
-//       noreturn attribute?), adding a redeclaration here for the
-//       time being.
-
-extern void __helenos_assert_abort(const char *, const char *, unsigned int);
-
-#define __unimplemented() assert(!"Not implemented!")
+/** ELF module load flags */
+#define RTLD_MODULE_LDF 0
 
 #endif
+
+/** @}
+ */

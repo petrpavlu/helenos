@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Jaroslav Jindrak
+ * Copyright (c) 2019 Jiri Svoboda
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LIBCPP_CASSERT
-#define LIBCPP_CASSERT
+/** @addtogroup libc
+ * @{
+ */
+/** @file
+ */
 
+#ifndef LIBC_ppc32_RTLD_ELF_DYN_H_
+#define LIBC_ppc32_RTLD_ELF_DYN_H_
 
-extern "C" {
-    #include <assert.h>
-}
+/*
+ * ppc32 dynamic relocation types
+ */
 
-// TODO: For some reason, this function isn't visible (maybe the
-//       noreturn attribute?), adding a redeclaration here for the
-//       time being.
+#define R_PPC_ADDR32   1
+#define R_PPC_REL24    10
+#define R_PPC_COPY     19
+#define R_PPC_JMP_SLOT 21
+#define R_PPC_RELATIVE 22
 
-extern void __helenos_assert_abort(const char *, const char *, unsigned int);
-
-#define __unimplemented() assert(!"Not implemented!")
+#define R_PPC_DTPMOD32 68
+#define R_PPC_DTPREL32 78
 
 #endif
+
+/** @}
+ */
