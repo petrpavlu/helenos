@@ -54,7 +54,7 @@
 #error x29 and tls are not successive in context_t
 #endif
 
-FUNCTION_BEGIN(__setjmp)
+FUNCTION_BEGIN(__context_save)
 	/* Save callee-saved registers into context_t pointed by x0. */
 	mov x1, sp
 	stp x1, x30, [x0, #__CONTEXT_OFFSET_SP]
@@ -75,9 +75,9 @@ FUNCTION_BEGIN(__setjmp)
 	/* Return 0. */
 	mov x0, #0
 	ret
-FUNCTION_END(__setjmp)
+FUNCTION_END(__context_save)
 
-FUNCTION_BEGIN(__longjmp)
+FUNCTION_BEGIN(__context_restore)
 	/* Restore callee-saved registers from context_t pointed by x0. */
 	ldp x2, x30, [x0, #__CONTEXT_OFFSET_SP]
 	mov sp, x2
@@ -98,4 +98,4 @@ FUNCTION_BEGIN(__longjmp)
 	/* Return the second argument. */
 	mov x0, x1
 	ret
-FUNCTION_END(__longjmp)
+FUNCTION_END(__context_restore)
