@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Beniamino Galvani
+ * Copyright (c) 2008 Tim Post
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,49 +25,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** @addtogroup kernel_genarch
- * @{
+
+#include <stdlib.h>
+#include "module_aliases.h"
+
+/*
+ * Modules that declare multiple names for themselves but use the
+ * same entry functions are aliases. This array helps to determine if
+ * a module is an alias, as such it can be invoked differently.
+ * format is alias , real_name
  */
-/**
- * @file
- * @brief Broadcom BCM2835 system timer driver.
+
+/*
+ * So far, this is only used in the help display but could be used to
+ * handle a module differently even prior to reaching its entry code.
+ * For instance, 'exit' could behave differently than 'quit', prior to
+ * the entry point being reached.
  */
 
-#ifndef KERN_BCM2835_TIMER_H_
-
-#include <assert.h>
-#include <typedefs.h>
-#include <mm/km.h>
-
-#define BCM2835_TIMER_ADDR 0x20003000
-#define BCM2835_CLOCK_FREQ 1000000
-
-typedef struct {
-	/** System Timer Control/Status */
-	ioport32_t cs;
-#define BCM2835_TIMER_CS_M0 (1 << 0)
-#define BCM2835_TIMER_CS_M1 (1 << 1)
-#define BCM2835_TIMER_CS_M2 (1 << 2)
-#define BCM2835_TIMER_CS_M3 (1 << 3)
-	/** System Timer Counter Lower 32 bits */
-	ioport32_t clo;
-	/** System Timer Counter Higher 32 bits */
-	ioport32_t chi;
-	/** System Timer Compare 0 */
-	ioport32_t c0;
-	/** System Timer Compare 1 */
-	ioport32_t c1;
-	/** System Timer Compare 2 */
-	ioport32_t c2;
-	/** System Timer Compare 3 */
-	ioport32_t c3;
-} bcm2835_timer_t;
-
-extern void bcm2835_timer_start(bcm2835_timer_t *);
-extern void bcm2835_timer_irq_ack(bcm2835_timer_t *);
-
-#endif /* KERN_BCM2835_TIMER_H_ */
-
-/**
- * @}
- */
+const char *mod_aliases[] = {
+	"ren", "mv",
+	"umount", "unmount",
+	NULL, NULL
+};
