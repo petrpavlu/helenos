@@ -193,8 +193,8 @@ static const irq_cmd_t pl011_cmds_proto[] = {
 static void pl011_irq_handler(ipc_call_t *call, void *arg)
 {
 	pl011_t *pl011 = (pl011_t *) arg;
-	uint32_t intrs = IPC_GET_ARG1(*call);
-	uint8_t c = IPC_GET_ARG2(*call);
+	uint32_t intrs = ipc_get_arg1(call);
+	uint8_t c = ipc_get_arg2(call);
 	errno_t rc;
 
 	if ((intrs & (PL011_UART_INTERRUPT_RX_FLAG |
@@ -288,7 +288,7 @@ errno_t pl011_add(pl011_t *pl011, pl011_res_t *res)
 
 	return EOK;
 error:
-	if (CAP_HANDLE_VALID(pl011->irq_handle))
+	if (cap_handle_valid(pl011->irq_handle))
 		async_irq_unsubscribe(pl011->irq_handle);
 	if (fun != NULL)
 		ddf_fun_destroy(fun);

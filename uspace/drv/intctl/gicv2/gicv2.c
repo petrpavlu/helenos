@@ -191,16 +191,16 @@ static void gicv2_connection(ipc_call_t *icall, void *arg)
 	while (true) {
 		async_get_call(&call);
 
-		if (!IPC_GET_IMETHOD(call)) {
+		if (!ipc_get_imethod(&call)) {
 			/* The other side has hung up. */
 			async_answer_0(&call, EOK);
 			return;
 		}
 
-		switch (IPC_GET_IMETHOD(call)) {
+		switch (ipc_get_imethod(&call)) {
 		case IRC_ENABLE_INTERRUPT:
 			async_answer_0(&call,
-			    gicv2_enable_irq(gicv2, IPC_GET_ARG1(call)));
+			    gicv2_enable_irq(gicv2, ipc_get_arg1(&call)));
 			break;
 		case IRC_DISABLE_INTERRUPT:
 			/* XXX TODO */
