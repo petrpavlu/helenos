@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup arm64
+/** @addtogroup kernel_arm64
  * @{
  */
 /** @file
@@ -92,3 +92,6 @@ void fpu_disable(void)
 	CPACR_EL1_write((CPACR_EL1_read() & ~CPACR_FPEN_MASK) |
 	    (CPACR_FPEN_TRAP_ALL << CPACR_FPEN_SHIFT));
 }
+
+/** @}
+ */

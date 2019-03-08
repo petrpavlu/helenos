@@ -79,3 +79,6 @@ static inline uint64_t arch_pio_read_64(const ioport64_t *port)
 }
 
 #endif
+
+/** @}
+ */

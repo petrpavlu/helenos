@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup gicv2
+/** @addtogroup uspace_drv_gicv2
  * @{
  */
 

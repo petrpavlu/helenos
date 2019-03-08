@@ -27,8 +27,7 @@
  */
 
 /**
- * @defgroup arm64virt ARM64 QEMU virt platform driver.
- * @brief HelenOS ARM64 QEMU virt platform driver.
+ * @addtogroup arm64virt
  * @{
  */
 

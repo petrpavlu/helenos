@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup arm64interrupt
+/** @addtogroup kernel_arm64_interrupt
  * @{
  */
 /** @file

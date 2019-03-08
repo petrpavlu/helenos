@@ -26,10 +26,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup arm64
+/** @addtogroup kernel_arm64
  * @{
  */
-/** @file Shared interface between the bootcode and the kernel.
+/** @file
+ * @brief Shared interface between the bootcode and the kernel.
  */
 
 #ifndef KERN_arm64_BOOT_H_

@@ -26,9 +26,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup arm64virt
+/** @addtogroup kernel_arm64_virt
  * @brief QEMU virt platform.
- * @ingroup arm64
+ * @ingroup kernel_arm64
  * @{
  */
 /** @file
