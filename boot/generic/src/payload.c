@@ -101,14 +101,10 @@ static bool extract_component(uint8_t **cstart, uint8_t *cend,
 	uint8_t *comp_end = ustart + unpacked_size;
 
 	/* Check limits and overlap. */
-	uint8_t *link_loader_start = get_loader_start();
-	uint8_t *link_loader_end = get_loader_end();
-	if (overlaps(ustart, comp_end, link_loader_start, link_loader_end)) {
+	if (overlaps(ustart, comp_end, loader_start, loader_end)) {
 		/* Move the component after bootloader. */
-		printf("%s would overlap bootloader, moving to %p.\n", name,
-		    link_loader_end);
-		uint8_t *new_ustart = (uint8_t *) ALIGN_UP(
-		    (uintptr_t) link_loader_end, PAGE_SIZE);
+		printf("%s would overlap bootloader, moving to %p.\n", name, loader_end);
+		uint8_t *new_ustart = (uint8_t *) ALIGN_UP((uintptr_t) loader_end, PAGE_SIZE);
 		actual_ustart += new_ustart - ustart;
 		ustart = new_ustart;
 		comp_end = ustart + unpacked_size;
@@ -152,12 +148,11 @@ static bool extract_component(uint8_t **cstart, uint8_t *cend,
 size_t payload_unpacked_size(void)
 {
 	size_t sz = 0;
-	uint8_t *start = get_payload_start();
-	uint8_t *link_payload_end = get_payload_end();
+	uint8_t *start = payload_start;
 	const char *name;
 	size_t packed_size;
 
-	while (tar_info(start, link_payload_end, &name, &packed_size)) {
+	while (tar_info(start, payload_end, &name, &packed_size)) {
 		sz = ALIGN_UP(sz, PAGE_SIZE);
 		if (isgzip(name))
 			sz += gzip_size(start + TAR_BLOCK_SIZE, packed_size);
@@ -200,36 +195,30 @@ void extract_payload(taskmap_t *tmap, uint8_t *kernel_dest, uint8_t *mem_end,
 	task_t task;
 	memset(&task, 0, sizeof(task));
 
-	uint8_t *link_loader_start = get_loader_start();
-	uint8_t *link_loader_end = get_loader_end();
-	uint8_t *link_payload_start = get_payload_start();
-	uint8_t *link_payload_end = get_payload_end();
-
-	printf("Boot loader: %p -> %p\n", link_loader_start, link_loader_end);
-	printf("Payload: %p -> %p\n", link_payload_start, link_payload_end);
+	printf("Boot loader: %p -> %p\n", loader_start, loader_end);
+	printf("Payload: %p -> %p\n", payload_start, payload_end);
 	printf("Kernel load address: %p\n", kernel_dest);
 	printf("Kernel start: %p\n", (void *) kernel_start);
 	printf("RAM end: %p (%zd bytes available)\n", mem_end,
 	    mem_end - kernel_dest);
 
-	size_t payload_size = link_payload_end - link_payload_start;
+	size_t payload_size = payload_end - payload_start;
 	uint8_t *real_payload_start;
 	uint8_t *real_payload_end;
 
-	if (overlaps(kernel_dest, mem_end, link_payload_start,
-	    link_payload_end)) {
+	if (overlaps(kernel_dest, mem_end, payload_start, payload_end)) {
 		/*
 		 * First, move the payload to the very end of available memory,
 		 * to make space for the unpacked data.
 		 */
 		real_payload_start = (uint8_t *) ALIGN_DOWN((uintptr_t)(mem_end - payload_size), PAGE_SIZE);
 		real_payload_end = real_payload_start + payload_size;
-		memmove(real_payload_start, link_payload_start, payload_size);
+		memmove(real_payload_start, payload_start, payload_size);
 
 		printf("Moved payload: %p -> %p\n", real_payload_start, real_payload_end);
 	} else {
-		real_payload_start = link_payload_start;
-		real_payload_end = link_payload_end;
+		real_payload_start = payload_start;
+		real_payload_end = payload_end;
 	}
 
 	printf("\nInflating components ... \n");

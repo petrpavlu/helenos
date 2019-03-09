@@ -136,7 +136,7 @@ efi_status_t bootstrap(void *efi_handle_in,
 
 	version_print();
 
-	printf("Boot loader: %p -> %p\n", get_loader_start(), get_loader_end());
+	printf("Boot loader: %p -> %p\n", loader_start, loader_end);
 	printf("\nMemory statistics\n");
 	printf(" %p|%p: loader\n", load_address, load_address);
 	printf(" %p|%p: UEFI system table\n", efi_system_table_in,

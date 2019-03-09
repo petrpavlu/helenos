@@ -245,6 +245,16 @@ enum elf_segment_access {
 };
 
 /**
+ * Dynamic array tags.
+ */
+enum elf_dynamic_tag {
+	DT_NULL = 0,
+	DT_RELA = 7,
+	DT_RELASZ = 8,
+	DT_RELAENT = 9,
+};
+
+/**
  * ELF data types
  *
  * These types are found to be identical in both 32-bit and 64-bit
@@ -406,12 +416,49 @@ struct elf64_note {
 	elf_word type;
 };
 
+/**
+ * Dynamic structure
+ */
+struct elf32_dyn {
+	elf_sword d_tag;
+	union {
+		elf_word d_val;
+		elf32_addr d_ptr;
+	} d_un;
+};
+
+struct elf64_dyn {
+	elf_sxword d_tag;
+	union {
+		elf_xword d_val;
+		elf64_addr d_ptr;
+	} d_un;
+};
+
+struct elf32_rela {
+	elf32_addr r_offset;
+	elf_word r_info;
+	elf_sword r_addend;
+};
+
+struct elf64_rela {
+	elf64_addr r_offset;
+	elf_xword r_info;
+	elf_sxword r_addend;
+};
+
+#define ELF32_R_TYPE(i)  ((unsigned char) (i))
+#define ELF64_R_TYPE(i)  ((i) & 0xffffffffL)
+
 #ifdef __32_BITS__
 typedef struct elf32_header elf_header_t;
 typedef struct elf32_segment_header elf_segment_header_t;
 typedef struct elf32_section_header elf_section_header_t;
 typedef struct elf32_symbol elf_symbol_t;
 typedef struct elf32_note elf_note_t;
+typedef struct elf32_dyn elf_dyn_t;
+typedef struct elf32_rela elf_rela_t;
+#define ELF_R_TYPE(i)  ELF32_R_TYPE(i)
 #endif
 
 #ifdef __64_BITS__
@@ -420,6 +467,9 @@ typedef struct elf64_segment_header elf_segment_header_t;
 typedef struct elf64_section_header elf_section_header_t;
 typedef struct elf64_symbol elf_symbol_t;
 typedef struct elf64_note elf_note_t;
+typedef struct elf64_dyn elf_dyn_t;
+typedef struct elf64_rela elf_rela_t;
+#define ELF_R_TYPE(i)  ELF64_R_TYPE(i)
 #endif
 
 #endif

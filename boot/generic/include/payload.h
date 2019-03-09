@@ -34,25 +34,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef loader_start_arch
 extern uint8_t loader_start[];
-#define loader_start_arch() loader_start
-#endif
-
-#ifndef loader_end_arch
 extern uint8_t loader_end[];
-#define loader_end_arch() loader_end
-#endif
-
-#ifndef payload_start_arch
 extern uint8_t payload_start[];
-#define payload_start_arch() payload_start
-#endif
-
-#ifndef payload_end_arch
 extern uint8_t payload_end[];
-#define payload_end_arch() payload_end
-#endif
 
 size_t payload_unpacked_size(void);
 void extract_payload(taskmap_t *, uint8_t *, uint8_t *, uintptr_t,

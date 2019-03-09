@@ -36,16 +36,6 @@
 #ifndef BOOT_arm64_ASM_H
 #define BOOT_arm64_ASM_H
 
-extern void *get_loader_start(void);
-extern void *get_loader_end(void);
-extern void *get_payload_start(void);
-extern void *get_payload_end(void);
-
-#define loader_start_arch() get_loader_start()
-#define loader_end_arch() get_loader_end()
-#define payload_start_arch() get_payload_start()
-#define payload_end_arch() get_payload_end()
-
 /** Jump to the kernel entry point.
  *
  * @param entry    Kernel entry point.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Petr Pavlu
+ * Copyright (c) 2019 Petr Pavlu
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup abi_arm64
+/** @addtogroup boot_arm64
  * @{
  */
 /** @file
- * @brief ARM64 ELF constants.
+ * @brief Image self-relocation support.
  */
 
-#ifndef _ABI_arm64_ELF_H_
-#define _ABI_arm64_ELF_H_
+#ifndef BOOT_arm64_RELOCATE_H
+#define BOOT_arm64_RELOCATE_H
 
-#define ELF_MACHINE        EM_AARCH64
-#define ELF_DATA_ENCODING  ELFDATA2LSB
-#define ELF_CLASS          ELFCLASS64
+#include <abi/elf.h>
+#include <genarch/efi.h>
+#include <stdint.h>
 
-#define R_AARCH64_RELATIVE  1027
+extern efi_status_t self_relocate(uintptr_t base, const elf_dyn_t *dyn);
 
 #endif
 

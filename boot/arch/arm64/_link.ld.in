@@ -5,20 +5,26 @@ ENTRY(start)
 SECTIONS {
 	. = 0x0;
 	.text : {
-		loader_start = .;
+		HIDDEN(loader_start = .);
 		*(BOOTSTRAP);
 		*(.text);
 	}
+	.dynamic : { *(.dynamic); }
+	.rela.got : { *(.rela.got); }
+	.hash : { *(.hash); }
+	.dynsym : { *(.dynsym); }
+	.dynstr : { *(.dynstr); }
 	. = 0x8000;
 	.data : {
 		*(.data*);      /* initialized data */
 		*(.rodata*);
 		*(.bss);        /* uninitialized static variables */
 		*(COMMON);      /* global variables */
-		loader_end = .;
-		payload_start = .;
+		*(.got .got.plt);
+		HIDDEN(loader_end = .);
+		HIDDEN(payload_start = .);
 		*(.payload);
-		payload_end = .;
+		HIDDEN(payload_end = .);
 	}
 
 	/DISCARD/ : {

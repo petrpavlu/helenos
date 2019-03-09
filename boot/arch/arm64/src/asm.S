@@ -32,11 +32,6 @@
 
 .section BOOTSTRAP
 
-.global loader_start
-.global loader_end
-.global payload_start
-.global payload_end
-
 /* MS-DOS stub */
 msdos_stub:
 	.ascii "MZ"                     /* MS-DOS signature */
@@ -108,6 +103,8 @@ sec_table:
 	.long 0xe0000020
 
 SYMBOL(start)
+	.hidden start
+
 	/*
 	 * Parameters:
 	 * x0 is the image handle.
@@ -118,43 +115,41 @@ SYMBOL(start)
 	 * Stay on the UEFI stack. Its size is at least 128 kB, plenty for this
 	 * boot loader.
 	 */
+	stp x29, x30, [sp, #-32]!
+	mov x29, sp
+	stp x0, x1, [sp, #16]
+
+	/*
+	 * Self-relocate the image. Pass a load address of the image (x0) and a
+	 * pointer to the dynamic array (x1).
+	 */
+	adr x0, msdos_stub
+	adrp x1, _DYNAMIC
+	add x1, x1, #:lo12:_DYNAMIC
+	bl self_relocate
+	cbnz x0, 0f
 
 	/*
 	 * Pass the image handle (x0), a pointer to the UEFI system table (x1),
 	 * and the image load address (x2) to the boostrap function.
 	 */
+	ldp x0, x1, [sp, #16]
 	adr x2, msdos_stub
-	b bootstrap
+	bl bootstrap
 
-FUNCTION_BEGIN(get_loader_start)
-	adrp x0, loader_start
-	add x0, x0, #:lo12:loader_start
+0:
+	ldp x29, x30, [sp], #32
 	ret
-FUNCTION_END(get_loader_start)
-
-FUNCTION_BEGIN(get_loader_end)
-	adrp x0, loader_end
-	add x0, x0, #:lo12:loader_end
-	ret
-FUNCTION_END(get_loader_end)
-
-FUNCTION_BEGIN(get_payload_start)
-	adrp x0, payload_start
-	add x0, x0, #:lo12:payload_start
-	ret
-FUNCTION_END(get_payload_start)
-
-FUNCTION_BEGIN(get_payload_end)
-	adrp x0, payload_end
-	add x0, x0, #:lo12:payload_end
-	ret
-FUNCTION_END(get_payload_end)
 
 FUNCTION_BEGIN(halt)
+	.hidden halt
+
 	b halt
 FUNCTION_END(halt)
 
 FUNCTION_BEGIN(jump_to_kernel)
+	.hidden jump_to_kernel
+
 	/*
 	 * Parameters:
 	 * x0 is kernel entry point.
