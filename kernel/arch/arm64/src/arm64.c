@@ -55,7 +55,6 @@ arch_ops_t arm64_ops = {
 
 arch_ops_t *arch_ops = &arm64_ops;
 
-
 /** Perform ARM64 specific initialization before main_bsp() is called. */
 void arm64_pre_main(void *entry __attribute__((unused)), bootinfo_t *bootinfo)
 {
