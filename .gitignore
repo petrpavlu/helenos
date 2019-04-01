@@ -67,7 +67,6 @@ tag
 tags
 tools/amd64-unknown-elf
 tools/arm-linux-gnueabi
-tools/aarch64-linux-gnu
 tools/binutils-*.tar.bz2
 tools/downloads/
 tools/gcc-*.tar.bz2
@@ -249,7 +248,6 @@ uspace/dist/drv/atkbd/
 uspace/dist/drv/cmos-rtc/
 uspace/dist/drv/e1k/
 uspace/dist/drv/ehci/
-uspace/dist/drv/gicv2/
 uspace/dist/drv/hdaudio/
 uspace/dist/drv/i8042/
 uspace/dist/drv/i8259/
@@ -263,7 +261,6 @@ uspace/dist/drv/ns8250/
 uspace/dist/drv/ohci/
 uspace/dist/drv/pc/
 uspace/dist/drv/pciintel/
-uspace/dist/drv/pl011/
 uspace/dist/drv/pl050/
 uspace/dist/drv/ps2mouse/
 uspace/dist/drv/root/

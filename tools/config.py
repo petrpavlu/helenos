@@ -62,7 +62,7 @@ class BinaryOp:
 			return self._left.evaluate(config) or \
 			    self._right.evaluate(config)
 
-		# "=" or "!="
+		# '=' or '!='
 		if not self._left in config:
 			config_val = ''
 		else:
@@ -90,7 +90,7 @@ class CondParser:
 
 		res = self._parse_expr()
 		if self._token_type != self.TOKEN_EOE:
-			self._error('Expected end of expression')
+			self._error("Expected end of expression")
 		return res
 
 	def _next_char(self):
@@ -103,8 +103,8 @@ class CondParser:
 		    ('&', '|', '=', '!', '(', ')')
 
 	def _error(self, msg):
-		raise RuntimeError('Error parsing expression: %s:\n%s\n%s^' %
-		    (msg, self._text, ' ' * self._token_position))
+		raise RuntimeError("Error parsing expression: %s:\n%s\n%s^" %
+		    (msg, self._text, " " * self._token_position))
 
 	def _next_token(self):
 		self._token_position = self._position
@@ -115,13 +115,13 @@ class CondParser:
 			self._token_type = self.TOKEN_EOE
 			return
 
-		# "&", "|", "=", "!=", "(", ")"
+		# '&', '|', '=', '!=', '(', ')'
 		if self._is_special_char:
 			self._token = self._char
 			self._next_char()
 			if self._token == '!':
 				if self._char != '=':
-					self._error('Expected "="')
+					self._error("Expected '='")
 				self._token += self._char
 				self._next_char()
 			self._token_type = self.TOKEN_SPECIAL
@@ -137,7 +137,7 @@ class CondParser:
 				break
 
 	def _parse_expr(self):
-		''' <expr> ::= <or_expr> ("&" <or_expr>)* '''
+		""" <expr> ::= <or_expr> ('&' <or_expr>)* """
 
 		left = self._parse_or_expr()
 		while self._token == '&':
@@ -146,7 +146,7 @@ class CondParser:
 		return left
 
 	def _parse_or_expr(self):
-		''' <or_expr> ::= <factor> ("|" <factor>)* '''
+		""" <or_expr> ::= <factor> ('|' <factor>)* """
 
 		left = self._parse_factor()
 		while self._token == '|':
@@ -155,13 +155,13 @@ class CondParser:
 		return left
 
 	def _parse_factor(self):
-		''' <factor> ::= <var> <cond> | "(" <expr> ")" '''
+		""" <factor> ::= <var> <cond> | '(' <expr> ')' """
 
 		if self._token == '(':
 			self._next_token()
 			res = self._parse_expr()
 			if self._token != ')':
-				self._error('Expected ")"')
+				self._error("Expected ')'")
 			self._next_token()
 			return res
 
@@ -170,19 +170,19 @@ class CondParser:
 			self._next_token()
 			return self._parse_cond(var)
 
-		self._error('Expected "(" or <var>')
+		self._error("Expected '(' or <var>")
 
 	def _parse_cond(self, var):
-		''' <cond> ::= "=" <val> | "!=" <val> '''
+		""" <cond> ::= '=' <val> | '!=' <val> """
 
 		if self._token not in ('=', '!='):
-			self._error('Expected "=" or "!="')
+			self._error("Expected '=' or '!='")
 
 		oper = self._token
 		self._next_token()
 
 		if self._token_type != self.TOKEN_STRING:
-			self._error('Expected <val>')
+			self._error("Expected <val>")
 
 		val = self._token
 		self._next_token()
