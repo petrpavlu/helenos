@@ -37,6 +37,7 @@
 
 #include <stdint.h>
 
+extern void dorder_init(void);
 extern uint32_t dorder_cpuid(void);
 extern void dorder_ipi_ack(uint32_t);
 

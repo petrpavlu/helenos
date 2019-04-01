@@ -26,7 +26,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup kernel_ia32
+/** @addtogroup kernel_genarch
  * @{
  */
 /**
@@ -36,59 +36,60 @@
  * Programmable Interrupt Controller for UP systems based on i8259 chip.
  */
 
-#include <arch/drivers/i8259.h>
-#include <cpu.h>
+#include <genarch/drivers/i8259/i8259.h>
+#include <typedefs.h>
 #include <stdint.h>
-#include <arch/asm.h>
-#include <arch.h>
 #include <log.h>
 #include <interrupt.h>
 
 static void pic_spurious(unsigned int n, istate_t *istate);
 
-void i8259_init(void)
-{
-	/* ICW1: this is ICW1, ICW4 to follow */
-	pio_write_8(PIC_PIC0PORT1, PIC_ICW1 | PIC_ICW1_NEEDICW4);
+// XXX: need to change pic_* API to get rid of these
+static i8259_t *saved_pic0;
+static i8259_t *saved_pic1;
 
-	/* ICW2: IRQ 0 maps to INT IRQBASE */
-	pio_write_8(PIC_PIC0PORT2, IVT_IRQBASE);
+void i8259_init(i8259_t *pic0, i8259_t *pic1, inr_t pic1_irq,
+    unsigned int irq0_int, unsigned int irq8_int)
+{
+	saved_pic0 = pic0;
+	saved_pic1 = pic1;
+
+	/* ICW1: this is ICW1, ICW4 to follow */
+	pio_write_8(&pic0->port1, PIC_ICW1 | PIC_ICW1_NEEDICW4);
+
+	/* ICW2: IRQ 0 maps to INT irq0_int */
+	pio_write_8(&pic0->port2, irq0_int);
 
 	/* ICW3: pic1 using IRQ IRQ_PIC1 */
-	pio_write_8(PIC_PIC0PORT2, 1 << IRQ_PIC1);
+	pio_write_8(&pic0->port2, 1 << pic1_irq);
 
 	/* ICW4: i8086 mode */
-	pio_write_8(PIC_PIC0PORT2, 1);
+	pio_write_8(&pic0->port2, 1);
 
 	/* ICW1: ICW1, ICW4 to follow */
-	pio_write_8(PIC_PIC1PORT1, PIC_ICW1 | PIC_ICW1_NEEDICW4);
+	pio_write_8(&pic1->port1, PIC_ICW1 | PIC_ICW1_NEEDICW4);
 
-	/* ICW2: IRQ 8 maps to INT (IVT_IRQBASE + 8) */
-	pio_write_8(PIC_PIC1PORT2, IVT_IRQBASE + 8);
+	/* ICW2: IRQ 8 maps to INT irq8_int */
+	pio_write_8(&pic1->port2, irq8_int);
 
 	/* ICW3: pic1 is known as IRQ_PIC1 */
-	pio_write_8(PIC_PIC1PORT2, IRQ_PIC1);
+	pio_write_8(&pic1->port2, pic1_irq);
 
 	/* ICW4: i8086 mode */
-	pio_write_8(PIC_PIC1PORT2, 1);
+	pio_write_8(&pic1->port2, 1);
 
 	/*
 	 * Register interrupt handler for the PIC spurious interrupt.
+	 *
+	 * XXX: This is currently broken. Both IRQ 7 and IRQ 15 can be spurious
+	 *      or can be actual interrupts. This needs to be detected when
+	 *      the interrupt happens by inspecting ISR.
 	 */
-	exc_register(VECTOR_PIC_SPUR, "pic_spurious", false,
+	exc_register(irq0_int + 7, "pic_spurious", false,
 	    (iroutine_t) pic_spurious);
 
-	/*
-	 * Set the enable/disable IRQs handlers.
-	 * Set the End-of-Interrupt handler.
-	 */
-	enable_irqs_function = pic_enable_irqs;
-	disable_irqs_function = pic_disable_irqs;
-	eoi_function = pic_eoi;
-	irqs_info = "i8259";
-
 	pic_disable_irqs(0xffff);		/* disable all irq's */
-	pic_enable_irqs(1 << IRQ_PIC1);		/* but enable pic1 */
+	pic_enable_irqs(1 << pic1_irq);		/* but enable pic1_irq */
 }
 
 void pic_enable_irqs(uint16_t irqmask)
@@ -96,12 +97,14 @@ void pic_enable_irqs(uint16_t irqmask)
 	uint8_t x;
 
 	if (irqmask & 0xff) {
-		x = pio_read_8(PIC_PIC0PORT2);
-		pio_write_8(PIC_PIC0PORT2, (uint8_t) (x & (~(irqmask & 0xff))));
+		x = pio_read_8(&saved_pic0->port2);
+		pio_write_8(&saved_pic0->port2,
+		    (uint8_t) (x & (~(irqmask & 0xff))));
 	}
 	if (irqmask >> 8) {
-		x = pio_read_8(PIC_PIC1PORT2);
-		pio_write_8(PIC_PIC1PORT2, (uint8_t) (x & (~(irqmask >> 8))));
+		x = pio_read_8(&saved_pic1->port2);
+		pio_write_8(&saved_pic1->port2,
+		    (uint8_t) (x & (~(irqmask >> 8))));
 	}
 }
 
@@ -110,19 +113,20 @@ void pic_disable_irqs(uint16_t irqmask)
 	uint8_t x;
 
 	if (irqmask & 0xff) {
-		x = pio_read_8(PIC_PIC0PORT2);
-		pio_write_8(PIC_PIC0PORT2, (uint8_t) (x | (irqmask & 0xff)));
+		x = pio_read_8(&saved_pic0->port2);
+		pio_write_8(&saved_pic0->port2,
+		    (uint8_t) (x | (irqmask & 0xff)));
 	}
 	if (irqmask >> 8) {
-		x = pio_read_8(PIC_PIC1PORT2);
-		pio_write_8(PIC_PIC1PORT2, (uint8_t) (x | (irqmask >> 8)));
+		x = pio_read_8(&saved_pic1->port2);
+		pio_write_8(&saved_pic1->port2, (uint8_t) (x | (irqmask >> 8)));
 	}
 }
 
 void pic_eoi(void)
 {
-	pio_write_8(PIC_PIC0PORT1, PIC_OCW4 | PIC_OCW4_NSEOI);
-	pio_write_8(PIC_PIC1PORT1, PIC_OCW4 | PIC_OCW4_NSEOI);
+	pio_write_8(&saved_pic0->port1, PIC_OCW4 | PIC_OCW4_NSEOI);
+	pio_write_8(&saved_pic1->port1, PIC_OCW4 | PIC_OCW4_NSEOI);
 }
 
 void pic_spurious(unsigned int n __attribute__((unused)), istate_t *istate __attribute__((unused)))

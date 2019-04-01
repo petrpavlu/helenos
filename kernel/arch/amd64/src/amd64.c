@@ -44,11 +44,11 @@
 #include <arch/bios/bios.h>
 #include <arch/boot/boot.h>
 #include <arch/drivers/i8254.h>
-#include <arch/drivers/i8259.h>
 #include <arch/syscall.h>
 #include <genarch/acpi/acpi.h>
 #include <genarch/drivers/ega/ega.h>
 #include <genarch/drivers/i8042/i8042.h>
+#include <genarch/drivers/i8259/i8259.h>
 #include <genarch/drivers/ns16550/ns16550.h>
 #include <genarch/drivers/legacy/ia32/io.h>
 #include <genarch/fb/bfb.h>
@@ -119,7 +119,18 @@ void amd64_pre_mm_init(void)
 		bios_init();
 
 		/* PIC */
-		i8259_init();
+		i8259_init((i8259_t *) I8259_PIC0_BASE,
+		    (i8259_t *) I8259_PIC1_BASE, IRQ_PIC1, IVT_IRQBASE,
+		    IVT_IRQBASE + 8);
+
+		/*
+		 * Set the enable/disable IRQs handlers.
+		 * Set the End-of-Interrupt handler.
+		 */
+		enable_irqs_function = pic_enable_irqs;
+		disable_irqs_function = pic_disable_irqs;
+		eoi_function = pic_eoi;
+		irqs_info = "i8259";
 	}
 }
 

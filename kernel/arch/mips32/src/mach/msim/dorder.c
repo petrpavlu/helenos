@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2004 Jakub Jermar
+ * Copyright (c) 2007 Martin Decky
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,61 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** @addtogroup kernel_ia32
+/** @addtogroup kernel_mips32
  * @{
  */
 /** @file
  */
 
-#ifndef KERN_ia32_I8259_H_
-#define KERN_ia32_I8259_H_
-
+#include <arch/mach/msim/dorder.h>
+#include <arch/mach/msim/msim.h>
+#include <stdint.h>
+#include <smp/ipi.h>
+#include <interrupt.h>
+#include <arch/asm.h>
 #include <typedefs.h>
-#include <arch/interrupt.h>
 
-#define PIC_PIC0PORT1  ((ioport8_t *) 0x20U)
-#define PIC_PIC0PORT2  ((ioport8_t *) 0x21U)
-#define PIC_PIC1PORT1  ((ioport8_t *) 0xa0U)
-#define PIC_PIC1PORT2  ((ioport8_t *) 0xa1U)
+static irq_t dorder_irq;
 
-/* ICW1 bits */
-#define PIC_ICW1           (1 << 4)
-#define PIC_ICW1_NEEDICW4  (1 << 0)
+#ifdef CONFIG_SMP
 
-/* OCW4 bits */
-#define PIC_OCW4           (0 << 3)
-#define PIC_OCW4_NSEOI     (1 << 5)
-
-extern void i8259_init(void);
-extern void pic_enable_irqs(uint16_t);
-extern void pic_disable_irqs(uint16_t);
-extern void pic_eoi(void);
+void ipi_broadcast_arch(int ipi)
+{
+	pio_write_32(((ioport32_t *) MSIM_DORDER_ADDRESS), 0x7fffffff);
+}
 
 #endif
+
+static irq_ownership_t dorder_claim(irq_t *irq)
+{
+	return IRQ_ACCEPT;
+}
+
+static void dorder_irq_handler(irq_t *irq)
+{
+	dorder_ipi_ack(1 << dorder_cpuid());
+}
+
+void dorder_init(void)
+{
+	irq_initialize(&dorder_irq);
+	dorder_irq.inr = MSIM_DORDER_IRQ;
+	dorder_irq.claim = dorder_claim;
+	dorder_irq.handler = dorder_irq_handler;
+	irq_register(&dorder_irq);
+
+	cp0_unmask_int(MSIM_DORDER_IRQ);
+}
+
+uint32_t dorder_cpuid(void)
+{
+	return pio_read_32((ioport32_t *) MSIM_DORDER_ADDRESS);
+}
+
+void dorder_ipi_ack(uint32_t mask)
+{
+	pio_write_32((ioport32_t *) (MSIM_DORDER_ADDRESS + 4), mask);
+}
 
 /** @}
  */
